@@ -16,7 +16,7 @@ submodule nokia-conf-svc-vprn-isis {
     include nokia-conf-system;
     include nokia-conf-system-security;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -39,7 +39,7 @@ submodule nokia-conf-svc-vprn-isis {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2024-06-21";
+    revision "2026-07-22";
 
     grouping conf-svc-vprn-isis {
         list isis {
@@ -50,7 +50,7 @@ submodule nokia-conf-svc-vprn-isis {
                 type int32 {
                     range "0..127";
                 }
-                description "Instance ID for the IS-IS instance";
+                description "IS-IS instance ID";
             }
 
             leaf authentication-keychain {
@@ -120,6 +120,12 @@ submodule nokia-conf-svc-vprn-isis {
                 type boolean;
                 default "true";
                 description "Perform authentication check to reject mismatch PDUs";
+            }
+
+            leaf csnp-on-p2p {
+                type boolean;
+                default "true";
+                description "Send periodic CSNP PDUs on point-to-point interfaces";
             }
 
             leaf default-route-tag {
@@ -677,6 +683,13 @@ submodule nokia-conf-svc-vprn-isis {
                     description "Time interval between successive CSN PDUs sent";
                 }
 
+                leaf conditional-advertise-prefix {
+                    type leafref {
+                        path "../../../../../policy-options/policy-statement/name";
+                    }
+                    description "Policy to conditionally advertise interface prefixes";
+                }
+
                 leaf default-instance {
                     type boolean;
                     default "false";
@@ -765,7 +778,7 @@ submodule nokia-conf-svc-vprn-isis {
                     leaf exclude {
                         type boolean;
                         default "false";
-                        description "Enable/disable Loopfree Alternative at interface level.";
+                        description "Exclude Loopfree Alternative at the interface level";
                     }
 
                     container policy-map {

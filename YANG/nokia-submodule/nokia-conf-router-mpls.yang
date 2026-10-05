@@ -16,7 +16,7 @@ submodule nokia-conf-router-mpls {
     include nokia-conf-router-pcep;
     include nokia-conf-routing-options;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -39,7 +39,7 @@ submodule nokia-conf-router-mpls {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2019-07-08";
+    revision "2026-07-22";
 
     grouping conf-router-mpls {
         container mpls {
@@ -250,6 +250,12 @@ submodule nokia-conf-router-mpls {
                 description "Resolves RSVP-TE LSP ERO to local and host routes only";
             }
 
+            leaf resignal-on-igp-event {
+                type boolean;
+                default "false";
+                description "Reoptimize RSVP LSP paths upon IGP events";
+            }
+
             leaf p2mp-ttl-propagate {
                 type boolean;
                 default "true";
@@ -328,7 +334,7 @@ submodule nokia-conf-router-mpls {
                         range "1..16383";
                     }
                     default "288";
-                    description "Collection intervals in a sample interval";
+                    description "Collection intervals in an adjust interval";
                 }
 
             } // container auto-bandwidth-multipliers
@@ -799,6 +805,7 @@ submodule nokia-conf-router-mpls {
                         enum p2p-sr-te-mesh                 { value 5; }
                         enum p2p-sr-te-pce-init             { value 6; }
                         enum p2p-sr-te-on-demand            { value 8; }
+                        enum p2p-rsvp-member                { value 9; }
                     }
                     sros-ext:immutable;
                     sros-ext:auto-restart-to-modify;
@@ -813,7 +820,7 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf backup-class-type {
-                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh'" {
+                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type types-mpls:class-type;
@@ -823,7 +830,7 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf bandwidth {
-                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh'" {
+                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type types-mpls:lsp-bandwidth;
@@ -832,16 +839,16 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf bgp-shortcut {
-                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-pce-init' or ../type = 'p2p-sr-te-on-demand'" {
+                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-pce-init' or ../type = 'p2p-sr-te-on-demand' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type boolean;
                     sros-ext:auto-restart-to-modify;
-                    description "Enable/disable use of RSVP LSP for IPv4 BGP routes.";
+                    description "Enable use of RSVP LSP for IPv4 BGP routes";
                 }
 
                 leaf bgp-transport-tunnel {
-                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-pce-init' or ../type = 'p2p-sr-te-on-demand'" {
+                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-pce-init' or ../type = 'p2p-sr-te-on-demand' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type boolean;
@@ -861,7 +868,7 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf default-path {
-                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-pce-init' or ../type = 'p2p-sr-te-on-demand'" {
+                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-pce-init' or ../type = 'p2p-sr-te-on-demand' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type leafref {
@@ -873,7 +880,7 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf from {
-                    when "not(../type) or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-on-demand'" {
+                    when "not(../type) or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-on-demand' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type types-sros:ip-address;
@@ -882,7 +889,7 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf hop-limit {
-                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-on-demand'" {
+                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-on-demand' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type uint16 {
@@ -893,7 +900,7 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf ldp-over-rsvp {
-                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh'" {
+                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type boolean;
@@ -903,7 +910,7 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf metric {
-                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-pce-init' or ../type = 'p2p-sr-te-on-demand'" {
+                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-pce-init' or ../type = 'p2p-sr-te-on-demand' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type uint32 {
@@ -915,7 +922,7 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf vprn-auto-bind {
-                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-pce-init' or ../type = 'p2p-sr-te-on-demand'" {
+                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-pce-init' or ../type = 'p2p-sr-te-on-demand' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type boolean;
@@ -925,7 +932,7 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf pce-report {
-                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-pce-init' or ../type = 'p2p-sr-te-on-demand'" {
+                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-pce-init' or ../type = 'p2p-sr-te-on-demand' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type types-sros:bool-with-inherit;
@@ -934,7 +941,7 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf entropy-label {
-                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-pce-init' or ../type = 'p2p-sr-te-on-demand'" {
+                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-pce-init' or ../type = 'p2p-sr-te-on-demand' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type types-sros:bool-with-inherit;
@@ -953,7 +960,7 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf adaptive {
-                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh'" {
+                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type boolean;
@@ -963,7 +970,7 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf adspec {
-                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh'" {
+                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type boolean;
@@ -973,7 +980,7 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf class-type {
-                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh'" {
+                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type types-mpls:class-type;
@@ -983,7 +990,7 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf least-fill {
-                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh'" {
+                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type boolean;
@@ -993,7 +1000,7 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf load-balancing-weight {
-                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-pce-init' or ../type = 'p2p-sr-te-on-demand'" {
+                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-pce-init' or ../type = 'p2p-sr-te-on-demand' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type uint32 {
@@ -1004,7 +1011,7 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf main-ct-retry-limit {
-                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh'" {
+                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type uint32 {
@@ -1015,7 +1022,7 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf propagate-admin-group {
-                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh'" {
+                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type boolean;
@@ -1025,7 +1032,7 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf retry-limit {
-                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-on-demand'" {
+                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-on-demand' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type uint32 {
@@ -1036,7 +1043,7 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf retry-timer {
-                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-on-demand'" {
+                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-on-demand' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type uint32 {
@@ -1049,7 +1056,7 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf record {
-                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh'" {
+                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type boolean;
@@ -1059,7 +1066,7 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf record-label {
-                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh'" {
+                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type boolean;
@@ -1086,7 +1093,7 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf path-computation-method {
-                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-on-demand'" {
+                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-on-demand' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type enumeration {
@@ -1111,16 +1118,29 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf metric-type {
-                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-on-demand'" {
+                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-on-demand' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type enumeration {
                         enum igp                            { value 1; }
                         enum te                             { value 2; }
+                        enum delay                          { value 3; }
                     }
                     sros-ext:auto-restart-to-modify;
                     default "igp";
                     description "Metric type used for LSP path computation";
+                }
+
+                leaf delay-metric-limit {
+                    when "not(../type) or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-on-demand'" {
+                        description "not allowed for this LSP template type";
+                    }
+                    type uint32 {
+                        range "1..16777215";
+                    }
+                    units "microseconds";
+                    sros-ext:auto-restart-to-modify;
+                    description "Delay metric limit";
                 }
 
                 leaf local-sr-protection {
@@ -1148,11 +1168,10 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf lsp-self-ping {
-                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh'" {
+                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type types-sros:bool-with-inherit;
-                    sros-ext:auto-restart-to-modify;
                     description "LSP Self Ping activation status on RSVP-TE LSP template";
                 }
 
@@ -1189,7 +1208,7 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf soft-preemption {
-                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh'" {
+                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type boolean;
@@ -1198,7 +1217,7 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf-list include-admin-group {
-                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-on-demand'" {
+                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-on-demand' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type leafref {
@@ -1210,7 +1229,7 @@ submodule nokia-conf-router-mpls {
                 }
 
                 leaf-list exclude-admin-group {
-                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-on-demand'" {
+                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-on-demand' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     type leafref {
@@ -1242,7 +1261,7 @@ submodule nokia-conf-router-mpls {
                 }
 
                 container class-forwarding {
-                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-pce-init' or ../type = 'p2p-sr-te-on-demand'" {
+                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-pce-init' or ../type = 'p2p-sr-te-on-demand' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     presence "Enable the class-forwarding context";
@@ -1337,7 +1356,7 @@ submodule nokia-conf-router-mpls {
                 } // container cspf
 
                 container priority {
-                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2mp-rsvp'" {
+                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     sros-ext:auto-restart-to-modify;
@@ -1360,7 +1379,7 @@ submodule nokia-conf-router-mpls {
                 } // container priority
 
                 container fast-reroute {
-                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh'" {
+                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     presence "Enable the fast-reroute context";
@@ -1397,7 +1416,7 @@ submodule nokia-conf-router-mpls {
                 } // container fast-reroute
 
                 container igp-shortcut {
-                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-pce-init' or ../type = 'p2p-sr-te-on-demand'" {
+                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-pce-init' or ../type = 'p2p-sr-te-on-demand' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     sros-ext:auto-restart-to-modify;
@@ -1474,7 +1493,7 @@ submodule nokia-conf-router-mpls {
                 } // container max-sr-labels
 
                 list admin-tag {
-                    when "not(../type) or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-sr-te-pce-init' or ../type = 'p2p-sr-te-on-demand'" {
+                    when "not(../type) or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-sr-te-pce-init' or ../type = 'p2p-sr-te-on-demand' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     key "name";
@@ -1532,7 +1551,7 @@ submodule nokia-conf-router-mpls {
                 } // list path-profile
 
                 container auto-bandwidth {
-                    when "not(../type) or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-rsvp-one-hop'" {
+                    when "not(../type) or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     presence "Enable the auto-bandwidth context";
@@ -1541,19 +1560,19 @@ submodule nokia-conf-router-mpls {
                     leaf max-bandwidth {
                         type types-mpls:lsp-bandwidth;
                         default "100000";
-                        description "Maximum bandwidth of auto-bandwidth to request for LSP";
+                        description "Maximum bandwidth to request for an LSP";
                     }
 
                     leaf min-bandwidth {
                         type types-mpls:lsp-bandwidth;
                         default "0";
-                        description "Minimum bandwidth of auto-bandwidth to request for the LSP";
+                        description "Minimum bandwidth to request for an LSP";
                     }
 
                     leaf monitor-bandwidth {
                         type boolean;
                         default "false";
-                        description "Collect and display auto-bandwidth measurements for the LSP";
+                        description "Collect and display auto-bandwidth measurements for LSP";
                     }
 
                     leaf-list apply-groups {
@@ -1616,7 +1635,7 @@ submodule nokia-conf-router-mpls {
                         leaf percent {
                             type types-sros:percent;
                             default "5";
-                            description "Minimum difference in percent";
+                            description "Minimum difference in percentage of current bandwidth";
                         }
 
                         leaf bw {
@@ -1633,7 +1652,7 @@ submodule nokia-conf-router-mpls {
                         leaf percent {
                             type types-sros:percent;
                             default "5";
-                            description "Minimum difference in percent";
+                            description "Minimum difference in percentage of current bandwidth";
                         }
 
                         leaf bw {
@@ -1670,7 +1689,7 @@ submodule nokia-conf-router-mpls {
                         leaf threshold {
                             type types-sros:percent;
                             default "0";
-                            description "Minimum difference in percent between the LSP bandwidth and the sampled data rate";
+                            description "Minimum difference in percentage of bandwidth";
                         }
 
                         leaf bw {
@@ -1685,7 +1704,7 @@ submodule nokia-conf-router-mpls {
                                 range "1..10";
                             }
                             mandatory true;
-                            description "Number of overflow samples to trigger an overflow auto-bandwidth adjustment attempt";
+                            description "Number of samples to trigger auto-bandwidth adjustment";
                         }
 
                     } // container overflow-limit
@@ -1697,7 +1716,7 @@ submodule nokia-conf-router-mpls {
                         leaf threshold {
                             type types-sros:percent;
                             default "0";
-                            description "Minimum difference in percent between the LSP bandwidth and the sampled data rate";
+                            description "Minimum difference in percentage of bandwidth";
                         }
 
                         leaf bw {
@@ -1712,7 +1731,7 @@ submodule nokia-conf-router-mpls {
                                 range "1..10";
                             }
                             mandatory true;
-                            description "Number of overflow samples to trigger an overflow auto-bandwidth adjustment attempt";
+                            description "Number of samples to trigger auto-bandwidth adjustment";
                         }
 
                     } // container underflow-limit
@@ -1720,7 +1739,7 @@ submodule nokia-conf-router-mpls {
                 } // container auto-bandwidth
 
                 container egress-statistics {
-                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-pce-init' or ../type = 'p2p-sr-te-on-demand'" {
+                    when "not(../type) or ../type = 'p2mp-rsvp' or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-pce-init' or ../type = 'p2p-sr-te-on-demand' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     presence "Enable the egress-statistics context";
@@ -1728,7 +1747,7 @@ submodule nokia-conf-router-mpls {
                     description "Enable the egress-statistics context";
 
                     leaf collect-stats {
-                        when "not(../../type) or ../../type = 'p2mp-rsvp' or ../../type = 'p2p-rsvp-one-hop' or ../../type = 'p2p-rsvp-mesh' or ../../type = 'p2p-sr-te-one-hop' or ../../type = 'p2p-sr-te-mesh'" {
+                        when "not(../../type) or ../../type = 'p2mp-rsvp' or ../../type = 'p2p-rsvp-one-hop' or ../../type = 'p2p-rsvp-mesh' or ../../type = 'p2p-sr-te-one-hop' or ../../type = 'p2p-sr-te-mesh' or ../../type = 'p2p-rsvp-member'" {
                             description "not allowed for this lsp-template type";
                         }
                         type boolean;
@@ -1738,7 +1757,7 @@ submodule nokia-conf-router-mpls {
                     }
 
                     leaf accounting-policy {
-                        when "not(../../type) or ../../type = 'p2mp-rsvp' or ../../type = 'p2p-rsvp-one-hop' or ../../type = 'p2p-rsvp-mesh' or ../../type = 'p2p-sr-te-one-hop' or ../../type = 'p2p-sr-te-mesh'" {
+                        when "not(../../type) or ../../type = 'p2mp-rsvp' or ../../type = 'p2p-rsvp-one-hop' or ../../type = 'p2p-rsvp-mesh' or ../../type = 'p2p-sr-te-one-hop' or ../../type = 'p2p-sr-te-mesh' or ../../type = 'p2p-rsvp-member'" {
                             description "not allowed for this lsp-template type";
                         }
                         type leafref {
@@ -1760,7 +1779,7 @@ submodule nokia-conf-router-mpls {
                 } // container egress-statistics
 
                 container bfd {
-                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-pce-init' or ../type = 'p2p-sr-te-on-demand'" {
+                    when "not(../type) or ../type = 'p2p-rsvp-one-hop' or ../type = 'p2p-rsvp-mesh' or ../type = 'p2p-sr-te-mesh' or ../type = 'p2p-sr-te-one-hop' or ../type = 'p2p-sr-te-pce-init' or ../type = 'p2p-sr-te-on-demand' or ../type = 'p2p-rsvp-member'" {
                         description "not allowed for this LSP template type";
                     }
                     sros-ext:auto-restart-to-modify;
@@ -1769,7 +1788,7 @@ submodule nokia-conf-router-mpls {
                     leaf bfd-liveness {
                         type boolean;
                         default "false";
-                        description "Enable BFD on the RSVP LSP or S-BFD on the SR-TE LSP";
+                        description "Enable BFD on the LSP";
                     }
 
                     leaf bfd-template {
@@ -1780,7 +1799,7 @@ submodule nokia-conf-router-mpls {
                     }
 
                     leaf lsp-ping-interval {
-                        when "not(../../type) or ../../type = 'p2p-rsvp-one-hop' or ../../type = 'p2p-rsvp-mesh'" {
+                        when "not(../../type) or ../../type = 'p2p-rsvp-one-hop' or ../../type = 'p2p-rsvp-mesh' or ../../type = 'p2p-rsvp-member'" {
                             description "not allowed for this LSP type";
                         }
                         type union {
@@ -1824,10 +1843,19 @@ submodule nokia-conf-router-mpls {
                             description "not allowed for this LSP template type";
                         }
                         type uint32 {
-                            range "32..1048512";
+                            range "32..1048575";
                         }
                         sros-ext:auto-restart-to-modify;
                         description "S-BFD return-path label";
+                    }
+
+                    leaf source-address {
+                        when "not(../../type) or ../../type = 'p2p-sr-te-one-hop' or ../../type = 'p2p-sr-te-mesh' or ../../type = 'p2p-sr-te-pce-init' or ../../type = 'p2p-sr-te-on-demand'" {
+                            description "not allowed for this LSP template type";
+                        }
+                        type types-sros:ip-unicast-address;
+                        sros-ext:auto-restart-to-modify;
+                        description "Source address for S-BFD packets";
                     }
 
                 } // container bfd
@@ -1897,6 +1925,7 @@ submodule nokia-conf-router-mpls {
                         enum p2p-sr-te-one-hop              { value 12; }
                         enum p2p-sr-te-pce-init             { value 13; }
                         enum p2p-sr-te-on-demand            { value 15; }
+                        enum p2p-rsvp-member                { value 16; }
                     }
                     sros-ext:immutable;
                     mandatory true;
@@ -2178,6 +2207,7 @@ submodule nokia-conf-router-mpls {
                     type enumeration {
                         enum igp                            { value 1; }
                         enum te                             { value 2; }
+                        enum delay                          { value 3; }
                     }
                     default "igp";
                     description "Metric type used for LSP path computation";
@@ -2202,7 +2232,7 @@ submodule nokia-conf-router-mpls {
                     }
                     type boolean;
                     default "false";
-                    description "Enable/disable label compression for LSP path.";
+                    description "Enable label compression for LSP path";
                 }
 
                 leaf lsp-self-ping {
@@ -2486,19 +2516,19 @@ submodule nokia-conf-router-mpls {
                     leaf max-bandwidth {
                         type types-mpls:lsp-bandwidth;
                         default "100000";
-                        description "Maximum bandwidth of auto-bandwidth to request for LSP";
+                        description "Maximum bandwidth to request for an LSP";
                     }
 
                     leaf min-bandwidth {
                         type types-mpls:lsp-bandwidth;
                         default "0";
-                        description "Minimum bandwidth of auto-bandwidth to request for the LSP";
+                        description "Minimum bandwidth to request for an LSP";
                     }
 
                     leaf monitor-bandwidth {
                         type boolean;
                         default "false";
-                        description "Collect and display auto-bandwidth measurements for the LSP";
+                        description "Collect and display auto-bandwidth measurements for LSP";
                     }
 
                     leaf-list apply-groups {
@@ -2561,7 +2591,7 @@ submodule nokia-conf-router-mpls {
                         leaf percent {
                             type types-sros:percent;
                             default "5";
-                            description "Minimum difference in percent";
+                            description "Minimum difference in percentage of current bandwidth";
                         }
 
                         leaf bw {
@@ -2578,7 +2608,7 @@ submodule nokia-conf-router-mpls {
                         leaf percent {
                             type types-sros:percent;
                             default "5";
-                            description "Minimum difference in percent";
+                            description "Minimum difference in percentage of current bandwidth";
                         }
 
                         leaf bw {
@@ -2615,7 +2645,7 @@ submodule nokia-conf-router-mpls {
                         leaf threshold {
                             type types-sros:percent;
                             default "0";
-                            description "Minimum difference in percent between the LSP bandwidth and the sampled data rate";
+                            description "Minimum difference in percentage of bandwidth";
                         }
 
                         leaf bw {
@@ -2630,7 +2660,7 @@ submodule nokia-conf-router-mpls {
                                 range "1..10";
                             }
                             mandatory true;
-                            description "Number of overflow samples to trigger an overflow auto-bandwidth adjustment attempt";
+                            description "Number of samples to trigger auto-bandwidth adjustment";
                         }
 
                     } // container overflow-limit
@@ -2642,7 +2672,7 @@ submodule nokia-conf-router-mpls {
                         leaf threshold {
                             type types-sros:percent;
                             default "0";
-                            description "Minimum difference in percent between the LSP bandwidth and the sampled data rate";
+                            description "Minimum difference in percentage of bandwidth";
                         }
 
                         leaf bw {
@@ -2657,7 +2687,7 @@ submodule nokia-conf-router-mpls {
                                 range "1..10";
                             }
                             mandatory true;
-                            description "Number of overflow samples to trigger an overflow auto-bandwidth adjustment attempt";
+                            description "Number of samples to trigger auto-bandwidth adjustment";
                         }
 
                     } // container underflow-limit
@@ -2750,7 +2780,7 @@ submodule nokia-conf-router-mpls {
                     leaf bfd-liveness {
                         type boolean;
                         default "false";
-                        description "Enable BFD on the RSVP LSP or S-BFD on the SR-TE LSP";
+                        description "Enable BFD on the LSP";
                     }
 
                     leaf bfd-template {
@@ -2785,7 +2815,7 @@ submodule nokia-conf-router-mpls {
                             enum failover-or-down               { value 3; }
                         }
                         default "none";
-                        description "Action when LSP BFD fails on the RSVP SR-TE LSP";
+                        description "Action when LSP BFD fails";
                     }
 
                     leaf wait-for-up-timer {
@@ -2805,9 +2835,17 @@ submodule nokia-conf-router-mpls {
                             description "not allowed for this LSP type";
                         }
                         type uint32 {
-                            range "32..1048512";
+                            range "32..1048575";
                         }
                         description "S-BFD return-path label";
+                    }
+
+                    leaf source-address {
+                        when "not(../../type) or ../../type = 'p2p-sr-te'" {
+                            description "not allowed for this LSP type";
+                        }
+                        type types-sros:ip-unicast-address;
+                        description "Source address for the S-BFD packets";
                     }
 
                 } // container bfd
@@ -2966,6 +3004,17 @@ submodule nokia-conf-router-mpls {
                         description "Class-type";
                     }
 
+                    leaf delay-metric-limit {
+                        when "not(../../type) or ../../type = 'p2p-sr-te'" {
+                            description "not allowed for this LSP type";
+                        }
+                        type uint32 {
+                            range "1..16777215";
+                        }
+                        units "microseconds";
+                        description "Delay metric limit";
+                    }
+
                     leaf backup-class-type {
                         when "not(../../type) or ../../type = 'p2p-rsvp'" {
                             description "not allowed for this LSP type";
@@ -3101,9 +3150,17 @@ submodule nokia-conf-router-mpls {
                                 description "not allowed for this LSP type";
                             }
                             type uint32 {
-                                range "32..1048512";
+                                range "32..1048575";
                             }
                             description "S-BFD return-path label";
+                        }
+
+                        leaf source-address {
+                            when "not(../../../type) or ../../../type = 'p2p-sr-te'" {
+                                description "not allowed for this LSP type";
+                            }
+                            type types-sros:ip-unicast-address;
+                            description "Source address for S-BFD packets";
                         }
 
                     } // container bfd
@@ -3182,6 +3239,17 @@ submodule nokia-conf-router-mpls {
                         }
                         type types-mpls:class-type;
                         description "Class-type";
+                    }
+
+                    leaf delay-metric-limit {
+                        when "not(../../type) or ../../type = 'p2p-sr-te'" {
+                            description "not allowed for this LSP type";
+                        }
+                        type uint32 {
+                            range "1..16777215";
+                        }
+                        units "microseconds";
+                        description "Delay metric limit";
                     }
 
                     leaf path-preference {
@@ -3340,9 +3408,17 @@ submodule nokia-conf-router-mpls {
                                 description "not allowed for this LSP type";
                             }
                             type uint32 {
-                                range "32..1048512";
+                                range "32..1048575";
                             }
                             description "S-BFD return-path label";
+                        }
+
+                        leaf source-address {
+                            when "not(../../../type) or ../../../type = 'p2p-sr-te'" {
+                                description "not allowed for this LSP type";
+                            }
+                            type types-sros:ip-unicast-address;
+                            description "Source address for S-BFD packets";
                         }
 
                     } // container bfd
@@ -3687,6 +3763,128 @@ submodule nokia-conf-router-mpls {
 
             } // list static-lsp
 
+            list lsp-container {
+                key "container-name";
+                max-elements 256;
+                description "Enter the lsp-container list instance";
+
+                leaf container-name {
+                    type types-sros:named-item;
+                    description "LSP container name";
+                }
+
+                leaf admin-state {
+                    type types-sros:admin-state;
+                    default "disable";
+                    description "Administrative state of the LSP container";
+                }
+
+                leaf member-lsp-template {
+                    type leafref {
+                        path "../../../../router/mpls/lsp-template/template-name";
+                    }
+                    sros-ext:auto-restart-to-modify;
+                    description "LSP template that creates member LSPs in LSP container";
+                }
+
+                leaf suffix {
+                    type types-sros:string-not-all-spaces {
+                        length "1..24";
+                    }
+                    sros-ext:auto-restart-to-modify;
+                    description "Suffix used to name member LSPs of the LSP container";
+                }
+
+                leaf min-member-lsps {
+                    type uint32 {
+                        range "1..64";
+                    }
+                    default "1";
+                    description "Minimum number of member LSPs in the LSP container";
+                }
+
+                leaf max-member-lsps {
+                    type uint32 {
+                        range "1..64";
+                    }
+                    default "64";
+                    description "Maximum number of member LSPs in the LSP container";
+                }
+
+                leaf initial-member-lsps {
+                    type uint32 {
+                        range "1..64";
+                    }
+                    description "Initial number of member LSPs in the LSP container";
+                }
+
+                leaf initial-member-lsp-bw {
+                    type int32 {
+                        range "0..6400000";
+                    }
+                    units "megabps";
+                    sros-ext:auto-restart-to-modify;
+                    description "Initial average traffic rate per member LSP";
+                }
+
+                leaf to {
+                    type types-sros:ip-unicast-address;
+                    sros-ext:auto-restart-to-modify;
+                    description "Destination IP address for member LSPs of LSP container";
+                }
+
+                leaf-list apply-groups {
+                    type leafref {
+                        path "../../../../groups/group/name";
+                    }
+                    max-elements 8;
+                    ordered-by user;
+                    description "Apply a configuration group at this level";
+                }
+
+                leaf-list apply-groups-exclude {
+                    type leafref {
+                        path "../../../../groups/group/name";
+                    }
+                    max-elements 8;
+                    ordered-by user;
+                    description "Exclude a configuration group at this level";
+                }
+
+                container optimization {
+                    description "Enter the optimization context";
+
+                    leaf min-avg-rate {
+                        type types-mpls:lsp-bandwidth;
+                        default "0";
+                        description "Minimum allowed average traffic rate per member LSP";
+                    }
+
+                    leaf max-avg-rate {
+                        type types-mpls:lsp-bandwidth;
+                        default "6400000";
+                        description "Maximum allowed average traffic rate per member LSP";
+                    }
+
+                    leaf optimization-timer {
+                        type uint32 {
+                            range "15..44640";
+                        }
+                        units "minutes";
+                        default "2880";
+                        description "Timer-based optimization interval of the LSP container";
+                    }
+
+                    leaf ad-hoc {
+                        type boolean;
+                        default "false";
+                        description "Enable ad hoc optimization";
+                    }
+
+                } // container optimization
+
+            } // list lsp-container
+
             container forwarding-policies {
                 presence "Enable the forwarding-policies context";
                 description "Enable the forwarding-policies context";
@@ -3748,7 +3946,7 @@ submodule nokia-conf-router-mpls {
                     leaf endpoint {
                         type types-sros:ip-unicast-address;
                         sros-ext:auto-restart-to-modify;
-                        description "Configure endpoint address.";
+                        description "Endpoint address for the MPLS forwarding policy";
                     }
 
                     leaf revert-timer {
@@ -4337,7 +4535,7 @@ submodule nokia-conf-router-mpls {
                 leaf resignal-on-igp-event {
                     type boolean;
                     default "false";
-                    description "Re-optimize SR-TE LSPs upon IGP link events";
+                    description "Reoptimize SR-TE LSPs upon IGP link events";
                 }
 
                 leaf resignal-on-igp-overload {

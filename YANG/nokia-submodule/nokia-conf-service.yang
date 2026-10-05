@@ -31,7 +31,7 @@ submodule nokia-conf-service {
     include nokia-conf-svc-vpls;
     include nokia-conf-svc-vprn;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -54,7 +54,7 @@ submodule nokia-conf-service {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-08-23";
+    revision "2026-07-22";
 
     grouping conf-service {
         container service {
@@ -1004,7 +1004,7 @@ submodule nokia-conf-service {
                         enum qinq-c-tag-c-tag               { value 2; }
                         enum qinq-s-tag-c-tag               { value 3; }
                     }
-                    description "VC forwarding action";
+                    description "VLAN tag processing action";
                 }
 
                 leaf control-word {
@@ -1017,6 +1017,13 @@ submodule nokia-conf-service {
                     type boolean;
                     default "false";
                     description "Enable block traffic on peer fault";
+                }
+
+                leaf path-mtu {
+                    type int32 {
+                        range "576..9782";
+                    }
+                    description "MTU the SDP can transmit";
                 }
 
                 leaf-list apply-groups {
@@ -1088,7 +1095,7 @@ submodule nokia-conf-service {
 
                             leaf protected-src-mac-violation-action {
                                 type types-services:sap-protected-src-mac-violation-action;
-                                description "Action for protected source MAC restriction";
+                                description "Action taken after a relearn request for protected MAC";
                             }
 
                             leaf discard-unprotected-dest-mac {
@@ -1384,7 +1391,7 @@ submodule nokia-conf-service {
 
                     leaf protected-src-mac-violation-action {
                         type types-services:sdp-protected-src-mac-violation-action;
-                        description "Action for protected source MAC restriction";
+                        description "Action taken after a relearn request for protected MAC";
                     }
 
                     container mac-learning {
@@ -1600,6 +1607,29 @@ submodule nokia-conf-service {
 
                 } // container bgp-auto-rd-range
 
+                container reserved-label-block {
+                    description "Enter the reserved-label-block context";
+
+                    list label-block {
+                        key "label-block-name user";
+                        description "Add a list entry for label-block";
+
+                        leaf label-block-name {
+                            type leafref {
+                                path "../../../../../router/mpls-labels/reserved-label-block/label-block-name";
+                            }
+                            description "Reserved label block name";
+                        }
+
+                        leaf user {
+                            type types-services:reserved-label-block-user;
+                            description "Label block service name";
+                        }
+
+                    } // list label-block
+
+                } // container reserved-label-block
+
                 container fdb {
                     description "Enter the fdb context";
 
@@ -1774,6 +1804,13 @@ submodule nokia-conf-service {
                             description "Route distinguisher for ES routes";
                         }
 
+                        leaf hash-label-block {
+                            type leafref {
+                                path "../../../../../router/mpls-labels/reserved-label-block/label-block-name";
+                            }
+                            description "Hash label block reservation";
+                        }
+
                         leaf ingress-replication-bum-label-block {
                             type leafref {
                                 path "../../../../../router/mpls-labels/reserved-label-block/label-block-name";
@@ -1792,7 +1829,7 @@ submodule nokia-conf-service {
 
                         list ethernet-segment {
                             key "ethernet-segment-name";
-                            max-elements 4095;
+                            max-elements 20480;
                             description "Enter the ethernet-segment list instance";
 
                             leaf ethernet-segment-name {
@@ -1840,6 +1877,7 @@ submodule nokia-conf-service {
                                     enum single-active                  { value 1; }
                                     enum single-active-no-esi-label     { value 2; }
                                     enum all-active                     { value 3; }
+                                    enum all-active-no-esi-label        { value 4; }
                                 }
                                 sros-ext:auto-restart-to-modify;
                                 default "none";
@@ -2218,7 +2256,7 @@ submodule nokia-conf-service {
                                                 type leafref {
                                                     path "../../../../../../../../lag/lag-name";
                                                 }
-                                                description "LAG multi-homed with the Ethernet segment entry";
+                                                description "LAG multihomed with the Ethernet segment entry";
                                             }
 
                                             leaf-list apply-groups {
@@ -2781,6 +2819,28 @@ submodule nokia-conf-service {
 
                             } // container pbb
 
+                            container advertise-ifl-host-ad-routes {
+                                presence "Enable the advertise-ifl-host-ad-routes context";
+                                sros-ext:auto-restart-to-modify;
+                                description "Enable the advertise-ifl-host-ad-routes context";
+
+                                leaf route-tag {
+                                    type int32 {
+                                        range "1..255";
+                                    }
+                                    description "Route tag added to VPRN AD per-EVI routes of ES";
+                                }
+
+                                leaf bgp-evpn-instance {
+                                    type int32 {
+                                        range "1";
+                                    }
+                                    default "1";
+                                    description "EVPN interface-less VPRN instance using ES";
+                                }
+
+                            } // container advertise-ifl-host-ad-routes
+
                         } // list ethernet-segment
 
                         container ad-per-es-route {
@@ -2812,22 +2872,58 @@ submodule nokia-conf-service {
                             description "Enter the ip-prefix-routes context";
 
                             leaf iff-attribute-uniform-propagation {
+                                status obsolete;
                                 type boolean;
                                 default "false";
                                 description "Enable uniform propagation of BGP attributes";
                             }
 
                             leaf iff-bgp-path-selection {
+                                status obsolete;
                                 type boolean;
                                 default "false";
                                 description "Enable BGP path selection for EVPN-IFF routes";
                             }
 
                             leaf d-path-length-ignore {
+                                status obsolete;
                                 type boolean;
                                 default "false";
                                 description "Ignore D-PATH length for BGP path selection of EVPN-IFF";
                             }
+
+                            container interface-ful {
+                                description "Enter the interface-ful context";
+
+                                leaf attribute-uniform-propagation {
+                                    type boolean;
+                                    default "false";
+                                    description "Enable attribute uniform propagation";
+                                }
+
+                                leaf bgp-path-selection {
+                                    type boolean;
+                                    default "false";
+                                    description "Enable BGP path selection";
+                                }
+
+                                leaf d-path-length-ignore {
+                                    type boolean;
+                                    default "false";
+                                    description "Ignore the D-PATH length when using BGP path selection";
+                                }
+
+                            } // container interface-ful
+
+                            container interface-less {
+                                description "Enter the interface-less context";
+
+                                leaf vxlan-router-mac {
+                                    type types-sros:mac-unicast-address-no-zero;
+                                    description "VXLAN router MAC address";
+                                }
+
+                            } // container interface-less
 
                         } // container ip-prefix-routes
 
@@ -2864,6 +2960,23 @@ submodule nokia-conf-service {
                             }
 
                         } // container ad-per-evi-routes
+
+                        container segment-routing-v6 {
+                            description "Enter the segment-routing-v6 context";
+
+                            container direct-ip-transport {
+                                description "Enter the direct-ip-transport context";
+
+                                leaf argfe2-egress-remark {
+                                    type leafref {
+                                        path "../../../../../../../qos/egress-remark-policy/egress-remark-policy-name";
+                                    }
+                                    description "Egress remark policy for BUM SRv6 packets";
+                                }
+
+                            } // container direct-ip-transport
+
+                        } // container segment-routing-v6
 
                     } // container evpn
 

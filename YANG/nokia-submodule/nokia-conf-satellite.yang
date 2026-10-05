@@ -13,7 +13,7 @@ submodule nokia-conf-satellite {
     include nokia-conf-port;
     include nokia-conf-system;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -36,7 +36,7 @@ submodule nokia-conf-satellite {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-12-18";
+    revision "2026-07-22";
 
     grouping conf-satellite {
         container satellite {
@@ -146,7 +146,7 @@ submodule nokia-conf-satellite {
                     description "Enter the port list instance";
 
                     leaf sat-phys-port-id {
-                        type string;
+                        type types-sros:named-item-255;
                         description "Satellite physical port ID";
                     }
 
@@ -161,8 +161,11 @@ submodule nokia-conf-satellite {
                     }
 
                     leaf uplink {
-                        type leafref {
-                            path "../../port/sat-phys-port-id";
+                        type union {
+                            type string;
+                            type enumeration {
+                                enum none                           { value 0; }
+                            }
                         }
                         sros-ext:immutable;
                         description "Uplink association used for associated satellite port";
@@ -196,7 +199,7 @@ submodule nokia-conf-satellite {
 
                 leaf satellite-id {
                     type types-chassis:sat-id;
-                    description "The unique index identifying this satellite";
+                    description "Ethernet satellite ID";
                 }
 
                 leaf description {
@@ -304,6 +307,45 @@ submodule nokia-conf-satellite {
                     ordered-by user;
                     description "Exclude a configuration group at this level";
                 }
+
+                container ptp-ip {
+                    description "Enter the ptp-ip context";
+
+                    leaf admin-state {
+                        type types-sros:admin-state;
+                        default "disable";
+                        description "Administrative state of PTP over IP transparent clock";
+                    }
+
+                    leaf ipv4-address {
+                        type types-sros:ipv4-address;
+                        description "IPv4 destination address of PTP messages";
+                    }
+
+                    leaf ipv6-address {
+                        type types-sros:ipv6-address;
+                        description "IPv6 destination address of PTP messages";
+                    }
+
+                    leaf-list apply-groups {
+                        type leafref {
+                            path "../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Apply a configuration group at this level";
+                    }
+
+                    leaf-list apply-groups-exclude {
+                        type leafref {
+                            path "../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Exclude a configuration group at this level";
+                    }
+
+                } // container ptp-ip
 
                 container central-frequency-clock {
                     description "Enter the central-frequency-clock context";
@@ -418,6 +460,42 @@ submodule nokia-conf-satellite {
 
                 } // list port-map
 
+                list event {
+                    key "type";
+                    description "Enter the event list instance";
+
+                    leaf type {
+                        type enumeration {
+                            enum soft-error                     { value 1; }
+                        }
+                        description "Satellite event type to be monitored";
+                    }
+
+                    leaf action {
+                        type types-chassis:hw-event-action;
+                        description "Action to be taken on satellite when event is detected";
+                    }
+
+                    leaf-list apply-groups {
+                        type leafref {
+                            path "../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Apply a configuration group at this level";
+                    }
+
+                    leaf-list apply-groups-exclude {
+                        type leafref {
+                            path "../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Exclude a configuration group at this level";
+                    }
+
+                } // list event
+
             } // list ethernet-satellite
 
             list port-topology {
@@ -437,7 +515,7 @@ submodule nokia-conf-satellite {
                     }
                     sros-ext:immutable;
                     mandatory true;
-                    description "Far end port identifier.";
+                    description "Far end port ID";
                 }
 
                 leaf-list apply-groups {

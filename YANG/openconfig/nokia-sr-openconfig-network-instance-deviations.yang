@@ -5,34 +5,18 @@ module nokia-sr-openconfig-network-instance-deviations {
     prefix "nokia-oc-netinst-devs";
 
     import nokia-sros-yang-extensions     { prefix "sros-ext"; }
-    import openconfig-aft                 { prefix "oc-aft"; }
-    import openconfig-bgp                 { prefix "oc-bgp"; }
     import openconfig-bgp-types           { prefix "oc-bgp-types"; }
-    import openconfig-evpn                { prefix "oc-evpn"; }
-    import openconfig-extensions          { prefix "oc-ext"; }
-    import openconfig-igmp                { prefix "oc-igmp"; }
-    import openconfig-interfaces          { prefix "oc-if"; }
-    import openconfig-isis                { prefix "oc-isis"; }
-    import openconfig-local-routing       { prefix "oc-loc-rt"; }
-    import openconfig-mpls                { prefix "oc-mpls"; }
     import openconfig-network-instance    { prefix "oc-netinst"; }
-    import openconfig-network-instance-l3 { prefix "oc-ni-l3"; }
     import openconfig-network-instance-types { prefix "oc-ni-types"; }
-    import openconfig-ospfv2              { prefix "oc-ospfv2"; }
-    import openconfig-pim                 { prefix "oc-pim"; }
-    import openconfig-policy-forwarding   { prefix "oc-pf"; }
-    import openconfig-policy-types        { prefix "oc-pol-types"; }
-    import openconfig-routing-policy      { prefix "oc-rpol"; }
-    import openconfig-types               { prefix "oc-types"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
          Web: <http://www.nokia.com>";
     description
         "This module contains the list of deviations against the openconfig-network-instance
-          module for the Nokia SR OS based routers.
+         module for the Nokia SR OS based routers.
 
          Copyright 2016 Nokia. All rights reserved. Reproduction of this document
          is authorized on the condition that the foregoing copyright notice is included.
@@ -49,7 +33,7 @@ module nokia-sr-openconfig-network-instance-deviations {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2022-04-20";
+    revision "2025-03-12";
 
     deviation /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:fdb {
         deviate not-supported;

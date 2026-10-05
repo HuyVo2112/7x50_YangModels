@@ -11,7 +11,7 @@ submodule nokia-state-router-mpls {
 
     include nokia-state-router;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -34,11 +34,11 @@ submodule nokia-state-router-mpls {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2019-07-08";
+    revision "2026-02-11";
 
     grouping state-router-mpls {
         container mpls {
-            description "Enable the mpls context";
+            description "Enter the mpls context";
 
             leaf bypass-next-resignal-timer {
                 type uint32;
@@ -174,7 +174,7 @@ submodule nokia-state-router-mpls {
                     type leafref {
                         path "../../../interface/interface-name";
                     }
-                    description "Router interface name";
+                    description "Router interface name.";
                 }
 
                 leaf oper-state {
@@ -213,7 +213,7 @@ submodule nokia-state-router-mpls {
 
                     leaf in-label {
                         type types-sros:mpls-label;
-                        description "Match the incoming MPLS label";
+                        description "The incoming label for the label-map.";
                     }
 
                     leaf oper-state {
@@ -291,7 +291,7 @@ submodule nokia-state-router-mpls {
 
                 leaf policy-name {
                     type types-sros:named-item;
-                    description "Name of class forwarding policy";
+                    description "Specifies the name for class forwarding policy.";
                 }
 
                 leaf ref-count {
@@ -309,7 +309,7 @@ submodule nokia-state-router-mpls {
 
                 leaf path-name {
                     type types-sros:named-item-64;
-                    description "Name for this LSP path";
+                    description "The canonical name assigned to this tunnel.";
                 }
 
                 leaf oper-state {
@@ -330,7 +330,9 @@ submodule nokia-state-router-mpls {
 
                 leaf template-name {
                     type types-sros:named-item;
-                    description "LSP template name";
+                    description
+                        "Specifies the name of the LSP Template which is used to
+                         automatically create and signal multiple LSP instances.";
                 }
 
                 leaf lsp-count {
@@ -342,11 +344,16 @@ submodule nokia-state-router-mpls {
                     type yang:counter32;
                     description
                         "The value indicates the number of MVPNs as well as number of P2MP LSP
-                         users associated to this template.";
+                         users associated with this template.";
+                }
+
+                leaf lsp-container-ref-count {
+                    type yang:counter32;
+                    description "Indicates the number of LSP containers referencing this template.";
                 }
 
                 container auto-bandwidth {
-                    description "Enable the auto-bandwidth context";
+                    description "Enter the auto-bandwidth context";
 
                     leaf sample-time {
                         type uint32;
@@ -364,7 +371,7 @@ submodule nokia-state-router-mpls {
 
                 leaf lsp-name {
                     type types-sros:named-item-64;
-                    description "Labeled Switch path name";
+                    description "Administrative name for Labeled Switch Path.";
                 }
 
                 leaf oper-state {
@@ -395,6 +402,18 @@ submodule nokia-state-router-mpls {
                 leaf oper-metric {
                     type uint32;
                     description "Indicates the operational metric for the LSP.";
+                }
+
+                leaf lsp-container {
+                    type types-sros:named-item;
+                    description "Indicates the LSP container that this LSP is a member of.";
+                }
+
+                leaf member-id {
+                    type uint32 {
+                        range "1..64";
+                    }
+                    description "Indicates the member ID of this LSP within the LSP container.";
                 }
 
                 leaf origin-template {
@@ -575,7 +594,7 @@ submodule nokia-state-router-mpls {
                 } // container entropy-label-state
 
                 container auto-bandwidth {
-                    description "Enable the auto-bandwidth context";
+                    description "Enter the auto-bandwidth context";
 
                     leaf sample-time {
                         type uint32;
@@ -677,7 +696,7 @@ submodule nokia-state-router-mpls {
                         type leafref {
                             path "../../../path/path-name";
                         }
-                        description "Path name";
+                        description "The path name.";
                     }
 
                     leaf oper-state {
@@ -914,8 +933,21 @@ submodule nokia-state-router-mpls {
                         type enumeration {
                             enum igp                            { value 1; }
                             enum te                             { value 2; }
+                            enum delay                          { value 3; }
                         }
                         description "Indicates the metric-type that was used to compute the current operational LSP path.";
+                    }
+
+                    leaf oper-delay-metric-limit {
+                        type union {
+                            type enumeration {
+                                enum no-limit                       { value 0; }
+                            }
+                            type uint32 {
+                                range "1..16777215";
+                            }
+                        }
+                        description "Indicates the delay-metric-limit that was used to compute the current operational LSP path.";
                     }
 
                     leaf oper-local-sr-protection {
@@ -950,6 +982,13 @@ submodule nokia-state-router-mpls {
                             bit manual-switch                  { position 3; }
                         }
                         description "Indicates the reason if path is degraded.";
+                    }
+
+                    leaf path-lsp-id {
+                        type uint32 {
+                            range "1..65535";
+                        }
+                        description "LSP identifier for this LSP path.";
                     }
 
                     leaf main-ct-retry-remaining {
@@ -1169,7 +1208,7 @@ submodule nokia-state-router-mpls {
                         type leafref {
                             path "../../../path/path-name";
                         }
-                        description "Path name";
+                        description "The path name.";
                     }
 
                     leaf oper-state {
@@ -1406,8 +1445,21 @@ submodule nokia-state-router-mpls {
                         type enumeration {
                             enum igp                            { value 1; }
                             enum te                             { value 2; }
+                            enum delay                          { value 3; }
                         }
                         description "Indicates the metric-type that was used to compute the current operational LSP path.";
+                    }
+
+                    leaf oper-delay-metric-limit {
+                        type union {
+                            type enumeration {
+                                enum no-limit                       { value 0; }
+                            }
+                            type uint32 {
+                                range "1..16777215";
+                            }
+                        }
+                        description "Indicates the delay-metric-limit that was used to compute the current operational LSP path.";
                     }
 
                     leaf oper-local-sr-protection {
@@ -1442,6 +1494,13 @@ submodule nokia-state-router-mpls {
                             bit manual-switch                  { position 3; }
                         }
                         description "Indicates the reason if path is degraded.";
+                    }
+
+                    leaf path-lsp-id {
+                        type uint32 {
+                            range "1..65535";
+                        }
+                        description "LSP identifier for this LSP path.";
                     }
 
                     leaf active-by-manual {
@@ -1638,7 +1697,7 @@ submodule nokia-state-router-mpls {
 
                     leaf instance-name {
                         type types-sros:named-item;
-                        description "P2MP LSP instance name";
+                        description "The unique name which identifies this P2MP LSP for this virtual router. ";
                     }
 
                     leaf oper-state {
@@ -1730,12 +1789,12 @@ submodule nokia-state-router-mpls {
                             type leafref {
                                 path "../../../../path/path-name";
                             }
-                            description "P2MP LSP name";
+                            description "A label switch path (P2MP LSP) name.";
                         }
 
                         leaf to {
                             type types-sros:ip-address;
-                            description "System IP address of the egress router";
+                            description "The IP address of the destination address of the S2L sub LSP.";
                         }
 
                         leaf oper-state {
@@ -2009,7 +2068,7 @@ submodule nokia-state-router-mpls {
 
                 leaf lsp-name {
                     type types-sros:named-item-64;
-                    description "Labeled Switch path name";
+                    description "Administrative name for Labeled Switch Path.";
                 }
 
                 leaf oper-state {
@@ -2045,7 +2104,7 @@ submodule nokia-state-router-mpls {
                 }
 
                 container push {
-                    description "Enable the push context";
+                    description "Enter the push context";
 
                     leaf out-if-index {
                         type uint32;
@@ -2066,8 +2125,150 @@ submodule nokia-state-router-mpls {
 
             } // list static-lsp
 
+            list lsp-container {
+                key "container-name";
+                description "Enter the lsp-container list instance";
+
+                leaf container-name {
+                    type types-sros:named-item;
+                    description "LSP container name.";
+                }
+
+                leaf oper-state {
+                    type types-sros:oper-state;
+                    description "The current operational state of the LSP Container.";
+                }
+
+                leaf oper-down-reason {
+                    type enumeration {
+                        enum admin-down                     { value 1; }
+                        enum lsp-name-conflict              { value 2; }
+                        enum no-resources-available         { value 3; }
+                        enum no-lsp-operational             { value 4; }
+                    }
+                    description "The reason due to which the LSP container is operationally down.";
+                }
+
+                leaf member-lsp-count {
+                    type yang:gauge32;
+                    description "The number of member LSPs in the LSP container.";
+                }
+
+                leaf member-lsp-up-count {
+                    type yang:gauge32;
+                    description "The number of member LSPs in the LSP container that are operationally up.";
+                }
+
+                leaf nominal-lsp-count {
+                    type yang:gauge32;
+                    description "The nominal number of member LSPs in the LSP container.";
+                }
+
+                leaf nominal-bandwidth {
+                    type uint32;
+                    units "megabps";
+                    description
+                        "The nominal bandwidth, in mega-bits per second, computed for
+                         each member LSP in the LSP container.";
+                }
+
+                leaf optimization-time-remaining {
+                    type uint32;
+                    units "seconds";
+                    description
+                        "The time remaining, in seconds, till the optimization timer
+                         expires and optimization is started for the LSP container.";
+                }
+
+                leaf ad-hoc-optimization-pending {
+                    type boolean;
+                    description "Indicates whether ad-hoc optimization is pending for the LSP container.";
+                }
+
+                leaf ad-hoc-optimization-event {
+                    type enumeration {
+                        enum lsp-auto-bw-failed             { value 1; }
+                        enum lsp-failed-to-establish        { value 2; }
+                        enum lsp-auto-bw-skipped            { value 3; }
+                    }
+                    description "The ad-hoc optimization event for the LSP container.";
+                }
+
+                container last-optimization {
+                    description "Enter the last-optimization context";
+
+                    leaf start-time {
+                        type yang:date-and-time;
+                        description "The system time when the last optimization started for the LSP container.";
+                    }
+
+                    leaf status {
+                        type enumeration {
+                            enum completed                      { value 1; }
+                            enum failed                         { value 2; }
+                        }
+                        description "The status of the last optimization.";
+                    }
+
+                    leaf reason {
+                        type enumeration {
+                            enum timer-based                    { value 1; }
+                            enum ad-hoc                         { value 2; }
+                            enum config-param-modified          { value 3; }
+                        }
+                        description "The reason for the last optimization.";
+                    }
+
+                } // container last-optimization
+
+                list member-lsp {
+                    key "member-id";
+                    description "Enter the member-lsp list instance";
+
+                    leaf member-id {
+                        type uint32 {
+                            range "1..64";
+                        }
+                        description "Unique ID for the member LSP within the LSP container.";
+                    }
+
+                    leaf lsp-name {
+                        type types-sros:named-item-64;
+                        description "The name of the member LSP.";
+                    }
+
+                    leaf oper-state {
+                        type types-sros:oper-state;
+                        description "The current operational state of the member LSP.";
+                    }
+
+                    leaf tunnel-id {
+                        type uint32;
+                        description "The tunnel ID for the member LSP.";
+                    }
+
+                    leaf oper-bandwidth {
+                        type uint32;
+                        units "megabps";
+                        description
+                            "The operational bandwidth, in mega-bits per second, for
+                             the member LSP.";
+                    }
+
+                    leaf sampled-avg-rate {
+                        type uint32;
+                        units "megabps";
+                        description
+                            "The sampled average rate, in mega-bits per second, for
+                             the member LSP.";
+                    }
+
+                } // list member-lsp
+
+            } // list lsp-container
+
             container forwarding-policies {
-                description "Enable the forwarding-policies context";
+                description "Enter the forwarding-policies context";
 
                 leaf oper-state {
                     type types-sros:oper-state;
@@ -2089,7 +2290,7 @@ submodule nokia-state-router-mpls {
 
                     leaf policy-name {
                         type types-sros:named-item-64;
-                        description "Forwarding policy name";
+                        description "Administrative name for Forwarding Policy.";
                     }
 
                     leaf oper-state {
@@ -2105,7 +2306,7 @@ submodule nokia-state-router-mpls {
                             type uint32 {
                                 range "1..32";
                             }
-                            description "Index for next hop group";
+                            description "Index for next-hop group.";
                         }
 
                         leaf oper-state {
@@ -2114,7 +2315,7 @@ submodule nokia-state-router-mpls {
                         }
 
                         container primary-next-hop {
-                            description "Enable the primary-next-hop context";
+                            description "Enter the primary-next-hop context";
 
                             leaf oper-state {
                                 type types-sros:oper-state;
@@ -2124,7 +2325,7 @@ submodule nokia-state-router-mpls {
                         } // container primary-next-hop
 
                         container backup-next-hop {
-                            description "Enable the backup-next-hop context";
+                            description "Enter the backup-next-hop context";
 
                             leaf oper-state {
                                 type types-sros:oper-state;
@@ -2270,7 +2471,7 @@ submodule nokia-state-router-mpls {
                                 type uint32 {
                                     range "1..32";
                                 }
-                                description "Index for next hop group";
+                                description "Index for next-hop group.";
                             }
 
                             leaf oper-state {
@@ -2365,7 +2566,7 @@ submodule nokia-state-router-mpls {
                                         type uint32 {
                                             range "1..10";
                                         }
-                                        description "Index for push label";
+                                        description "Index for push-label.";
                                     }
 
                                     leaf label {
@@ -2373,7 +2574,7 @@ submodule nokia-state-router-mpls {
                                             range "1..1048575";
                                         }
                                         mandatory true;
-                                        description "Label value";
+                                        description "Push label value.";
                                     }
 
                                 } // list pushed-labels
@@ -2438,7 +2639,7 @@ submodule nokia-state-router-mpls {
                                         type uint32 {
                                             range "1..10";
                                         }
-                                        description "Index for push label";
+                                        description "Index for push-label.";
                                     }
 
                                     leaf label {
@@ -2446,7 +2647,7 @@ submodule nokia-state-router-mpls {
                                             range "1..1048575";
                                         }
                                         mandatory true;
-                                        description "Label value";
+                                        description "Push label value.";
                                     }
 
                                 } // list pushed-labels
@@ -2598,7 +2799,7 @@ submodule nokia-state-router-mpls {
                                 type uint32 {
                                     range "1..32";
                                 }
-                                description "Index for next hop group";
+                                description "Index for next-hop group.";
                             }
 
                             leaf oper-state {
@@ -2693,7 +2894,7 @@ submodule nokia-state-router-mpls {
                                         type uint32 {
                                             range "1..10";
                                         }
-                                        description "Index for push label";
+                                        description "Index for push-label.";
                                     }
 
                                     leaf label {
@@ -2701,7 +2902,7 @@ submodule nokia-state-router-mpls {
                                             range "1..1048575";
                                         }
                                         mandatory true;
-                                        description "Label value";
+                                        description "Push label value.";
                                     }
 
                                 } // list pushed-labels
@@ -2766,7 +2967,7 @@ submodule nokia-state-router-mpls {
                                         type uint32 {
                                             range "1..10";
                                         }
-                                        description "Index for push label";
+                                        description "Index for push-label.";
                                     }
 
                                     leaf label {
@@ -2774,7 +2975,7 @@ submodule nokia-state-router-mpls {
                                             range "1..1048575";
                                         }
                                         mandatory true;
-                                        description "Label value";
+                                        description "Push label value.";
                                     }
 
                                 } // list pushed-labels
@@ -2809,10 +3010,10 @@ submodule nokia-state-router-mpls {
             } // container forwarding-policies
 
             container pce-init-lsp {
-                description "Enable the pce-init-lsp context";
+                description "Enter the pce-init-lsp context";
 
                 container sr-te {
-                    description "Enable the sr-te context";
+                    description "Enter the sr-te context";
 
                     leaf oper-state {
                         type types-sros:oper-state;
@@ -2841,12 +3042,12 @@ submodule nokia-state-router-mpls {
 
                     leaf sender {
                         type types-sros:ip-unicast-address;
-                        description "Sender address";
+                        description "Indicates the sender address.";
                     }
 
                     leaf rsvp-session-name {
                         type types-sros:named-item-64;
-                        description "RSVP session name";
+                        description "Administrative name for RSVP session.";
                     }
 
                     leaf total-session {
@@ -2862,12 +3063,12 @@ submodule nokia-state-router-mpls {
 
                     leaf sender {
                         type types-sros:ip-unicast-address;
-                        description "Sender address";
+                        description "Indicates the sender address.";
                     }
 
                     leaf rsvp-session-name {
                         type types-sros:named-item-64;
-                        description "RSVP session name";
+                        description "Administrative name for RSVP session.";
                     }
 
                     leaf total-session {
@@ -2943,6 +3144,11 @@ submodule nokia-state-router-mpls {
                     leaf originate-one-hop-lsp-count {
                         type yang:gauge32;
                         description "The number of one hop P2P LSPs originating at this virtual router.";
+                    }
+
+                    leaf originate-member-lsp-count {
+                        type yang:gauge32;
+                        description "The number of member P2P LSPs originating at this virtual router.";
                     }
 
                     leaf lsp-up-count {
@@ -3137,7 +3343,7 @@ submodule nokia-state-router-mpls {
 
                     leaf lsp-name {
                         type types-sros:named-item-64;
-                        description "LSP name";
+                        description "Administrative name for Labeled Switch Path.";
                     }
 
                     container fc {

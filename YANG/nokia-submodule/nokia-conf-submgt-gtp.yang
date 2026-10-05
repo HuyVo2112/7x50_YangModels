@@ -14,7 +14,7 @@ submodule nokia-conf-submgt-gtp {
     include nokia-conf-submgt-local-user-db;
     include nokia-conf-subscriber-mgmt;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -37,11 +37,20 @@ submodule nokia-conf-submgt-gtp {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2021-07-01";
+    revision "2026-07-22";
 
     grouping conf-submgt-gtp {
         container gtp {
             description "Enter the gtp context";
+
+            leaf gtp-u-ipv6-checksum {
+                type enumeration {
+                    enum false                          { value 0; }
+                    enum true                           { value 1; }
+                }
+                default "false";
+                description "UDP checksum for GTP-u packets transmitted over IPv6";
+            }
 
             leaf max-held-uplink-sessions {
                 type uint32 {

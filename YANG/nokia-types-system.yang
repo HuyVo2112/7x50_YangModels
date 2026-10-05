@@ -10,7 +10,7 @@ module nokia-types-system {
     import nokia-sros-yang-extensions     { prefix "sros-ext"; }
     import nokia-types-sros               { prefix "types-sros"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -33,7 +33,7 @@ module nokia-types-system {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2024-01-29";
+    revision "2026-02-11";
 
     typedef device-state {
         type enumeration {
@@ -44,6 +44,8 @@ module nokia-types-system {
             enum out-of-service                 { value 5; }
             enum not-provisioned                { value 6; }
             enum not-applicable                 { value 7; }
+            enum formatting                     { value 8; }
+            enum secure-erase                   { value 9; }
         }
         description
             "Values used to identify states of chassis
@@ -218,6 +220,7 @@ module nokia-types-system {
             enum telnet                         { value 41; }
             enum tftp                           { value 42; }
             enum twamp                          { value 43; }
+            enum needs-icmp                     { value 44; }
         }
         description
             "Indicates the protocols supported for the distributed CPU
@@ -307,6 +310,29 @@ module nokia-types-system {
         description "Type of session";
     }
 
+    typedef netconf-transport {
+        type enumeration {
+            enum ssh {
+                value 0;
+                description "Transport type is SSH";
+            }
+        }
+        description "Type of transport for Netconf layer";
+    }
+
+    typedef netconf-oper-down-reason {
+        type enumeration {
+            enum admin-down                     { value 1; }
+            enum no-connected-client            { value 2; }
+            enum active-delay-on-boot           { value 3; }
+            enum no-route-to-destination        { value 4; }
+            enum tcp-connection-failed          { value 5; }
+            enum ssh-connection-failed          { value 6; }
+            enum listen-port-unavailable        { value 7; }
+        }
+        description "The reason due to which the netconf session (Client initiated or Call-home initiated) is operationally down";
+    }
+
     typedef permit-deny {
         type enumeration {
             enum permit                         { value 1; }
@@ -344,17 +370,50 @@ module nokia-types-system {
 
     typedef ssm-quality-level-override {
         type enumeration {
-            enum unused                         { value 0; }
-            enum prs                            { value 1; }
-            enum stu                            { value 2; }
-            enum st2                            { value 3; }
-            enum tnc                            { value 4; }
-            enum st3e                           { value 5; }
-            enum st3                            { value 6; }
-            enum prc                            { value 10; }
-            enum ssua                           { value 11; }
-            enum ssub                           { value 12; }
-            enum sec                            { value 13; }
+            enum unused {
+                value 0;
+                description "Not used";
+            }
+            enum prs {
+                value 1;
+                description "SONET Primary Reference Source traceable";
+            }
+            enum stu {
+                value 2;
+                description "SONET Synchronous Traceability Unknown";
+            }
+            enum st2 {
+                value 3;
+                description "SONET Stratum 2 traceable";
+            }
+            enum tnc {
+                value 4;
+                description "SONET Transit Node Clock traceable";
+            }
+            enum st3e {
+                value 5;
+                description "SONET Stratum 3E traceable";
+            }
+            enum st3 {
+                value 6;
+                description "SONET Stratum 3 traceable";
+            }
+            enum prc {
+                value 10;
+                description "SDH Primary Reference Clock traceable";
+            }
+            enum ssua {
+                value 11;
+                description "SDH primary level Synchronization Supply Unit traceable";
+            }
+            enum ssub {
+                value 12;
+                description "SDH second Level Synchronization Supply Unit traceable";
+            }
+            enum sec {
+                value 13;
+                description "SDH Synchronous Equipment Clock traceable";
+            }
         }
         description
             "ssm-quality-level-override is an enumerated integer that describes the values used
@@ -364,27 +423,66 @@ module nokia-types-system {
 
     typedef ref-ssm-quality-level-override {
         type enumeration {
-            enum unused                         { value 0; }
-            enum prs                            { value 1; }
-            enum stu                            { value 2; }
-            enum st2                            { value 3; }
-            enum tnc                            { value 4; }
-            enum st3e                           { value 5; }
-            enum st3                            { value 6; }
-            enum prc                            { value 10; }
-            enum ssua                           { value 11; }
-            enum ssub                           { value 12; }
-            enum sec                            { value 13; }
-            enum eec1                           { value 17; }
-            enum eec2                           { value 18; }
+            enum unused {
+                value 0;
+                description "Not used";
+            }
+            enum prs {
+                value 1;
+                description "SONET Primary Reference Source traceable";
+            }
+            enum stu {
+                value 2;
+                description "SONET Synchronous Traceability Unknown";
+            }
+            enum st2 {
+                value 3;
+                description "SONET Stratum 2 traceable";
+            }
+            enum tnc {
+                value 4;
+                description "SONET Transit Node Clock traceable";
+            }
+            enum st3e {
+                value 5;
+                description "SONET Stratum 3E traceable";
+            }
+            enum st3 {
+                value 6;
+                description "SONET Stratum 3 traceable";
+            }
+            enum prc {
+                value 10;
+                description "SDH Primary Reference Clock traceable";
+            }
+            enum ssua {
+                value 11;
+                description "SDH primary level Synchronization Supply Unit traceable";
+            }
+            enum ssub {
+                value 12;
+                description "SDH second Level Synchronization Supply Unit traceable";
+            }
+            enum sec {
+                value 13;
+                description "SDH Synchronous Equipment Clock traceable";
+            }
+            enum eec1 {
+                value 17;
+                description "SDH Ethernet Equipment Clock";
+            }
+            enum eec2 {
+                value 18;
+                description "SONET Ethernet Equipment Clock";
+            }
         }
         description
-            "ssm-quality-level-override is an enumerated integer that describes the values used
+            "ref-ssm-quality-level-override is an enumerated integer that describes the values used
              to identify the SSM Quality level used to override the one extracted from received
              SSM messages.";
     }
 
-    typedef gnss-ssm-quality-level-override {
+    typedef ssm-quality-level {
         type enumeration {
             enum unused                         { value 0; }
             enum prs                            { value 1; }
@@ -393,6 +491,55 @@ module nokia-types-system {
             enum tnc                            { value 4; }
             enum st3e                           { value 5; }
             enum st3                            { value 6; }
+            enum smc                            { value 7; }
+            enum st4                            { value 8; }
+            enum dus                            { value 9; }
+            enum prc                            { value 10; }
+            enum ssua                           { value 11; }
+            enum ssub                           { value 12; }
+            enum sec                            { value 13; }
+            enum dnu                            { value 14; }
+            enum inv                            { value 15; }
+            enum pno                            { value 16; }
+            enum eec1                           { value 17; }
+            enum eec2                           { value 18; }
+            enum failed                         { value 19; }
+        }
+        description
+            "The ssm-quality-level is an enumerated integer that describes the values used
+             to identify the SSM messages.";
+    }
+
+    typedef gnss-ssm-quality-level-override {
+        type enumeration {
+            enum unused {
+                value 0;
+                description "Not used";
+            }
+            enum prs {
+                value 1;
+                description "SONET Primary Reference Source traceable";
+            }
+            enum stu {
+                value 2;
+                description "SONET Synchronous Traceability Unknown";
+            }
+            enum st2 {
+                value 3;
+                description "SONET Stratum 2 traceable";
+            }
+            enum tnc {
+                value 4;
+                description "SONET Transit Node Clock traceable";
+            }
+            enum st3e {
+                value 5;
+                description "SONET Stratum 3E traceable";
+            }
+            enum st3 {
+                value 6;
+                description "SONET Stratum 3 traceable";
+            }
         }
         description
             "gnss-ssm-quality-level-override is an enumerated integer that describes the values used
@@ -413,6 +560,164 @@ module nokia-types-system {
             "The sets-ref-source data type is an enumerated integer that
              describes the values used to identify the Synchronous Equipment
              Timing Source (SETS) timing reference source.";
+    }
+
+    typedef sets-clock-state {
+        type enumeration {
+            enum not-present {
+                value 1;
+                description "Reserved";
+            }
+            enum master-freerun {
+                value 2;
+                description "The clock is in free-run because it hasn't had a qualified input reference to lock to";
+            }
+            enum master-holdover {
+                value 3;
+                description "The clock was locked to an input reference but has lost all qualified input references and is in holdover";
+            }
+            enum master-locked {
+                value 4;
+                description "The clock is locked to an input reference";
+            }
+            enum slave {
+                value 5;
+                description "Reserved";
+            }
+            enum acquiring {
+                value 6;
+                description "The clock is training to a qualified input reference.";
+            }
+        }
+        description "Indicates the present status of the synchronous timing equipment subsystem (SETS).";
+    }
+
+    typedef reference-input-state {
+        type enumeration {
+            enum disabled {
+                value 0;
+                description "Disabled";
+            }
+            enum unqualified {
+                value 1;
+                description "Unqualified reference";
+            }
+            enum standby {
+                value 2;
+                description "Standby";
+            }
+            enum up {
+                value 3;
+                description "In service";
+            }
+            enum previous-failure {
+                value 4;
+                description "Previous failure present";
+            }
+            enum low-quality {
+                value 5;
+                description "Input is low quality";
+            }
+            enum lof {
+                value 6;
+                description "Loss of frame";
+            }
+            enum ais {
+                value 7;
+                description "Alarm indication signal error";
+            }
+            enum ghost {
+                value 8;
+                description "Reference is not physically present";
+            }
+            enum validating {
+                value 9;
+                description "Validating input reference";
+            }
+            enum fer {
+                value 13;
+                description "Frame error";
+            }
+            enum ptp-admin-disabled {
+                value 17;
+                description "PTP timing reference not in use because it's admin-state is out of service";
+            }
+            enum ptp-oper-down {
+                value 18;
+                description "PTP timing reference not in use because it's oper-state is out of service";
+            }
+            enum ptp-no-parent-clock {
+                value 19;
+                description "PTP timing reference not in use because the local PTP clock has not selected a master clock to be the parent clock";
+            }
+            enum oper-speed-not-supported {
+                value 20;
+                description "Timing reference is not in use because the copper based port is operating at 10Mbps where recovered timing is not supported";
+            }
+            enum unsupported-2048khz {
+                value 21;
+                description "Timing reference is not in use because the CPM does not meet the specifications for the 2048kHz BITS output signal under G.703";
+            }
+        }
+        description "State of an input reference";
+    }
+
+    typedef reference-input-alarm {
+        type enumeration {
+            enum loss-of-signal                 { value 0; }
+            enum out-of-frequency-range         { value 1; }
+            enum out-of-pull-in-range           { value 2; }
+        }
+        description "Input reference alarms";
+    }
+
+    typedef reference-source {
+        type enumeration {
+            enum mate-cpm {
+                value 0;
+                description "Frequency feed from mate CPM";
+            }
+            enum reference-1 {
+                value 1;
+                description "line reference 1";
+            }
+            enum reference-2 {
+                value 2;
+                description "line reference 2";
+            }
+            enum bits-input-a {
+                value 3;
+                description "BITS on CPM A";
+            }
+            enum bits-input-b {
+                value 4;
+                description "BITS on CPM B";
+            }
+            enum ptp {
+                value 5;
+                description "PTP frequency";
+            }
+            enum no-reference {
+                value 6;
+                description "Currently no input selected";
+            }
+            enum synce-a {
+                value 7;
+                description "Dedicated SyncE/1588 port on CPM A";
+            }
+            enum synce-b {
+                value 8;
+                description "Dedicated SyncE/1588 port on CPM B";
+            }
+            enum gnss-a {
+                value 9;
+                description "Embedded GNSS receiver on CPM A";
+            }
+            enum gnss-b {
+                value 10;
+                description "Embedded GNSS receiver on CPM B";
+            }
+        }
     }
 
     typedef bits-out-source {
@@ -507,9 +812,18 @@ module nokia-types-system {
 
     typedef threshold-startup-alarm {
         type enumeration {
-            enum rising                         { value 1; }
-            enum falling                        { value 2; }
-            enum either                         { value 3; }
+            enum rising {
+                value 1;
+                description "Raise TCA if threshold is crossed in upward direction";
+            }
+            enum falling {
+                value 2;
+                description "Raise TCA if threshold is crossed in downward direction";
+            }
+            enum either {
+                value 3;
+                description "Raise TCA if threshold is crossed from either direction";
+            }
         }
         default "either";
         description "Describes threshold startup alarm types";
@@ -517,8 +831,14 @@ module nokia-types-system {
 
     typedef threshold-sample {
         type enumeration {
-            enum absolute                       { value 1; }
-            enum delta                          { value 2; }
+            enum absolute {
+                value 1;
+                description "Value compared with end sampling interval thresholds";
+            }
+            enum delta {
+                value 2;
+                description "Selected minus current and compared with thresholds";
+            }
         }
         default "absolute";
         description "Describes threshold sample types.";
@@ -586,6 +906,7 @@ module nokia-types-system {
             enum vsd                            { value 4; }
             enum cron-python                    { value 5; }
             enum event-script-python            { value 6; }
+            enum subscriber-mgmt                { value 7; }
         }
         description "Indicates the module that started this run of a script";
     }
@@ -844,6 +1165,7 @@ module nokia-types-system {
             enum ldp                            { value 3; }
             enum sr-mpls                        { value 4; }
             enum service-sdp-bind-gre           { value 5; }
+            enum service-sap-ring-aps           { value 6; }
             enum service                        { value 9; }
             enum service-sap                    { value 10; }
             enum service-sdp-bind               { value 11; }
@@ -862,6 +1184,59 @@ module nokia-types-system {
             enum srv6                           { value 24; }
         }
         description "IXR resource owners.";
+    }
+
+    typedef mpls-resource-owner {
+        type enumeration {
+            enum rsvp                           { value 1; }
+            enum ldp                            { value 2; }
+            enum bgp                            { value 3; }
+            enum mpls-tp                        { value 4; }
+            enum static-service                 { value 5; }
+            enum sr-mpls                        { value 6; }
+            enum bier                           { value 7; }
+            enum tree-sid                       { value 8; }
+            enum reserved-blk                   { value 9; }
+        }
+        description "MPLS resource owners.";
+    }
+
+    typedef bank-application-id {
+        type enumeration {
+            enum fc-policers {
+                value 1;
+                description "Per-FC policers";
+            }
+            enum fc-policers-high-scale {
+                value 2;
+                description "High-scale FC policers";
+            }
+            enum fc-policer-statistics {
+                value 3;
+                description "FC policer statistics";
+            }
+            enum l1-policers {
+                value 4;
+                description "Aggregate, shared, and filter shared policers";
+            }
+            enum l1-policer-statistics {
+                value 5;
+                description "Aggregate and filter shared policer statistics";
+            }
+            enum shared-policer-statistics {
+                value 6;
+                description "Shared policer statistics";
+            }
+            enum ing-filter-statistics {
+                value 7;
+                description "Ingress filter statistics";
+            }
+            enum egr-filter-statistics {
+                value 8;
+                description "Egress filter statistics";
+            }
+        }
+        description "Specifies the application for the bank.";
     }
 
 }

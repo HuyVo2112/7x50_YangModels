@@ -14,7 +14,7 @@ submodule nokia-state-application-assurance {
 
     include nokia-state-aa-group;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -37,7 +37,7 @@ submodule nokia-state-application-assurance {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-06-14";
+    revision "2025-03-12";
 
     grouping state-application-assurance {
         container application-assurance {
@@ -49,7 +49,7 @@ submodule nokia-state-application-assurance {
 
                 leaf aarp-id {
                     type types-services:bsx-aarp-id;
-                    description "AARP ID";
+                    description "Specifies an identifier that uniquely identifies an AARP instance within AA.";
                 }
 
                 leaf oper-state {
@@ -133,7 +133,7 @@ submodule nokia-state-application-assurance {
 
                     leaf field-name {
                         type types-sros:named-item;
-                        description "Cflowd record field name";
+                        description "Specifies the name of a cflowd record field.";
                     }
 
                     leaf id {
@@ -205,16 +205,19 @@ submodule nokia-state-application-assurance {
                             }
 
                             leaf rtp-performance-voice {
+                                status obsolete;
                                 type types-aa:cflowd-field-inclusion;
                                 description "Specifies the applicability of the cflowd field for rtp-performance voice records.";
                             }
 
                             leaf rtp-performance-video {
+                                status obsolete;
                                 type types-aa:cflowd-field-inclusion;
                                 description "Specifies the applicability of the cflowd field for rtp-performance video records.";
                             }
 
                             leaf rtp-performance-audio {
+                                status obsolete;
                                 type types-aa:cflowd-field-inclusion;
                                 description "Specifies the applicability of the cflowd field for rtp-performance audio records.";
                             }
@@ -246,7 +249,7 @@ submodule nokia-state-application-assurance {
 
                     leaf attribute-name {
                         type types-sros:named-item;
-                        description "Attribute name";
+                        description "Specifies the flow-attribute attribute name.";
                     }
 
                     leaf id {
@@ -274,7 +277,7 @@ submodule nokia-state-application-assurance {
 
                     leaf field-name {
                         type types-sros:named-item;
-                        description "HTTP enrich field name (void, do not use)";
+                        description "Specifies the http-enrich field name.";
                     }
 
                     leaf id {
@@ -349,7 +352,7 @@ submodule nokia-state-application-assurance {
                         type uint32 {
                             range "400..999";
                         }
-                        description "Error code for HTTP error redirection";
+                        description "Specifies the http-error-redirect error-code number.";
                     }
 
                     leaf description {
@@ -372,7 +375,7 @@ submodule nokia-state-application-assurance {
 
                     leaf template-id {
                         type uint32;
-                        description "HTTP error redirect template ID";
+                        description "Specifies the http-error-redirect template ID.";
                     }
 
                     leaf description {
@@ -395,7 +398,7 @@ submodule nokia-state-application-assurance {
 
                     leaf template-id {
                         type uint32;
-                        description "HTTP notification template ID";
+                        description "Specifies the http-notification template ID.";
                     }
 
                     leaf description {
@@ -441,7 +444,7 @@ submodule nokia-state-application-assurance {
 
                     leaf template-id {
                         type uint32;
-                        description "HTTP redirect template ID";
+                        description "Specifies the http-redirect template ID.";
                     }
 
                     leaf description {
@@ -466,7 +469,7 @@ submodule nokia-state-application-assurance {
 
                 leaf protocol-name {
                     type types-sros:named-item;
-                    description "AA protocol name";
+                    description "Specifies the protocol name.";
                 }
 
                 leaf description {
@@ -494,7 +497,7 @@ submodule nokia-state-application-assurance {
 
                 leaf rad-acct-plcy-name {
                     type types-sros:named-item;
-                    description "AA RADIUS accounting policy name";
+                    description "AA RADIUS accounting policy.";
                 }
 
                 container statistics {
@@ -540,7 +543,7 @@ submodule nokia-state-application-assurance {
                             type uint32 {
                                 range "1..5";
                             }
-                            description "RADIUS accounting server index";
+                            description "An identifier that uniquely identifies a radius accounting server instance within an AA accounting policy.";
                         }
 
                         leaf oper-state {
@@ -662,12 +665,12 @@ submodule nokia-state-application-assurance {
 
                     leaf esa-id {
                         type types-esa:esa-id;
-                        description "ESA ID";
+                        description "Specifies an ESA identifier.";
                     }
 
                     leaf vm {
                         type types-esa:vm-id;
-                        description "VM ID within the ESA";
+                        description "Specifies the VM identifier within the ESA.";
                     }
 
                     leaf software-version {
@@ -683,7 +686,7 @@ submodule nokia-state-application-assurance {
 
                     leaf mda-id {
                         type types-isa:slot-mda;
-                        description "MDA/ISA ID";
+                        description "Specifies an MDA/ISA identifier <card slot number>/<mda slot number>";
                     }
 
                     leaf software-version {

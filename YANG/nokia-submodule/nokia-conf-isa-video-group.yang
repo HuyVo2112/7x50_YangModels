@@ -12,7 +12,7 @@ submodule nokia-conf-isa-video-group {
     include nokia-conf-esa;
     include nokia-conf-groups;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -35,7 +35,7 @@ submodule nokia-conf-isa-video-group {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2022-11-12";
+    revision "2026-07-22";
 
     grouping conf-isa-video-group {
         list video-group {
@@ -59,15 +59,12 @@ submodule nokia-conf-isa-video-group {
             leaf ad-insert {
                 status obsolete;
                 type boolean;
-                sros-ext:immutable;
                 default "false";
                 description "Enable the ad insert server for the ISA video group";
             }
 
             leaf analyzer {
                 type boolean;
-                sros-ext:immutable;
-                sros-ext:auto-restart-to-modify;
                 default "false";
                 description "Enable the analyzer for all streams on the video group";
             }
@@ -80,23 +77,18 @@ submodule nokia-conf-isa-video-group {
             leaf rt-client {
                 status obsolete;
                 type boolean;
-                sros-ext:immutable;
                 default "true";
                 description "Allow client capability for retransmission";
             }
 
             leaf fcc-server {
                 type boolean;
-                sros-ext:immutable;
-                sros-ext:auto-restart-to-modify;
                 default "false";
                 description "Allow FCC server capability for the group";
             }
 
             leaf local-rt-server {
                 type boolean;
-                sros-ext:immutable;
-                sros-ext:auto-restart-to-modify;
                 default "false";
                 description "Enable the local RET server for the group";
             }
@@ -111,8 +103,6 @@ submodule nokia-conf-isa-video-group {
 
             leaf stream-selection {
                 type boolean;
-                sros-ext:immutable;
-                sros-ext:auto-restart-to-modify;
                 default "false";
                 description "Allow stream selection for the group";
             }
@@ -149,7 +139,7 @@ submodule nokia-conf-isa-video-group {
 
             list vapp {
                 key "esa-id vapp-id";
-                max-elements 6;
+                max-elements 32;
                 description "Add a list entry for vapp";
 
                 leaf esa-id {

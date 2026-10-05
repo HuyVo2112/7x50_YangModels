@@ -10,7 +10,7 @@ submodule nokia-state-system-telemetry {
     import nokia-types-sros               { prefix "types-sros"; }
     import nokia-types-system             { prefix "types-system"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -33,7 +33,7 @@ submodule nokia-state-system-telemetry {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-08-10";
+    revision "2025-03-12";
 
     grouping state-system-telemetry {
         container telemetry {
@@ -145,6 +145,16 @@ submodule nokia-state-system-telemetry {
                         description "Maximum time difference between contexts in single notification.";
                     }
 
+                    container extension {
+                        description "Enter the extension context";
+
+                        leaf config-subscription {
+                            type boolean;
+                            description "Indicates requested gNMI config-subscription extension.";
+                        }
+
+                    } // container extension
+
                     list path {
                         key "path";
                         description "Enter the path list instance";
@@ -174,12 +184,24 @@ submodule nokia-state-system-telemetry {
                                  values according to the interval.";
                         }
 
+                        leaf heartbeat-interval {
+                            type uint64;
+                            units "milliseconds";
+                            description
+                                "Time in milliseconds between the device's sample of a
+                                 telemetry data source.
+
+                                 Applicable only when subscription path mode is 'on-change'.";
+                        }
+
                         leaf sample-interval {
                             type uint64;
                             units "milliseconds";
                             description
                                 "Time in milliseconds between the device's sample of a
-                                 telemetry data source.";
+                                 telemetry data source.
+
+                                 Applicable only when subscription path mode is not 'on-change'.";
                         }
 
                         leaf finished-collection-count {
@@ -267,7 +289,9 @@ submodule nokia-state-system-telemetry {
                             units "milliseconds";
                             description
                                 "Time in milliseconds between the device's sample of a
-                                 telemetry data source.";
+                                 telemetry data source.
+
+                                 Applicable only when subscription path mode is not 'on-change'.";
                         }
 
                         leaf finished-collection-count {
@@ -331,7 +355,7 @@ submodule nokia-state-system-telemetry {
 
                     leaf name {
                         type types-sros:named-item;
-                        description "Persistent subscription name";
+                        description "Persistent subscription name.";
                     }
 
                     leaf subscription-id {
@@ -365,12 +389,14 @@ submodule nokia-state-system-telemetry {
                                     type types-sros:ip-address;
                                     type types-sros:fully-qualified-domain-name;
                                 }
-                                description "Address of the destination within the destination group";
+                                description "Address for the telemetry stream destination.";
                             }
 
                             leaf port {
                                 type types-sros:tcp-udp-port;
-                                description "TCP port number for the destination";
+                                description
+                                    "Protocol (UDP or TCP) port number for the telemetry
+                                     stream destination.";
                             }
 
                             leaf oper-state {
@@ -465,7 +491,9 @@ submodule nokia-state-system-telemetry {
                                 type string {
                                     length "1..512";
                                 }
-                                description "gNMI path to be streamed";
+                                description
+                                    "Path to a section of operational state of interest
+                                     (the sensor).";
                             }
 
                             leaf finished-collection-count {
@@ -524,7 +552,9 @@ submodule nokia-state-system-telemetry {
                                 type string {
                                     length "1..512";
                                 }
-                                description "gNMI path to be streamed";
+                                description
+                                    "Path to a section of operational state of interest
+                                     (the sensor).";
                             }
 
                             leaf finished-collection-count {
@@ -590,18 +620,20 @@ submodule nokia-state-system-telemetry {
 
                     leaf name {
                         type types-sros:named-item;
-                        description "Sensor group name";
+                        description "Sensor group name.";
                     }
 
                     list path {
                         key "xpath";
-                        description "Add a list entry for path";
+                        description "Enter the path list instance";
 
                         leaf xpath {
                             type string {
                                 length "1..512";
                             }
-                            description "gNMI path to be streamed";
+                            description
+                                "Path to a section of operational state of interest
+                                 (the sensor).";
                         }
 
                         leaf error-reason {

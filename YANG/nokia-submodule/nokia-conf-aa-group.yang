@@ -16,7 +16,7 @@ submodule nokia-conf-aa-group {
     include nokia-conf-mirror;
     include nokia-conf-subscriber-mgmt;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -39,7 +39,7 @@ submodule nokia-conf-aa-group {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-09-14";
+    revision "2026-07-22";
 
     grouping conf-aa-group {
         list group {
@@ -126,6 +126,12 @@ submodule nokia-conf-aa-group {
                     description "Administrative state of cflowd export";
                 }
 
+                leaf system-name {
+                    type types-sros:named-item;
+                    sros-ext:auto-restart-to-modify;
+                    description "Node name to report in cflowd template";
+                }
+
                 leaf template-retransmit {
                     type uint32 {
                         range "10..600";
@@ -158,14 +164,14 @@ submodule nokia-conf-aa-group {
 
                     leaf aes-128-encryption-key {
                         type types-sros:encrypted-leaf {
-                            length "51";
+                            length "1..51";
                         }
                         description "AES-128 encryption key";
                     }
 
                     leaf aes-256-encryption-key {
                         type types-sros:encrypted-leaf {
-                            length "71";
+                            length "1..71";
                         }
                         description "AES-256 encryption key";
                     }
@@ -411,19 +417,23 @@ submodule nokia-conf-aa-group {
 
 
                 container rtp-performance {
+                    status obsolete;
                     description "Enter the rtp-performance context";
 
                     leaf flow-rate {
+                        status obsolete;
                         type types-aa:cflowd-sample-rate;
                         description "Cflowd flow sampling rate";
                     }
 
                     leaf flow-rate-2 {
+                        status obsolete;
                         type types-aa:cflowd-sample-rate;
                         description "Cflowd per-flow second sampling rate";
                     }
 
                     leaf-list apply-groups {
+                        status obsolete;
                         type leafref {
                             path "../../../../../groups/group/name";
                         }
@@ -433,6 +443,7 @@ submodule nokia-conf-aa-group {
                     }
 
                     leaf-list apply-groups-exclude {
+                        status obsolete;
                         type leafref {
                             path "../../../../../groups/group/name";
                         }
@@ -442,15 +453,18 @@ submodule nokia-conf-aa-group {
                     }
 
                     container audio-template {
+                        status obsolete;
                         description "Enter the audio-template context";
 
                         leaf field-selection {
+                            status obsolete;
                             type types-aa:aa-grp-cflowd-template-select;
                             default "legacy";
                             description "Field selection method";
                         }
 
                         leaf-list apply-groups {
+                            status obsolete;
                             type leafref {
                                 path "../../../../../../groups/group/name";
                             }
@@ -460,6 +474,7 @@ submodule nokia-conf-aa-group {
                         }
 
                         leaf-list apply-groups-exclude {
+                            status obsolete;
                             type leafref {
                                 path "../../../../../../groups/group/name";
                             }
@@ -469,19 +484,23 @@ submodule nokia-conf-aa-group {
                         }
 
                         container dynamic-fields {
+                            status obsolete;
                             description "Enter the dynamic-fields context";
 
                             leaf admin-state {
+                                status obsolete;
                                 type types-sros:admin-state;
                                 default "disable";
                                 description "Administrative state of the dynamic fields";
                             }
 
                             list field {
+                                status obsolete;
                                 key "field-name";
                                 description "Add a list entry for field";
 
                                 leaf field-name {
+                                    status obsolete;
                                     type types-sros:named-item;
                                     description "Cflowd template dynamic field name";
                                 }
@@ -493,15 +512,18 @@ submodule nokia-conf-aa-group {
                     } // container audio-template
 
                     container video-template {
+                        status obsolete;
                         description "Enter the video-template context";
 
                         leaf field-selection {
+                            status obsolete;
                             type types-aa:aa-grp-cflowd-template-select;
                             default "legacy";
                             description "Field selection method";
                         }
 
                         leaf-list apply-groups {
+                            status obsolete;
                             type leafref {
                                 path "../../../../../../groups/group/name";
                             }
@@ -511,6 +533,7 @@ submodule nokia-conf-aa-group {
                         }
 
                         leaf-list apply-groups-exclude {
+                            status obsolete;
                             type leafref {
                                 path "../../../../../../groups/group/name";
                             }
@@ -520,19 +543,23 @@ submodule nokia-conf-aa-group {
                         }
 
                         container dynamic-fields {
+                            status obsolete;
                             description "Enter the dynamic-fields context";
 
                             leaf admin-state {
+                                status obsolete;
                                 type types-sros:admin-state;
                                 default "disable";
                                 description "Administrative state of the dynamic fields";
                             }
 
                             list field {
+                                status obsolete;
                                 key "field-name";
                                 description "Add a list entry for field";
 
                                 leaf field-name {
+                                    status obsolete;
                                     type types-sros:named-item;
                                     description "Cflowd template dynamic field name";
                                 }
@@ -544,15 +571,18 @@ submodule nokia-conf-aa-group {
                     } // container video-template
 
                     container voice-template {
+                        status obsolete;
                         description "Enter the voice-template context";
 
                         leaf field-selection {
+                            status obsolete;
                             type types-aa:aa-grp-cflowd-template-select;
                             default "legacy";
                             description "Field selection method";
                         }
 
                         leaf-list apply-groups {
+                            status obsolete;
                             type leafref {
                                 path "../../../../../../groups/group/name";
                             }
@@ -562,6 +592,7 @@ submodule nokia-conf-aa-group {
                         }
 
                         leaf-list apply-groups-exclude {
+                            status obsolete;
                             type leafref {
                                 path "../../../../../../groups/group/name";
                             }
@@ -571,19 +602,23 @@ submodule nokia-conf-aa-group {
                         }
 
                         container dynamic-fields {
+                            status obsolete;
                             description "Enter the dynamic-fields context";
 
                             leaf admin-state {
+                                status obsolete;
                                 type types-sros:admin-state;
                                 default "disable";
                                 description "Administrative state of the dynamic fields";
                             }
 
                             list field {
+                                status obsolete;
                                 key "field-name";
                                 description "Add a list entry for field";
 
                                 leaf field-name {
+                                    status obsolete;
                                     type types-sros:named-item;
                                     description "Cflowd template dynamic field name";
                                 }
@@ -744,6 +779,72 @@ submodule nokia-conf-aa-group {
                 } // container volume
 
             } // container cflowd
+
+            list dns-enrich {
+                key "dns-enrich-name";
+                description "Enter the dns-enrich list instance";
+
+                leaf dns-enrich-name {
+                    type types-sros:named-item;
+                    description "DNS enrichment object name";
+                }
+
+                leaf admin-state {
+                    type types-sros:admin-state;
+                    default "disable";
+                    description "Administrative state of the DNS enrichment object";
+                }
+
+                leaf description {
+                    type types-sros:description;
+                    description "Text description";
+                }
+
+                leaf gateway-id {
+                    type uint32;
+                    default "0";
+                    description "Gateway ID portion of the enriched device ID";
+                }
+
+                leaf packet-size-limit {
+                    type uint32 {
+                        range "256..9212";
+                    }
+                    units "octets";
+                    default "1500";
+                    description "Maximum packet size after DNS enrichment";
+                }
+
+                leaf-list apply-groups {
+                    type leafref {
+                        path "../../../../groups/group/name";
+                    }
+                    max-elements 8;
+                    ordered-by user;
+                    description "Apply a configuration group at this level";
+                }
+
+                leaf-list apply-groups-exclude {
+                    type leafref {
+                        path "../../../../groups/group/name";
+                    }
+                    max-elements 8;
+                    ordered-by user;
+                    description "Exclude a configuration group at this level";
+                }
+
+                list option {
+                    key "option-type";
+                    description "Add a list entry for option";
+
+                    leaf option-type {
+                        type types-aa:dns-enrich-option-type;
+                        description "Name of the DNS option to enrich by AA";
+                    }
+
+                } // list option
+
+            } // list dns-enrich
 
             list dns-ip-cache {
                 key "dns-ip-cache-name";
@@ -1464,6 +1565,12 @@ submodule nokia-conf-aa-group {
                 leaf tcp-stack {
                     type types-aa:tcp-optimizer-stack;
                     description "TCP stack congestion control algorithm";
+                }
+
+                leaf high-cpu-backoff {
+                    type boolean;
+                    default "false";
+                    description "Stop optimizing sessions when CPU capacity is limited";
                 }
 
                 leaf-list apply-groups {
@@ -2431,6 +2538,252 @@ submodule nokia-conf-aa-group {
                     } // list time-of-day-override
 
                 } // list dual-bucket-bandwidth-policer
+
+                list flow-bandwidth-policer {
+                    key "policer-name";
+                    description "Enter the flow-bandwidth-policer list instance";
+
+                    leaf policer-name {
+                        type types-sros:named-item;
+                        description "Policer name";
+                    }
+
+                    leaf description {
+                        type types-sros:description;
+                        description "Text description";
+                    }
+
+                    leaf mbs {
+                        type types-aa:policer-burst-size;
+                        description "Bandwidth policer maximum burst size";
+                    }
+
+                    leaf pir {
+                        type types-aa:policer-ir;
+                        default "max";
+                        description "Peak information rate value for the bandwidth policer";
+                    }
+
+                    leaf action {
+                        type types-aa:policer-action;
+                        description "Action for packets violating configured policer rate";
+                    }
+
+                    leaf-list apply-groups {
+                        type leafref {
+                            path "../../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Apply a configuration group at this level";
+                    }
+
+                    leaf-list apply-groups-exclude {
+                        type leafref {
+                            path "../../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Exclude a configuration group at this level";
+                    }
+
+                    container adaptation-rule {
+                        description "Enter the adaptation-rule context";
+
+                        leaf pir {
+                            type types-qos:adaptation-rule;
+                            default "closest";
+                            description "Peak information rate value for the adaptation rule";
+                        }
+
+                    } // container adaptation-rule
+
+                    container congestion-override {
+                        description "Enter the congestion-override context";
+
+                        leaf mbs {
+                            type types-aa:policer-burst-size;
+                            description "Maximum burst size when in a congested state";
+                        }
+
+                        leaf pir {
+                            type types-aa:policer-ir;
+                            description "Peak information rate value for the congestion override";
+                        }
+
+                    } // container congestion-override
+
+                    container congestion-override-stage-2 {
+                        description "Enter the congestion-override-stage-2 context";
+
+                        leaf mbs {
+                            type types-aa:policer-burst-size;
+                            description "Maximum burst size when in a congested state";
+                        }
+
+                        leaf pir {
+                            type types-aa:policer-ir;
+                            description "Peak information rate value for the congestion override";
+                        }
+
+                    } // container congestion-override-stage-2
+
+                    list time-of-day-override {
+                        key "tod-override-id";
+                        max-elements 8;
+                        description "Enter the time-of-day-override list instance";
+
+                        leaf tod-override-id {
+                            type int32 {
+                                range "1..255";
+                            }
+                            description "ID for time of day override";
+                        }
+
+                        leaf admin-state {
+                            type types-sros:admin-state;
+                            default "disable";
+                            description "Administrative state of this time of day policer";
+                        }
+
+                        leaf description {
+                            type types-sros:description;
+                            description "Text description";
+                        }
+
+                        leaf mbs {
+                            type types-aa:policer-burst-size;
+                            description "Bandwidth policer MBS for time of day override";
+                        }
+
+                        leaf pir {
+                            type types-aa:policer-ir;
+                            default "max";
+                            description "Peak information rate value for time of day override";
+                        }
+
+                        leaf-list apply-groups {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Apply a configuration group at this level";
+                        }
+
+                        leaf-list apply-groups-exclude {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Exclude a configuration group at this level";
+                        }
+
+                        container time-range {
+                            description "Enter the time-range context";
+
+                            choice daily-weekly {
+                                case daily {
+
+                                    container daily {
+                                        presence "Enable the daily context";
+                                        description "Enable the daily context";
+
+                                        leaf start {
+                                            type types-aa:policer-start-time;
+                                            mandatory true;
+                                            description "Daily start time";
+                                        }
+
+                                        leaf end {
+                                            type types-aa:policer-end-time;
+                                            mandatory true;
+                                            description "Daily end time";
+                                        }
+
+                                        choice days {
+                                            default "all-days";
+                                            case all-days {
+
+                                                leaf all-days {
+                                                    type empty;
+                                                    description "Enable policer override on every day";
+                                                }
+
+                                            }
+                                            case some-week-days {
+
+                                                leaf-list on {
+                                                    type enumeration {
+                                                        enum sunday                         { value 1; }
+                                                        enum monday                         { value 2; }
+                                                        enum tuesday                        { value 3; }
+                                                        enum wednesday                      { value 4; }
+                                                        enum thursday                       { value 5; }
+                                                        enum friday                         { value 6; }
+                                                        enum saturday                       { value 7; }
+                                                    }
+                                                    max-elements 6;
+                                                    description "Policer override on selected days";
+                                                }
+
+                                            }
+                                        }
+                                    } // container daily
+
+                                }
+                                case weekly {
+
+                                    container weekly {
+                                        presence "Enable the weekly context";
+                                        description "Enable the weekly context";
+
+                                        container start {
+                                            presence "Enable the start context";
+                                            description "Enable the start context";
+
+                                            leaf day {
+                                                type types-aa:day-of-week;
+                                                mandatory true;
+                                                description "Weekly start day";
+                                            }
+
+                                            leaf time {
+                                                type types-aa:policer-start-time;
+                                                mandatory true;
+                                                description "Weekly start time";
+                                            }
+
+                                        } // container start
+
+                                        container end {
+                                            presence "Enable the end context";
+                                            description "Enable the end context";
+
+                                            leaf day {
+                                                type types-aa:day-of-week;
+                                                mandatory true;
+                                                description "Weekly end day";
+                                            }
+
+                                            leaf time {
+                                                type types-aa:policer-end-time;
+                                                mandatory true;
+                                                description "Weekly end time";
+                                            }
+
+                                        } // container end
+
+                                    } // container weekly
+
+                                }
+                            }
+                        } // container time-range
+
+                    } // list time-of-day-override
+
+                } // list flow-bandwidth-policer
 
                 list flow-count-limit-policer {
                     key "policer-name";
@@ -4640,6 +4993,25 @@ submodule nokia-conf-aa-group {
                                     }
 
                                 }
+                                case l3-l4-redirect {
+
+                                    container l3-l4-redirect {
+                                        description "Enter the l3-l4-redirect context";
+
+                                        leaf dst-ip-address {
+                                            type types-sros:ip-unicast-address;
+                                            description "Destination IP address for traffic redirection";
+                                        }
+
+                                        leaf dst-port {
+                                            type types-sros:tcp-udp-port;
+                                            default "0";
+                                            description "Destination port for traffic redirection";
+                                        }
+
+                                    } // container l3-l4-redirect
+
+                                }
                             }
                         } // container action
 
@@ -5024,6 +5396,12 @@ submodule nokia-conf-aa-group {
                             type boolean;
                             default "false";
                             description "Enable traffic redirection to AA ISAs or ESA VMs";
+                        }
+
+                        leaf aa-sub-distribute-traffic-by-ip {
+                            type boolean;
+                            default "false";
+                            description "Allow application assurance to divert traffic";
                         }
 
                         leaf-list apply-groups {
@@ -6661,6 +7039,13 @@ submodule nokia-conf-aa-group {
                                     description "Abandon TCPO for this entry";
                                 }
 
+                                leaf dns-enrich {
+                                    type leafref {
+                                        path "../../../../../../dns-enrich/dns-enrich-name";
+                                    }
+                                    description "DNS enrichment to apply";
+                                }
+
                                 leaf dns-ip-cache {
                                     type leafref {
                                         path "../../../../../../dns-ip-cache/dns-ip-cache-name";
@@ -6774,6 +7159,16 @@ submodule nokia-conf-aa-group {
                                                     path "../../../../../../../policer/dual-bucket-bandwidth-policer/policer-name";
                                                 }
                                                 description "Dual bucket bandwidth limiting policer";
+                                            }
+
+                                        }
+                                        case flow {
+
+                                            leaf flow {
+                                                type leafref {
+                                                    path "../../../../../../../policer/flow-bandwidth-policer/policer-name";
+                                                }
+                                                description "Flow policer";
                                             }
 
                                         }
@@ -6908,6 +7303,11 @@ submodule nokia-conf-aa-group {
 
                                 container remark {
                                     description "Enter the remark context";
+
+                                    leaf ecn {
+                                        type types-aa:ecn-remark-name;
+                                        description "Explicit Congestion Notification setting";
+                                    }
 
                                     leaf fc {
                                         type types-sros:fc-name;
@@ -7199,6 +7599,7 @@ submodule nokia-conf-aa-group {
                         }
 
                         leaf is-remote {
+                            status obsolete;
                             type boolean;
                             sros-ext:immutable;
                             mandatory true;
@@ -7318,7 +7719,7 @@ submodule nokia-conf-aa-group {
 
                         list app-group {
                             when "../flow-export-type = 'tcp-performance' or ../flow-export-type = 'rtp-performance' or ../flow-export-type = 'comprehensive'" {
-                                description "'app-group' is applicable when flow-export-type is tcp-performance, rtp-performance, or comprehensive";
+                                description "'app-group' is applicable when flow-export-type is tcp-performance, or comprehensive";
                             }
                             key "app-group-name";
                             description "Enter the app-group list instance";
@@ -7361,7 +7762,7 @@ submodule nokia-conf-aa-group {
 
                         list application {
                             when "../flow-export-type = 'tcp-performance' or ../flow-export-type = 'rtp-performance' or ../flow-export-type = 'comprehensive'" {
-                                description "'application' is applicable when flow-export-type is tcp-performance, rtp-performance, or comprehensive";
+                                description "'application' is applicable when flow-export-type is tcp-performance, or comprehensive";
                             }
                             key "application-name";
                             description "Enter the application list instance";

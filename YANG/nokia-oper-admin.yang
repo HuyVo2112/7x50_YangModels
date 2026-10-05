@@ -7,15 +7,13 @@ module nokia-oper-admin {
     prefix "oper-admin";
 
     import ietf-yang-types                { prefix "yang"; }
-    import nokia-conf                     { prefix "conf"; }
     import nokia-sros-yang-extensions     { prefix "sros-ext"; }
     import nokia-state                    { prefix "state"; }
-    import nokia-types-chassis            { prefix "types-chassis"; }
     import nokia-types-operation          { prefix "types-operation"; }
     import nokia-types-security           { prefix "types-security"; }
     import nokia-types-sros               { prefix "types-sros"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -38,7 +36,7 @@ module nokia-oper-admin {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2016-01-01";
+    revision "2025-12-17";
 
     typedef configuration-region {
         type enumeration {
@@ -52,6 +50,18 @@ module nokia-oper-admin {
     typedef cli-path-type {
         type string;
         description "Path type used for path infrastructure";
+    }
+
+    typedef anti-theft-password {
+        type string {
+            length "1..71";
+        }
+    }
+
+    typedef anti-theft-password-cleartext {
+        type string {
+            length "8..32";
+        }
     }
 
     container admin {
@@ -692,7 +702,7 @@ module nokia-oper-admin {
 
                             leaf certificate {
                                 type empty;
-                                description "Synchronize imported certificate, key, and CRL files";
+                                description "Synchronize the PKI certificate files";
                             }
 
                         }
@@ -927,7 +937,6 @@ module nokia-oper-admin {
 
             } // list ethernet-satellite
 
-
         } // container satellite
 
         container set {
@@ -997,6 +1006,478 @@ module nokia-oper-admin {
 
             container security {
                 description "Enter the security context";
+
+                container image-digital-signature {
+                    description "Perform digital signature actions on images";
+
+                    action validate {
+                        description "Perform software digital-signature validations";
+
+                        input {
+
+                            leaf software-image {
+                                type types-sros:cflash-and-url;
+                                mandatory true;
+                                description "Location of the target software image";
+                            }
+
+                        }
+                        output {
+
+                            leaf operation-id {
+                                type types-operation:operation-id;
+                                description "ID assigned to the operation.";
+                            }
+
+                            leaf start-time {
+                                type types-operation:operation-timestamp;
+                                description "Time when the operation started its execution.";
+                            }
+
+                            leaf results-path {
+                                type types-operation:operation-path;
+                                description "Path to the results of the operation formatted as xpath.";
+                            }
+
+                            leaf status {
+                                type types-operation:operation-status;
+                                description "Status of the operation";
+                            }
+
+                            leaf-list error-message {
+                                type types-operation:operation-message;
+                                description "Error messages reported during execution of the operation.";
+                            }
+
+                            leaf-list warning-message {
+                                type types-operation:operation-message;
+                                description "Warning messages reported during execution of the operation.";
+                            }
+
+                            leaf-list info-message {
+                                type types-operation:operation-message;
+                                description "Info messages reported during execution of the operation.";
+                            }
+
+                            leaf end-time {
+                                type types-operation:operation-timestamp;
+                                description "Time when the operation ended its execution.";
+                            }
+
+                        }
+                    } // action validate
+
+                } // container image-digital-signature
+
+                container os-security {
+                    description "Perform operating-system-level security operations";
+
+                    action set-password {
+                        description "Configure the password used to protect the system";
+
+                        input {
+
+                            leaf current-password {
+                                type anti-theft-password-cleartext;
+                                description "Existing OS security password";
+                            }
+
+                            leaf new-password {
+                                type anti-theft-password-cleartext;
+                                description "New OS security password";
+                            }
+
+                            leaf force {
+                                type empty;
+                                description "Proceed without further prompting from the system";
+                            }
+
+                        }
+                        output {
+
+                            leaf operation-id {
+                                type types-operation:operation-id;
+                                description "ID assigned to the operation.";
+                            }
+
+                            leaf start-time {
+                                type types-operation:operation-timestamp;
+                                description "Time when the operation started its execution.";
+                            }
+
+                            leaf results-path {
+                                type types-operation:operation-path;
+                                description "Path to the results of the operation formatted as xpath.";
+                            }
+
+                            leaf status {
+                                type types-operation:operation-status;
+                                description "Status of the operation";
+                            }
+
+                            leaf-list error-message {
+                                type types-operation:operation-message;
+                                description "Error messages reported during execution of the operation.";
+                            }
+
+                            leaf-list warning-message {
+                                type types-operation:operation-message;
+                                description "Warning messages reported during execution of the operation.";
+                            }
+
+                            leaf-list info-message {
+                                type types-operation:operation-message;
+                                description "Info messages reported during execution of the operation.";
+                            }
+
+                            leaf end-time {
+                                type types-operation:operation-timestamp;
+                                description "Time when the operation ended its execution.";
+                            }
+
+                        }
+                    } // action set-password
+
+                    action remove-password {
+                        description "Remove the OS security password";
+
+                        input {
+
+                            leaf password {
+                                type string {
+                                    length "8..32";
+                                }
+                                description "Preconfigured anti-theft password";
+                            }
+
+                            leaf force {
+                                type empty;
+                                description "Proceed without further prompting from the system";
+                            }
+
+                        }
+                        output {
+
+                            leaf operation-id {
+                                type types-operation:operation-id;
+                                description "ID assigned to the operation.";
+                            }
+
+                            leaf start-time {
+                                type types-operation:operation-timestamp;
+                                description "Time when the operation started its execution.";
+                            }
+
+                            leaf results-path {
+                                type types-operation:operation-path;
+                                description "Path to the results of the operation formatted as xpath.";
+                            }
+
+                            leaf status {
+                                type types-operation:operation-status;
+                                description "Status of the operation";
+                            }
+
+                            leaf-list error-message {
+                                type types-operation:operation-message;
+                                description "Error messages reported during execution of the operation.";
+                            }
+
+                            leaf-list warning-message {
+                                type types-operation:operation-message;
+                                description "Warning messages reported during execution of the operation.";
+                            }
+
+                            leaf-list info-message {
+                                type types-operation:operation-message;
+                                description "Info messages reported during execution of the operation.";
+                            }
+
+                            leaf end-time {
+                                type types-operation:operation-timestamp;
+                                description "Time when the operation ended its execution.";
+                            }
+
+                        }
+                    } // action remove-password
+
+                    action activate-password {
+                        description "Activate the new password used to protect the system";
+
+                        input {
+
+                            leaf card {
+                                type leafref {
+                                    path "/state:state/state:cpm/state:cpm-slot";
+                                }
+                                mandatory true;
+                                description "CPM slot to apply anti-theft settings";
+                            }
+
+                            leaf password {
+                                type string {
+                                    length "8..32";
+                                }
+                                description "Preconfigured anti-theft password";
+                            }
+
+                            leaf force {
+                                type empty;
+                                description "Proceed without further prompting from the system. Required for non-interactive interfaces";
+                            }
+
+                        }
+                        output {
+
+                            leaf operation-id {
+                                type types-operation:operation-id;
+                                description "ID assigned to the operation.";
+                            }
+
+                            leaf start-time {
+                                type types-operation:operation-timestamp;
+                                description "Time when the operation started its execution.";
+                            }
+
+                            leaf results-path {
+                                type types-operation:operation-path;
+                                description "Path to the results of the operation formatted as xpath.";
+                            }
+
+                            leaf status {
+                                type types-operation:operation-status;
+                                description "Status of the operation";
+                            }
+
+                            leaf-list error-message {
+                                type types-operation:operation-message;
+                                description "Error messages reported during execution of the operation.";
+                            }
+
+                            leaf-list warning-message {
+                                type types-operation:operation-message;
+                                description "Warning messages reported during execution of the operation.";
+                            }
+
+                            leaf-list info-message {
+                                type types-operation:operation-message;
+                                description "Info messages reported during execution of the operation.";
+                            }
+
+                            leaf end-time {
+                                type types-operation:operation-timestamp;
+                                description "Time when the operation ended its execution.";
+                            }
+
+                        }
+                    } // action activate-password
+
+                    container anti-theft {
+                        description "Perform anti-theft operations";
+
+                        action activate {
+                            description "Enable anti-theft for the specified CPM card";
+
+                            input {
+
+                                leaf card {
+                                    type leafref {
+                                        path "/state:state/state:cpm/state:cpm-slot";
+                                    }
+                                    mandatory true;
+                                    description "CPM slot to apply anti-theft settings";
+                                }
+
+                                leaf password {
+                                    type string {
+                                        length "8..32";
+                                    }
+                                    description "Preconfigured anti-theft password";
+                                }
+
+                                leaf force {
+                                    type empty;
+                                    description "Proceed without further prompting from the system";
+                                }
+
+                            }
+                            output {
+
+                                leaf operation-id {
+                                    type types-operation:operation-id;
+                                    description "ID assigned to the operation.";
+                                }
+
+                                leaf start-time {
+                                    type types-operation:operation-timestamp;
+                                    description "Time when the operation started its execution.";
+                                }
+
+                                leaf results-path {
+                                    type types-operation:operation-path;
+                                    description "Path to the results of the operation formatted as xpath.";
+                                }
+
+                                leaf status {
+                                    type types-operation:operation-status;
+                                    description "Status of the operation";
+                                }
+
+                                leaf-list error-message {
+                                    type types-operation:operation-message;
+                                    description "Error messages reported during execution of the operation.";
+                                }
+
+                                leaf-list warning-message {
+                                    type types-operation:operation-message;
+                                    description "Warning messages reported during execution of the operation.";
+                                }
+
+                                leaf-list info-message {
+                                    type types-operation:operation-message;
+                                    description "Info messages reported during execution of the operation.";
+                                }
+
+                                leaf end-time {
+                                    type types-operation:operation-timestamp;
+                                    description "Time when the operation ended its execution.";
+                                }
+
+                            }
+                        } // action activate
+
+                        action deactivate {
+                            description "Disables anti-theft for the specified CPM card";
+
+                            input {
+
+                                leaf card {
+                                    type leafref {
+                                        path "/state:state/state:cpm/state:cpm-slot";
+                                    }
+                                    mandatory true;
+                                    description "CPM slot to apply anti-theft settings";
+                                }
+
+                                leaf password {
+                                    type string {
+                                        length "8..32";
+                                    }
+                                    description "Preconfigured anti-theft password";
+                                }
+
+                                leaf force {
+                                    type empty;
+                                    description "Proceed without further prompting from the system";
+                                }
+
+                            }
+                            output {
+
+                                leaf operation-id {
+                                    type types-operation:operation-id;
+                                    description "ID assigned to the operation.";
+                                }
+
+                                leaf start-time {
+                                    type types-operation:operation-timestamp;
+                                    description "Time when the operation started its execution.";
+                                }
+
+                                leaf results-path {
+                                    type types-operation:operation-path;
+                                    description "Path to the results of the operation formatted as xpath.";
+                                }
+
+                                leaf status {
+                                    type types-operation:operation-status;
+                                    description "Status of the operation";
+                                }
+
+                                leaf-list error-message {
+                                    type types-operation:operation-message;
+                                    description "Error messages reported during execution of the operation.";
+                                }
+
+                                leaf-list warning-message {
+                                    type types-operation:operation-message;
+                                    description "Warning messages reported during execution of the operation.";
+                                }
+
+                                leaf-list info-message {
+                                    type types-operation:operation-message;
+                                    description "Info messages reported during execution of the operation.";
+                                }
+
+                                leaf end-time {
+                                    type types-operation:operation-timestamp;
+                                    description "Time when the operation ended its execution.";
+                                }
+
+                            }
+                        } // action deactivate
+
+                        action unlock {
+                            description "Disable anti-theft locking for the CPM";
+
+                            input {
+
+                                leaf password {
+                                    type string {
+                                        length "8..32";
+                                    }
+                                    description "Preconfigured anti-theft password";
+                                }
+
+                            }
+                            output {
+
+                                leaf operation-id {
+                                    type types-operation:operation-id;
+                                    description "ID assigned to the operation.";
+                                }
+
+                                leaf start-time {
+                                    type types-operation:operation-timestamp;
+                                    description "Time when the operation started its execution.";
+                                }
+
+                                leaf results-path {
+                                    type types-operation:operation-path;
+                                    description "Path to the results of the operation formatted as xpath.";
+                                }
+
+                                leaf status {
+                                    type types-operation:operation-status;
+                                    description "Status of the operation";
+                                }
+
+                                leaf-list error-message {
+                                    type types-operation:operation-message;
+                                    description "Error messages reported during execution of the operation.";
+                                }
+
+                                leaf-list warning-message {
+                                    type types-operation:operation-message;
+                                    description "Warning messages reported during execution of the operation.";
+                                }
+
+                                leaf-list info-message {
+                                    type types-operation:operation-message;
+                                    description "Info messages reported during execution of the operation.";
+                                }
+
+                                leaf end-time {
+                                    type types-operation:operation-timestamp;
+                                    description "Time when the operation ended its execution.";
+                                }
+
+                            }
+                        } // action unlock
+
+                    } // container anti-theft
+
+                } // container os-security
 
                 container hash-control {
                     description "Enter the hash-control context";
@@ -1693,7 +2174,7 @@ module nokia-oper-admin {
 
                                     leaf last-ca-response-time {
                                         type yang:date-and-time;
-                                        description "Time when CA last response";
+                                        description "Time when CA last responsed";
                                     }
 
                                     leaf transaction-status {
@@ -2008,7 +2489,7 @@ module nokia-oper-admin {
 
                                     leaf last-ca-response-time {
                                         type yang:date-and-time;
-                                        description "Time when CA last response";
+                                        description "Time when CA last responsed";
                                     }
 
                                     leaf transaction-status {
@@ -2157,7 +2638,7 @@ module nokia-oper-admin {
 
                                     leaf last-ca-response-time {
                                         type yang:date-and-time;
-                                        description "Time when CA last response";
+                                        description "Time when CA last responsed";
                                     }
 
                                     leaf transaction-status {
@@ -2260,7 +2741,7 @@ module nokia-oper-admin {
 
                                     leaf last-ca-response-time {
                                         type yang:date-and-time;
-                                        description "Time when CA last response";
+                                        description "Time when CA last responsed";
                                     }
 
                                     leaf transaction-status {
@@ -3206,6 +3687,7 @@ module nokia-oper-admin {
 
                 } // container pki
 
+
             } // container security
 
             container license {
@@ -3655,7 +4137,9 @@ module nokia-oper-admin {
                                 case subscription {
 
                                     leaf subscription-id {
-                                        type uint32;
+                                        type leafref {
+                                            path "/state:state/state:system/state:telemetry/state:grpc/state:subscription/state:subscription-id";
+                                        }
                                         description "ID of the telemetry subscription to cancel";
                                     }
 
@@ -3947,7 +4431,61 @@ module nokia-oper-admin {
 
                 } // container commit
 
+                container commit-management {
+                    description "Perform commit-management operations";
+
+                    container python-scripts {
+                        description "Perform operations on commit Python scripts";
+
+                        action disable-next-run {
+                            description "Disable commit Python scripts for next commit";
+
+                            output {
+
+                                leaf operation-id {
+                                    type types-operation:operation-id;
+                                    description "ID assigned to the operation.";
+                                }
+
+                                leaf start-time {
+                                    type types-operation:operation-timestamp;
+                                    description "Time when the operation started its execution.";
+                                }
+
+                                leaf status {
+                                    type types-operation:operation-status;
+                                    description "Status of the operation";
+                                }
+
+                                leaf-list error-message {
+                                    type types-operation:operation-message;
+                                    description "Error messages reported during execution of the operation.";
+                                }
+
+                                leaf-list warning-message {
+                                    type types-operation:operation-message;
+                                    description "Warning messages reported during execution of the operation.";
+                                }
+
+                                leaf-list info-message {
+                                    type types-operation:operation-message;
+                                    description "Info messages reported during execution of the operation.";
+                                }
+
+                                leaf end-time {
+                                    type types-operation:operation-timestamp;
+                                    description "Time when the operation ended its execution.";
+                                }
+
+                            }
+                        } // action disable-next-run
+
+                    } // container python-scripts
+
+                } // container commit-management
+
             } // container management-interface
+
 
         } // container system
 
@@ -4353,6 +4891,195 @@ module nokia-oper-admin {
             } // container show
 
         } // container ipsec
+
+        container isa {
+            description "ISA Application Assurance group admin operations";
+
+            list application-assurance-group {
+                key "aa-group-id";
+                description "List of application assurance group information";
+
+                leaf aa-group-id {
+                    type leafref {
+                        path "/state:state/state:isa/state:application-assurance-group/state:aa-group-id";
+                    }
+                    description "AA group ID";
+                }
+
+                list esa {
+                    key "esa-id vm";
+                    description "List of ESA-VMs associated with this AA group";
+
+                    leaf esa-id {
+                        type leafref {
+                            path "/state:state/state:isa/state:application-assurance-group[state:aa-group-id=current()/../../aa-group-id]/state:esa/state:esa-id";
+                        }
+                        description "ESA ID";
+                    }
+
+                    leaf vm {
+                        type leafref {
+                            path "/state:state/state:isa/state:application-assurance-group[state:aa-group-id=current()/../../aa-group-id]/state:esa[state:esa-id=current()/../esa-id]/state:vm";
+                        }
+                        description "ESA-VM ID";
+                    }
+
+                    action load-balance {
+                        description "Assign load-balancing mode to an AA group ISA or ESA-VM";
+
+                        input {
+
+                            choice option {
+                                case a {
+
+                                    leaf normal {
+                                        type empty;
+                                        description "Normal ISA or ESA-VM load-balancing mode";
+                                    }
+
+                                }
+                                case b {
+
+                                    leaf avoid-subs {
+                                        type empty;
+                                        description "Avoid-subscribers ISA or ESA-VM load-balancing mode";
+                                    }
+
+                                }
+                            }
+                        }
+                        output {
+
+                            leaf operation-id {
+                                type types-operation:operation-id;
+                                description "ID assigned to the operation.";
+                            }
+
+                            leaf start-time {
+                                type types-operation:operation-timestamp;
+                                description "Time when the operation started its execution.";
+                            }
+
+                            leaf results-path {
+                                type types-operation:operation-path;
+                                description "Path to the results of the operation formatted as xpath.";
+                            }
+
+                            leaf status {
+                                type types-operation:operation-status;
+                                description "Status of the operation";
+                            }
+
+                            leaf-list error-message {
+                                type types-operation:operation-message;
+                                description "Error messages reported during execution of the operation.";
+                            }
+
+                            leaf-list warning-message {
+                                type types-operation:operation-message;
+                                description "Warning messages reported during execution of the operation.";
+                            }
+
+                            leaf-list info-message {
+                                type types-operation:operation-message;
+                                description "Info messages reported during execution of the operation.";
+                            }
+
+                            leaf end-time {
+                                type types-operation:operation-timestamp;
+                                description "Time when the operation ended its execution.";
+                            }
+
+                        }
+                    } // action load-balance
+
+                } // list esa
+
+                list isa {
+                    key "mda-id";
+                    description "List of MDAs associated with this AA group";
+
+                    leaf mda-id {
+                        type leafref {
+                            path "/state:state/state:isa/state:application-assurance-group[state:aa-group-id=current()/../../aa-group-id]/state:isa/state:mda-id";
+                        }
+                        description "ISA MDA ID";
+                    }
+
+                    action load-balance {
+                        description "Assign load-balancing mode to an AA group ISA or ESA-VM";
+
+                        input {
+
+                            choice option {
+                                case a {
+
+                                    leaf normal {
+                                        type empty;
+                                        description "Normal ISA or ESA-VM load-balancing mode";
+                                    }
+
+                                }
+                                case b {
+
+                                    leaf avoid-subs {
+                                        type empty;
+                                        description "Avoid-subscribers ISA or ESA-VM load-balancing mode";
+                                    }
+
+                                }
+                            }
+                        }
+                        output {
+
+                            leaf operation-id {
+                                type types-operation:operation-id;
+                                description "ID assigned to the operation.";
+                            }
+
+                            leaf start-time {
+                                type types-operation:operation-timestamp;
+                                description "Time when the operation started its execution.";
+                            }
+
+                            leaf results-path {
+                                type types-operation:operation-path;
+                                description "Path to the results of the operation formatted as xpath.";
+                            }
+
+                            leaf status {
+                                type types-operation:operation-status;
+                                description "Status of the operation";
+                            }
+
+                            leaf-list error-message {
+                                type types-operation:operation-message;
+                                description "Error messages reported during execution of the operation.";
+                            }
+
+                            leaf-list warning-message {
+                                type types-operation:operation-message;
+                                description "Warning messages reported during execution of the operation.";
+                            }
+
+                            leaf-list info-message {
+                                type types-operation:operation-message;
+                                description "Info messages reported during execution of the operation.";
+                            }
+
+                            leaf end-time {
+                                type types-operation:operation-timestamp;
+                                description "Time when the operation ended its execution.";
+                            }
+
+                        }
+                    } // action load-balance
+
+                } // list isa
+
+            } // list application-assurance-group
+
+        } // container isa
 
     } // container admin
 

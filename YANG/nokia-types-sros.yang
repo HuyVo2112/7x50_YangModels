@@ -9,7 +9,7 @@ module nokia-types-sros {
     import ietf-inet-types                { prefix "inet"; }
     import nokia-sros-yang-extensions     { prefix "sros-ext"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -32,7 +32,7 @@ module nokia-types-sros {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-11-29";
+    revision "2025-07-16";
 
     typedef string-not-all-spaces {
         type string {
@@ -412,6 +412,14 @@ module nokia-types-sros {
              ";
     }
 
+    typedef buffer-size-delay-time {
+        type int32 {
+            range "0..1000000";
+        }
+        units "seconds";
+        description " Measure delay-time for the buffer size.";
+    }
+
     typedef ip-address {
         type inet:ip-address-no-zone;
         description "An IP address.";
@@ -486,7 +494,9 @@ module nokia-types-sros {
     }
 
     typedef ipv4-multicast-address {
-        type ipv4-address;
+        type ipv4-address {
+            pattern "((22[4-9]|23[0-9])\\.)(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.){2}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(%[\\p{N}\\p{L}]+)?";
+        }
         description "A multicast IPv4 address.";
     }
 
@@ -834,6 +844,19 @@ module nokia-types-sros {
         description "A string representing the name of a file.";
     }
 
+    typedef filename-255 {
+        type string {
+            length "1..255";
+            pattern "[^\\\\/]+" {
+                error-message "The given string does not represent a filename.";
+            }
+            pattern "(.*\\S.*)|()" {
+                error-message "The given string must not be all spaces.";
+            }
+        }
+        description "A string representing the name of a file.";
+    }
+
     typedef sat-url {
         type string {
             length "1..200";
@@ -936,6 +959,19 @@ module nokia-types-sros {
         description "A string representing an SCP URL.";
     }
 
+    typedef sftp-url {
+        type string {
+            length "1..180";
+            pattern "[^ <>{}|^\"`]*" {
+                error-message "The given string is not a valid URI.";
+            }
+            pattern "(sftp):(\\\\|/){2}([^:@?/]*:[^:@?/]*@)?((\\w|(\\w(\\w|\\.\\w|-\\w|[%]\\w)*))\\.\\w(\\w|-\\w|[%]\\w)*)((\\\\|/)[^;?]*)?" {
+                error-message "The given string is not a valid SFTP URL.";
+            }
+        }
+        description "A string representing an SFTP URL.";
+    }
+
     typedef http-url-loose {
         type string {
             length "1..180";
@@ -981,14 +1017,6 @@ module nokia-types-sros {
             "A string representing an HTTP URL that is loosely
              defined for backward compatibility and the HTTP scheme
              is implied if not specified.";
-    }
-
-    typedef local-url {
-        type union {
-            type sat-url;
-            type cflash-without-slot-url;
-        }
-        description "A string representing a local URL - cflash or sat.";
     }
 
     typedef local-file-url {
@@ -1208,7 +1236,7 @@ module nokia-types-sros {
     typedef eth-tunnel-path-tag {
         type string {
             length "1..9";
-            pattern "(([1-9]|[1-9][0-9]{1,2}|[1-3][0-9]{3}|40[0-8][0-9]|409[0-4]))|((([1-9]|[1-9][0-9]{1,2}|[1-3][0-9]{3}|40[0-8][0-9]|409[0-4]))|\\*)\\.((([1-9]|[1-9][0-9]{1,2}|[1-3][0-9]{3}|40[0-8][0-9]|409[0-4]))|\\*)";
+            pattern "(([0-9]|[1-9][0-9]{1,2}|[1-3][0-9]{3}|40[0-8][0-9]|409[0-4])|\\*)|((([0-9]|[1-9][0-9]{1,2}|[1-3][0-9]{3}|40[0-8][0-9]|409[0-4]))|\\*)\\.((([0-9]|[1-9][0-9]{1,2}|[1-3][0-9]{3}|40[0-8][0-9]|409[0-4]))|\\*)";
         }
         description "Ethernet tunnel path tag formatted string.";
     }
@@ -1427,7 +1455,7 @@ module nokia-types-sros {
             range "0..32767";
         }
         description
-            "A 16-bit number used to identify a Service Distribution Point.
+            "A 16-bit number used to identify a Service Destination Point.
              This ID must be unique only within the ESR where it is defined.
              The value 0 is used as the null ID.";
     }
@@ -1589,6 +1617,8 @@ module nokia-types-sros {
             enum gre-bridged                    { value 18; }
             enum tli                            { value 19; }
             enum pdn                            { value 20; }
+            enum vmhost                         { value 21; }
+            enum dhcp-client                    { value 22; }
             enum ipsec                          { value 23; }
             enum esa                            { value 24; }
             enum pfcp-cups                      { value 25; }
@@ -1652,14 +1682,38 @@ module nokia-types-sros {
 
     typedef fc-name {
         type enumeration {
-            enum be                             { value 0; }
-            enum l2                             { value 1; }
-            enum af                             { value 2; }
-            enum l1                             { value 3; }
-            enum h2                             { value 4; }
-            enum ef                             { value 5; }
-            enum h1                             { value 6; }
-            enum nc                             { value 7; }
+            enum be {
+                value 0;
+                description "Best effort";
+            }
+            enum l2 {
+                value 1;
+                description "Low 2 (best effort)";
+            }
+            enum af {
+                value 2;
+                description "Assured forwarding (assured)";
+            }
+            enum l1 {
+                value 3;
+                description "Low 1 (assured)";
+            }
+            enum h2 {
+                value 4;
+                description "High 2 (high priority)";
+            }
+            enum ef {
+                value 5;
+                description "Expedited forwarding (high priority)";
+            }
+            enum h1 {
+                value 6;
+                description "High 1 (high priority)";
+            }
+            enum nc {
+                value 7;
+                description "Network control (high priority)";
+            }
         }
         description "Specifies different Forwarding Classes (FC).";
     }
@@ -1792,7 +1846,7 @@ module nokia-types-sros {
             bit ef                             { position 5; }
             bit h1                             { position 6; }
             bit nc                             { position 7; }
-            bit defaultLsp                     { position 8; }
+            bit default-lsp                    { position 8; }
         }
         description "Indicates a set of forwarding classes.";
     }
@@ -1825,6 +1879,21 @@ module nokia-types-sros {
             range "0..1048575";
         }
         description "Indicates the full range for a MPLS label.";
+    }
+
+    typedef prefix-sid-full-range {
+        type uint32 {
+            range "0..1048575";
+        }
+        description
+            "Indicates the full range of possible values for a Prefix SID
+             index or label.
+
+             The maximum supported range can be [0..524287] or [0..1048575]
+             depending on the platform.
+
+             The available Prefix SID range is restricted by the configured 
+             MPLS SR label range.";
     }
 
     typedef isa-scaling-profile {
@@ -2157,6 +2226,23 @@ module nokia-types-sros {
         description "TLS status of certificate";
     }
 
+    typedef tls-cert-revocation-status {
+        type enumeration {
+            enum crl                            { value 1; }
+            enum ocsp                           { value 2; }
+        }
+        description "The certification revocation status.";
+    }
+
+    typedef tls-cert-revocation-status-with-none {
+        type enumeration {
+            enum none                           { value 0; }
+            enum crl                            { value 1; }
+            enum ocsp                           { value 2; }
+        }
+        description "The certification revocation status or none.";
+    }
+
     typedef attribute-set-import {
         type enumeration {
             enum ignore                         { value 1; }
@@ -2187,11 +2273,30 @@ module nokia-types-sros {
         description "Storm control traffic type";
     }
 
+    typedef untagged-route-type {
+        type enumeration {
+            enum none {
+                value 0;
+                description "Untagged routes can bind to tagged or untagged LSPs";
+            }
+            enum untagged-tunnel {
+                value 1;
+                description "Untagged routes only bind to LSPs without an admin tag";
+            }
+        }
+        description "Type of untagged route type to resolve";
+    }
+
     typedef comment-text-type {
         type string {
             length "0..2048";
         }
         description "Type of text of configuration comment that is added or that is replacing the existing comment for the configuration element";
+    }
+
+    typedef bridge-id {
+        type hex-string;
+        description "Type of bridge identifier";
     }
 
 }

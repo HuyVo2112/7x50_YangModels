@@ -12,7 +12,7 @@ submodule nokia-conf-system-ptp {
     include nokia-conf-groups;
     include nokia-conf-port;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -35,7 +35,7 @@ submodule nokia-conf-system-ptp {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-09-15";
+    revision "2026-07-22";
 
     grouping conf-system-ptp {
         container ptp {
@@ -117,6 +117,47 @@ submodule nokia-conf-system-ptp {
                 type boolean;
                 default "true";
                 description "Send Announce messages while clock is unsynchronized";
+            }
+
+            leaf time-inaccuracy {
+                type uint32 {
+                    range "0..10000000";
+                }
+                units "nanoseconds";
+                default "0";
+                description "Time inaccuracy value override";
+            }
+
+            leaf initial-time-inaccuracy {
+                type uint32 {
+                    range "0..10000000";
+                }
+                units "nanoseconds";
+                default "0";
+                description "Total time inaccuracy from grandmaster to local clock";
+            }
+
+            leaf tx-path-trace {
+                type boolean;
+                default "false";
+                description "Include PATH TRACE TLV in Announce messages";
+            }
+
+            leaf max-steps-removed {
+                type uint32 {
+                    range "1..255";
+                }
+                default "255";
+                description "Threshold for steps removed in Announce messages";
+            }
+
+            leaf within-holdover-spec-timer {
+                type uint32 {
+                    range "0..3600";
+                }
+                units "seconds";
+                default "600";
+                description "Duration for local clock to specify the holdover state";
             }
 
             leaf-list apply-groups {
@@ -210,6 +251,24 @@ submodule nokia-conf-system-ptp {
                     description "Administrative state of the PTP port";
                 }
 
+                leaf monitor-receiver {
+                    type boolean;
+                    default "false";
+                    description "Enable the PTP port as a monitor-receiver";
+                }
+
+                leaf monitor-sender {
+                    type boolean;
+                    default "false";
+                    description "Enable the PTP port as a monitor-sender";
+                }
+
+                leaf not-master {
+                    type boolean;
+                    default "false";
+                    description "Block PTP port from entering the timeTransmitter state";
+                }
+
                 leaf-list apply-groups {
                     type leafref {
                         path "../../../../groups/group/name";
@@ -241,7 +300,7 @@ submodule nokia-conf-system-ptp {
 
                 leaf peer-limit {
                     type int32 {
-                        range "0..512";
+                        range "0..1600";
                     }
                     description "Number of discovered peers allowed for routing instance";
                 }
@@ -304,6 +363,18 @@ submodule nokia-conf-system-ptp {
                         description "Administrative state of the PTP peer";
                     }
 
+                    leaf monitor-receiver {
+                        type boolean;
+                        default "false";
+                        description "Enable the PTP peer as a monitor-receiver";
+                    }
+
+                    leaf not-master {
+                        type boolean;
+                        default "false";
+                        description "Block PTP port from entering the timeTransmitter state";
+                    }
+
                     leaf-list apply-groups {
                         type leafref {
                             path "../../../../../groups/group/name";
@@ -344,10 +415,30 @@ submodule nokia-conf-system-ptp {
 
                 leaf profile {
                     type enumeration {
-                        enum g8265dot1-2010                 { value 1; }
-                        enum ieee1588-2008                  { value 2; }
-                        enum g8275dot1-2014                 { value 3; }
-                        enum g8275dot2-2016                 { value 4; }
+                        enum g8265dot1-2010 {
+                            value 1;
+                            description "ITU-T G.8265.1 specification";
+                        }
+                        enum ieee1588-2008 {
+                            value 2;
+                            description "2008 version of IEEE 1588 standard";
+                        }
+                        enum g8275dot1-2014 {
+                            value 3;
+                            description "2014 version of ITU-T G.8275.1 specification";
+                        }
+                        enum g8275dot2-2016 {
+                            value 4;
+                            description "2016 version of ITU-T G.8275.2 specification";
+                        }
+                        enum iec-61850-9-3-2016 {
+                            value 5;
+                            description "2016 version of IEC/IEEE 61850-9-3 standard";
+                        }
+                        enum c37dot238-2017 {
+                            value 6;
+                            description "2017 version of C37.238 specification";
+                        }
                     }
                     sros-ext:auto-restart-to-modify;
                     default "g8275dot1-2014";

@@ -9,7 +9,7 @@ submodule nokia-state-port-eth-dot1x {
     import nokia-types-port               { prefix "types-port"; }
     import nokia-types-sros               { prefix "types-sros"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -32,7 +32,7 @@ submodule nokia-state-port-eth-dot1x {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-07-17";
+    revision "2026-07-22";
 
     grouping state-port-eth-dot1x {
         container dot1x {
@@ -364,6 +364,7 @@ submodule nokia-state-port-eth-dot1x {
 
             } // list host
 
+
             container macsec {
                 description "Enter the macsec context";
 
@@ -375,7 +376,7 @@ submodule nokia-state-port-eth-dot1x {
                         type uint32 {
                             range "1..1023";
                         }
-                        description "Sub-port ID";
+                        description "Specifies the sub-port ID on the port.";
                     }
 
                     container statistics {
@@ -664,6 +665,77 @@ submodule nokia-state-port-eth-dot1x {
                             leaf invalid-header {
                                 type yang:counter64;
                                 description "Indicates the number of MKPDUs received with an invalid MKA header.";
+                            }
+
+                            leaf principal {
+                                type boolean;
+                                description "Indicates whether this MKA session is principal.";
+                            }
+
+                            leaf cak-type {
+                                status deprecated;
+                                type enumeration {
+                                    enum static-cak-active-psk          { value 1; }
+                                    enum static-cak-keychain            { value 2; }
+                                    enum auto-gen-psk                   { value 3; }
+                                }
+                                description
+                                    "Indicates which CAK method was used for this MKA session.
+                                     This leaf was deprecated in release 25.10 on Nokia SR OS series systems.
+                                     It has been replaced by /port/ethernet/dot1x/macsec/sub-port/statistics/mka/psk-source.";
+                            }
+
+                            leaf encoding-an {
+                                type union {
+                                    type int32 {
+                                        range "0..3";
+                                    }
+                                    type enumeration {
+                                        enum none                           { value -1; }
+                                    }
+                                }
+                                description
+                                    "Indicates the Association Number (AN) of the SA currently used
+                                     to encode the SecTAG for frames awaiting transmission.";
+                            }
+
+                            leaf latest-sak-receiving {
+                                type boolean;
+                                description
+                                    "Indicates whether the reception for the SAK is enabled for all
+                                     the receive SAs identified by the AN of the latest SAK.";
+                            }
+
+                            leaf latest-sak-transmitting {
+                                type boolean;
+                                description
+                                    "Indicates whether the SecY is transmitting using the SAK and
+                                     its own SA with the AN identified by the AN of the latest SAK.";
+                            }
+
+                            leaf previous-sak-receiving {
+                                type boolean;
+                                description
+                                    "Indicates whether reception for the SAK is enabled for all
+                                     the receive SAs identified by the AN of the previous SAK.";
+                            }
+
+                            leaf previous-sak-transmitting {
+                                type boolean;
+                                description
+                                    "Indicates whether the SecY is transmitting using the SAK and
+                                     its own SA with the AN identified by the AN of the previous SAK.";
+                            }
+
+                            leaf psk-source {
+                                type enumeration {
+                                    enum static-active-psk              { value 1; }
+                                    enum static-primary-keychain        { value 2; }
+                                    enum auto-gen-recovery-keychain     { value 3; }
+                                    enum auto-gen-generated             { value 4; }
+                                    enum auto-gen-receiver              { value 5; }
+                                }
+                                description "Indicates the source of PSK used for this MKA session.";
                             }
 
                             list mka-peer {

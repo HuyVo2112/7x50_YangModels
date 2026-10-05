@@ -11,7 +11,7 @@ submodule nokia-conf-policy-options {
 
     include nokia-conf-groups;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -34,7 +34,7 @@ submodule nokia-conf-policy-options {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-07-23";
+    revision "2026-07-22";
 
     grouping conf-policy-options {
         container policy-options {
@@ -309,7 +309,7 @@ submodule nokia-conf-policy-options {
 
                 leaf name {
                     type types-sros:policy-community-name;
-                    description "Community name";
+                    description "Name of extended community set";
                 }
 
                 leaf-list apply-groups {
@@ -378,6 +378,50 @@ submodule nokia-conf-policy-options {
                 } // container expression
 
             } // list community
+
+            list extended-community-set {
+                key "name";
+                description "Enter the extended-community-set list instance";
+
+                leaf name {
+                    type types-sros:policy-community-name;
+                    description "Name of extended community set";
+                }
+
+                leaf-list apply-groups {
+                    type leafref {
+                        path "../../../groups/group/name";
+                    }
+                    max-elements 8;
+                    ordered-by user;
+                    description "Apply a configuration group at this level";
+                }
+
+                leaf-list apply-groups-exclude {
+                    type leafref {
+                        path "../../../groups/group/name";
+                    }
+                    max-elements 8;
+                    ordered-by user;
+                    description "Exclude a configuration group at this level";
+                }
+
+                list member {
+                    key "value";
+                    description "Add a list entry for member";
+
+                    leaf value {
+                        type types-sros:member-community {
+                            pattern "target:.*:.*" {
+                                error-message "only target type community is supported";
+                            }
+                        }
+                        description "Member of an extended community set";
+                    }
+
+                } // list member
+
+            } // list extended-community-set
 
             list prefix-list {
                 key "name";
@@ -725,6 +769,23 @@ submodule nokia-conf-policy-options {
                             description "EVPN type as a match criterion for the entry";
                         }
 
+                        leaf extended-community-set {
+                            type leafref {
+                                path "../../../../extended-community-set/name";
+                            }
+                            description "Extended community set as a match criterion";
+                        }
+
+                        leaf extended-community-set-options {
+                            type enumeration {
+                                enum any                            { value 0; }
+                                enum all                            { value 1; }
+                                enum invert                         { value 2; }
+                            }
+                            default "any";
+                            description "Extended community set options as a match criterion";
+                        }
+
                         leaf external {
                             type boolean;
                             default "false";
@@ -1214,6 +1275,7 @@ submodule nokia-conf-policy-options {
                                     enum evpn-ifl                       { value 37; }
                                     enum srv6                           { value 39; }
                                     enum video                          { value 40; }
+                                    enum evpn-ifl-host                  { value 41; }
                                 }
                                 max-elements 5;
                                 description "List of protocol names as the match criterion";
@@ -1781,7 +1843,7 @@ submodule nokia-conf-policy-options {
                             type union {
                                 type types-policy:policy-var-name;
                                 type uint32 {
-                                    range "32..1048512";
+                                    range "32..1048575";
                                 }
                             }
                             description "S-BFD return path label";
@@ -1986,7 +2048,7 @@ submodule nokia-conf-policy-options {
                             description "Enter the sr-label-index context";
 
                             leaf value {
-                                type types-policy:value-524287-param-name;
+                                type types-policy:value-sr-label-param-name;
                                 description "BGP SR label index associated with routes";
                             }
 
@@ -2239,6 +2301,23 @@ submodule nokia-conf-policy-options {
                             description "EVPN type as a match criterion for the entry";
                         }
 
+                        leaf extended-community-set {
+                            type leafref {
+                                path "../../../../extended-community-set/name";
+                            }
+                            description "Extended community set as a match criterion";
+                        }
+
+                        leaf extended-community-set-options {
+                            type enumeration {
+                                enum any                            { value 0; }
+                                enum all                            { value 1; }
+                                enum invert                         { value 2; }
+                            }
+                            default "any";
+                            description "Extended community set options as a match criterion";
+                        }
+
                         leaf external {
                             type boolean;
                             default "false";
@@ -2728,6 +2807,7 @@ submodule nokia-conf-policy-options {
                                     enum evpn-ifl                       { value 37; }
                                     enum srv6                           { value 39; }
                                     enum video                          { value 40; }
+                                    enum evpn-ifl-host                  { value 41; }
                                 }
                                 max-elements 5;
                                 description "List of protocol names as the match criterion";
@@ -3295,7 +3375,7 @@ submodule nokia-conf-policy-options {
                             type union {
                                 type types-policy:policy-var-name;
                                 type uint32 {
-                                    range "32..1048512";
+                                    range "32..1048575";
                                 }
                             }
                             description "S-BFD return path label";
@@ -3500,7 +3580,7 @@ submodule nokia-conf-policy-options {
                             description "Enter the sr-label-index context";
 
                             leaf value {
-                                type types-policy:value-524287-param-name;
+                                type types-policy:value-sr-label-param-name;
                                 description "BGP SR label index associated with routes";
                             }
 
@@ -3895,7 +3975,7 @@ submodule nokia-conf-policy-options {
                         type union {
                             type types-policy:policy-var-name;
                             type uint32 {
-                                range "32..1048512";
+                                range "32..1048575";
                             }
                         }
                         description "S-BFD return path label";
@@ -4100,7 +4180,7 @@ submodule nokia-conf-policy-options {
                         description "Enter the sr-label-index context";
 
                         leaf value {
-                            type types-policy:value-524287-param-name;
+                            type types-policy:value-sr-label-param-name;
                             description "BGP SR label index associated with routes";
                         }
 

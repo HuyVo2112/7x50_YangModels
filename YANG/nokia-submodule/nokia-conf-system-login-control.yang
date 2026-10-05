@@ -9,7 +9,7 @@ submodule nokia-conf-system-login-control {
 
     include nokia-conf-groups;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -32,7 +32,7 @@ submodule nokia-conf-system-login-control {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2020-09-16";
+    revision "2026-07-22";
 
     grouping conf-system-login-control {
         container login-control {
@@ -176,6 +176,14 @@ submodule nokia-conf-system-login-control {
                     type boolean;
                     default "true";
                     description "Allow graceful shutdown of SSH sessions";
+                }
+
+                leaf max-channels-per-connection {
+                    type uint32 {
+                        range "1..50";
+                    }
+                    default "5";
+                    description "Maximum number of channels per SSH connection";
                 }
 
                 leaf inbound-max-sessions {

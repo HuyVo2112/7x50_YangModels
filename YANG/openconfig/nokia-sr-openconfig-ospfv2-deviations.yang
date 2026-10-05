@@ -8,16 +8,15 @@ module nokia-sr-openconfig-ospfv2-deviations {
     import openconfig-extensions          { prefix "oc-ext"; }
     import openconfig-network-instance    { prefix "oc-netinst"; }
     import openconfig-ospf-types          { prefix "oc-ospf-types"; }
-    import openconfig-ospfv2              { prefix "oc-ospfv2"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
          Web: <http://www.nokia.com>";
     description
         "This module contains the list of deviations against the openconfig-ospfv2
-          module for the Nokia SR OS based routers.
+         module for the Nokia SR OS based routers.
 
          Copyright 2016 Nokia. All rights reserved. Reproduction of this document
          is authorized on the condition that the foregoing copyright notice is included.
@@ -34,7 +33,7 @@ module nokia-sr-openconfig-ospfv2-deviations {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2022-02-10";
+    revision "2025-03-12";
 
     deviation /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:ospfv2/oc-netinst:global/oc-netinst:config/oc-netinst:log-adjacency-changes {
         deviate not-supported;

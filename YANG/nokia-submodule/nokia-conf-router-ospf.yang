@@ -18,7 +18,7 @@ submodule nokia-conf-router-ospf {
     include nokia-conf-system;
     include nokia-conf-system-security;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -41,7 +41,7 @@ submodule nokia-conf-router-ospf {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-09-13";
+    revision "2026-07-22";
 
     grouping conf-router-ospf {
         list ospf {
@@ -122,6 +122,15 @@ submodule nokia-conf-router-ospf {
                 type boolean;
                 default "false";
                 description "Submit routes into the multicast Route Table Manager";
+            }
+
+            leaf-list multicast-import-policy {
+                type leafref {
+                    path "../../../policy-options/policy-statement/name";
+                }
+                max-elements 1;
+                ordered-by user;
+                description "Import policy to submit IGP routes to the multicast RTM";
             }
 
             leaf overload-include-ext-1 {
@@ -555,6 +564,12 @@ submodule nokia-conf-router-ospf {
                     description "IGP instance in the BGP-LS NLRI";
                 }
 
+                leaf reachable-ls-only {
+                    type boolean;
+                    default "false";
+                    description "Encode only reachable link-state information";
+                }
+
                 container bgp-ls-identifier {
                     presence "Enable the bgp-ls-identifier context";
                     description "Enable the bgp-ls-identifier context";
@@ -562,7 +577,7 @@ submodule nokia-conf-router-ospf {
                     leaf value {
                         type uint32;
                         default "0";
-                        description "BGP-LS identifier sent in the BGP-LS NLRI";
+                        description "BGP-LS ID sent in the BGP-LS NLRI";
                     }
 
                 } // container bgp-ls-identifier
@@ -669,6 +684,20 @@ submodule nokia-conf-router-ospf {
                     description "Exclude a configuration group at this level";
                 }
 
+                container micro-loop-avoidance {
+                    presence "Enable the micro-loop-avoidance context";
+                    description "Enable the micro-loop-avoidance context";
+
+                    leaf fib-delay {
+                        type uint32 {
+                            range "1..300";
+                        }
+                        units "deciseconds";
+                        default "15";
+                        description "FIB delay";
+                    }
+
+                } // container micro-loop-avoidance
 
                 container prefix-sid-range {
                     presence "Enable the prefix-sid-range context";
@@ -686,18 +715,14 @@ submodule nokia-conf-router-ospf {
                         case local {
 
                             leaf start-label {
-                                type uint32 {
-                                    range "0..524287";
-                                }
+                                type types-sros:prefix-sid-full-range;
                                 sros-ext:auto-restart-to-modify;
                                 default "0";
                                 description "Lower bound value for the local label offset";
                             }
 
                             leaf max-index {
-                                type uint32 {
-                                    range "0..524287";
-                                }
+                                type types-sros:prefix-sid-full-range;
                                 sros-ext:auto-restart-to-modify;
                                 default "1";
                                 description "Upper bound value for the local SID index";
@@ -802,7 +827,7 @@ submodule nokia-conf-router-ospf {
 
                     leaf override-bmi {
                         type int32 {
-                            range "0..12";
+                            range "0..13";
                         }
                         description "Value to override the announced node MSD-BMI value";
                     }
@@ -1047,6 +1072,11 @@ submodule nokia-conf-router-ospf {
 
                     } // container loopfree-alternate
 
+                    container micro-loop-avoidance {
+                        presence "Enable the micro-loop-avoidance context";
+                        description "Enable the micro-loop-avoidance context";
+
+                    } // container micro-loop-avoidance
 
                 } // list flex-algo
 
@@ -1377,6 +1407,13 @@ submodule nokia-conf-router-ospf {
                         description "Advertise point-to-point interfaces as subnet routes";
                     }
 
+                    leaf conditional-advertise-prefix {
+                        type leafref {
+                            path "../../../../../policy-options/policy-statement/name";
+                        }
+                        description "Policy to conditionally advertise interface prefixes";
+                    }
+
                     leaf interface-type {
                         type types-ospf:interface-type;
                         sros-ext:immutable;
@@ -1619,6 +1656,30 @@ submodule nokia-conf-router-ospf {
                             }
                         }
                     } // container adjacency-sid
+
+                    container delay-normalization {
+                        presence "Enable the delay-normalization context";
+                        description "Enable the delay-normalization context";
+
+                        leaf delay-tolerance-interval {
+                            type uint32 {
+                                range "1..10000000";
+                            }
+                            units "microseconds";
+                            default "10";
+                            description "Interval between two delay values on the interface";
+                        }
+
+                        leaf minimum-delay {
+                            type uint32 {
+                                range "1..10000000";
+                            }
+                            units "microseconds";
+                            default "1";
+                            description "Minimum delay on the interface";
+                        }
+
+                    } // container delay-normalization
 
                     list message-digest-key {
                         key "key-id";

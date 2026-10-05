@@ -10,7 +10,7 @@ submodule nokia-state-submgt-gtp {
     import nokia-types-sros               { prefix "types-sros"; }
     import nokia-types-wlangw             { prefix "types-wlangw"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -33,7 +33,7 @@ submodule nokia-state-submgt-gtp {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2021-07-01";
+    revision "2025-03-12";
 
     grouping state-submgt-gtp {
         container gtp {
@@ -536,82 +536,66 @@ submodule nokia-state-submgt-gtp {
 
                         leaf bit0 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit1 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit2 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit3 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit4 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit5 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit6 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit7 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit8 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit9 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit10 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit11 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit12 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit13 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit14 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit15 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                     } // container charging-characteristics
@@ -698,82 +682,66 @@ submodule nokia-state-submgt-gtp {
 
                         leaf bit0 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit1 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit2 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit3 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit4 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit5 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit6 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit7 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit8 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit9 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit10 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit11 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit12 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit13 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit14 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit15 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                     } // container charging-characteristics
@@ -1051,82 +1019,66 @@ submodule nokia-state-submgt-gtp {
 
                         leaf bit0 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit1 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit2 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit3 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit4 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit5 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit6 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit7 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit8 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit9 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit10 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit11 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit12 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit13 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit14 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                         leaf bit15 {
                             type boolean;
-                            description "Set bit in charging characteristics information element";
                         }
 
                     } // container charging-characteristics
@@ -1329,6 +1281,30 @@ submodule nokia-state-submgt-gtp {
                 } // list pdn-session
 
             } // container s11
+
+            list apn-policy {
+                key "name";
+                description "Enter the apn-policy list instance";
+
+                leaf name {
+                    type types-sros:named-item;
+                    description "An GTP APN policy name";
+                }
+
+                list apn {
+                    key "apn-name";
+                    description "Enter the apn list instance";
+
+                    leaf apn-name {
+                        type string {
+                            length "1..80";
+                        }
+                        description "The GTP APN name";
+                    }
+
+                } // list apn
+
+            } // list apn-policy
 
         } // container gtp
 

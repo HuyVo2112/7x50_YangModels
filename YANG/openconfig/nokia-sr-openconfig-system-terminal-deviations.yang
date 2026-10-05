@@ -5,18 +5,16 @@ module nokia-sr-openconfig-system-terminal-deviations {
     prefix "nokia-oc-sys-term-devs";
 
     import nokia-sros-yang-extensions     { prefix "sros-ext"; }
-    import openconfig-extensions          { prefix "oc-ext"; }
     import openconfig-system              { prefix "oc-sys"; }
-    import openconfig-system-terminal     { prefix "oc-sys-term"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
          Web: <http://www.nokia.com>";
     description
         "This module contains the list of deviations against the openconfig-system-terminal
-          module for the Nokia SR OS based routers.
+         module for the Nokia SR OS based routers.
 
          Copyright 2016 Nokia. All rights reserved. Reproduction of this document
          is authorized on the condition that the foregoing copyright notice is included.
@@ -33,7 +31,7 @@ module nokia-sr-openconfig-system-terminal-deviations {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2017-09-18";
+    revision "2025-03-12";
 
     deviation /oc-sys:system/oc-sys:ssh-server/oc-sys:config/oc-sys:timeout {
         deviate replace {

@@ -8,7 +8,7 @@ submodule nokia-state-group-encryption {
     import nokia-sros-yang-extensions     { prefix "sros-ext"; }
     import nokia-types-sros               { prefix "types-sros"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -31,7 +31,7 @@ submodule nokia-state-group-encryption {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2022-09-08";
+    revision "2025-03-12";
 
     grouping state-group-encryption {
         container group-encryption {
@@ -45,7 +45,7 @@ submodule nokia-state-group-encryption {
                     type uint32 {
                         range "1..127";
                     }
-                    description "Encryption key group ID";
+                    description "Identification of the encryption keygroup";
                 }
 
                 leaf outbound-security-association-activation-time {
@@ -192,7 +192,7 @@ submodule nokia-state-group-encryption {
                         type uint32 {
                             range "1..1023";
                         }
-                        description "Security Parameter Index (SPI)";
+                        description "Security Parameter Index";
                     }
 
                     leaf install-time {

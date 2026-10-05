@@ -9,7 +9,7 @@ submodule nokia-state-router-rip {
     import nokia-types-rip                { prefix "types-rip"; }
     import nokia-types-sros               { prefix "types-sros"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -32,11 +32,11 @@ submodule nokia-state-router-rip {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2020-09-16";
+    revision "2025-03-12";
 
     grouping state-router-rip {
         container rip {
-            description "Enable the rip context";
+            description "Enter the rip context";
 
             leaf oper-state {
                 type types-sros:oper-state;
@@ -189,7 +189,6 @@ submodule nokia-state-router-rip {
 
                 leaf group-name {
                     type types-sros:named-item;
-                    description "RIP group name";
                 }
 
                 leaf oper-state {
@@ -203,7 +202,7 @@ submodule nokia-state-router-rip {
 
                     leaf interface-name {
                         type types-sros:interface-name;
-                        description "Neighbor added through the interface to the RIP group";
+                        description "Interface name.";
                     }
 
                     leaf oper-state {

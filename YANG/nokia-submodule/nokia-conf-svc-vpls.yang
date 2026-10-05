@@ -43,7 +43,7 @@ submodule nokia-conf-svc-vpls {
     include nokia-conf-system;
     include nokia-conf-system-security;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -66,7 +66,7 @@ submodule nokia-conf-svc-vpls {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2024-08-02";
+    revision "2026-07-22";
 
     grouping conf-svc-vpls {
         list vpls {
@@ -677,6 +677,11 @@ submodule nokia-conf-svc-vpls {
                                     description "AR role as replicator";
                                 }
 
+                                leaf preserve-leaf-source-vtep {
+                                    type empty;
+                                    description "Leaf source VTEP preservation";
+                                }
+
                             }
                         }
                     } // container assisted-replication
@@ -958,6 +963,35 @@ submodule nokia-conf-svc-vpls {
 
                 } // container duplicate-detect
 
+                container restrict-non-configured-ip-address {
+                    presence "Enable the restrict-non-configured-ip-address context";
+                    sros-ext:auto-restart-to-modify;
+                    description "Enable the restrict-non-configured-ip-address context";
+
+                    leaf sponge-mac {
+                        type types-sros:mac-unicast-address-no-zero;
+                        description "Sponge MAC used to reply to unauthorized requests";
+                    }
+
+                } // container restrict-non-configured-ip-address
+
+                container flood {
+                    description "Enter the flood context";
+
+                    leaf received-gratuitous-arp {
+                        type boolean;
+                        default "true";
+                        description "Allow GARP requests or replies to flood the service";
+                    }
+
+                    leaf received-unknown-arp-req {
+                        type boolean;
+                        default "true";
+                        description "Allow unknown ARP requests to flood the service";
+                    }
+
+                } // container flood
+
                 container static-arp {
                     description "Enter the static-arp context";
 
@@ -1043,6 +1077,20 @@ submodule nokia-conf-svc-vpls {
                             ordered-by user;
                             description "Exclude a configuration group at this level";
                         }
+
+                        list sap {
+                            key "sap-id";
+                            max-elements 1;
+                            description "Add a list entry for sap";
+
+                            leaf sap-id {
+                                type leafref {
+                                    path "../../../../../../vpls/sap/sap-id";
+                                }
+                                description "SAP identifier";
+                            }
+
+                        } // list sap
 
                     } // list ip-address
 
@@ -1226,6 +1274,41 @@ submodule nokia-conf-svc-vpls {
 
                 } // container duplicate-detect
 
+                container restrict-non-configured-ip-address {
+                    presence "Enable the restrict-non-configured-ip-address context";
+                    sros-ext:auto-restart-to-modify;
+                    description "Enable the restrict-non-configured-ip-address context";
+
+                    leaf sponge-mac {
+                        type types-sros:mac-unicast-address-no-zero;
+                        description "Sponge MAC used to reply to unauthorized requests";
+                    }
+
+                } // container restrict-non-configured-ip-address
+
+                container flood {
+                    description "Enter the flood context";
+
+                    leaf received-unknown-neighbor-advertise-host {
+                        type boolean;
+                        default "true";
+                        description "Allow unknown NA host messages to flood the service";
+                    }
+
+                    leaf received-unknown-neighbor-advertise-router {
+                        type boolean;
+                        default "true";
+                        description "Allow unknown router NA host messages to flood service";
+                    }
+
+                    leaf received-unknown-neighbor-solicitation {
+                        type boolean;
+                        default "true";
+                        description "Allow unknown NS messages to flood the service";
+                    }
+
+                } // container flood
+
                 container static-neighbor {
                     description "Enter the static-neighbor context";
 
@@ -1320,6 +1403,20 @@ submodule nokia-conf-svc-vpls {
                             ordered-by user;
                             description "Exclude a configuration group at this level";
                         }
+
+                        list sap {
+                            key "sap-id";
+                            max-elements 1;
+                            description "Add a list entry for sap";
+
+                            leaf sap-id {
+                                type leafref {
+                                    path "../../../../../../vpls/sap/sap-id";
+                                }
+                                description "SAP identifier";
+                            }
+
+                        } // list sap
 
                     } // list ip-address
 
@@ -2234,8 +2331,8 @@ submodule nokia-conf-svc-vpls {
             } // container spbm-control-vpls
 
             list segment-routing-v6 {
-                when "not(../pbb-type = 'b-vpls') and not(../pbb-type = 'i-vpls') and ../m-vpls = 'false' and ../etree = 'false' and not(../routed-vpls)" {
-                    description "not supported on b-vpls/i-vpls/m-vpls, routed-vpls or etree";
+                when "not(../pbb-type = 'b-vpls') and not(../pbb-type = 'i-vpls') and ../m-vpls = 'false' and ../etree = 'false'" {
+                    description "not supported on b-vpls/i-vpls/m-vpls or etree";
                 }
                 key "instance";
                 max-elements 1;
@@ -3066,6 +3163,11 @@ submodule nokia-conf-svc-vpls {
                     description "Ignore MTU mismatch";
                 }
 
+                leaf vlan-aware-bundle {
+                    type types-sros:named-item;
+                    description "VLAN aware bundle name";
+                }
+
                 leaf-list apply-groups {
                     type leafref {
                         path "../../../../groups/group/name";
@@ -3087,13 +3189,18 @@ submodule nokia-conf-svc-vpls {
                 container routes {
                     description "Enter the routes context";
 
+                    leaf vlan-aware-bundle-eth-tag {
+                        type types-services:bgp-evpn-ac-eth-tag;
+                        description "Ethernet tag associated with VPLS service";
+                    }
+
                     container mac-ip {
                         description "Enter the mac-ip context";
 
                         leaf advertise {
                             type boolean;
                             default "true";
-                            description "Status for the BGP-EVPN MAC/IP routes advertisement";
+                            description "Advertise BGP-EVPN MAC/IP routes";
                         }
 
                         leaf cfm-mac {
@@ -3134,7 +3241,7 @@ submodule nokia-conf-svc-vpls {
                         leaf advertise {
                             type boolean;
                             default "false";
-                            description "Status for the IP prefix routes advertisement";
+                            description "Advertise IP prefixes";
                         }
 
                         leaf include-direct-interface-host {
@@ -3346,8 +3453,8 @@ submodule nokia-conf-svc-vpls {
                 } // container isid-route-target
 
                 list segment-routing-v6 {
-                    when "not(../../pbb-type = 'b-vpls') and not(../../pbb-type = 'i-vpls') and ../../m-vpls = 'false' and ../../etree = 'false' and not(../../routed-vpls)" {
-                        description "not supported on b-vpls/i-vpls/m-vpls, routed-vpls or etree";
+                    when "not(../../pbb-type = 'b-vpls') and not(../../pbb-type = 'i-vpls') and ../../m-vpls = 'false' and ../../etree = 'false'" {
+                        description "not supported on b-vpls/i-vpls/m-vpls or etree";
                     }
                     key "bgp-instance";
                     max-elements 1;
@@ -3650,6 +3757,7 @@ submodule nokia-conf-svc-vpls {
                             description "VPLS PBB type must not be 'b-vpls' and routed VPLS must not be present";
                         }
                         type types-services:bgp-evpn-force-vc-forwarding;
+                        sros-ext:auto-restart-to-modify;
                         description "VC forwarding action";
                     }
 
@@ -3726,7 +3834,7 @@ submodule nokia-conf-svc-vpls {
                     leaf hash-label {
                         type boolean;
                         default "false";
-                        description "Push hash label";
+                        description "Default profile when the CP-provided profile is unknown";
                     }
 
                     leaf-list apply-groups {
@@ -3785,6 +3893,12 @@ submodule nokia-conf-svc-vpls {
                             type types-router:mpls-ecmp;
                             default "1";
                             description "Maximum ECMP routes information";
+                        }
+
+                        leaf enforce-untagged-route {
+                            type types-sros:untagged-route-type;
+                            default "none";
+                            description "Untagged route type enforcement";
                         }
 
                         leaf allow-flex-algo-fallback {
@@ -4054,7 +4168,7 @@ submodule nokia-conf-svc-vpls {
 
                     leaf protected-src-mac-violation-action {
                         type types-services:sdp-protected-src-mac-violation-action;
-                        description "Action when a relearn request for a protected MAC is received on the SDP";
+                        description "Action taken after a relearn request for protected MAC";
                     }
 
                 } // container fdb
@@ -4145,6 +4259,13 @@ submodule nokia-conf-svc-vpls {
                     description "Define as a residential split horizon group";
                 }
 
+                leaf multicast-source {
+                    type boolean;
+                    sros-ext:immutable;
+                    default "false";
+                    description "Enable multicast-source on the split-horizon group";
+                }
+
                 leaf-list apply-groups {
                     type leafref {
                         path "../../../../groups/group/name";
@@ -4184,7 +4305,7 @@ submodule nokia-conf-svc-vpls {
 
                         leaf protected-src-mac-violation-action {
                             type types-services:sap-protected-src-mac-violation-action;
-                            description "Action to take whenever a relearn request for a protected MAC is received";
+                            description "Action taken after a relearn request for protected MAC";
                         }
 
                         leaf discard-unprotected-dest-mac {
@@ -4222,6 +4343,7 @@ submodule nokia-conf-svc-vpls {
 
                 list mep {
                     key "md-admin-name ma-admin-name mep-id";
+                    max-elements 1;
                     description "Enter the mep list instance";
 
                     leaf md-admin-name {
@@ -4532,7 +4654,7 @@ submodule nokia-conf-svc-vpls {
                         enum qinq-c-tag-c-tag               { value 2; }
                         enum qinq-s-tag-c-tag               { value 3; }
                     }
-                    description "VC forwarding action";
+                    description "VLAN tag processing action";
                 }
 
                 leaf app-profile {
@@ -4592,6 +4714,13 @@ submodule nokia-conf-svc-vpls {
                     type boolean;
                     default "false";
                     description "Enable blocking after all SDPs are operationally down";
+                }
+
+                leaf adv-service-mtu {
+                    type int32 {
+                        range "0..9782";
+                    }
+                    description "Advertise service MTU value";
                 }
 
                 leaf-list apply-groups {
@@ -5155,7 +5284,7 @@ submodule nokia-conf-svc-vpls {
 
                     leaf protected-src-mac-violation-action {
                         type types-services:sdp-protected-src-mac-violation-action;
-                        description "Action when a relearn request for a protected MAC is received on the SDP";
+                        description "Action taken after a relearn request for protected MAC";
                     }
 
                     container mac-learning {
@@ -5970,8 +6099,14 @@ submodule nokia-conf-svc-vpls {
 
                             leaf low-priority-defect {
                                 type enumeration {
-                                    enum all-def                        { value 1; }
-                                    enum mac-rem-err-xcon               { value 2; }
+                                    enum all-def {
+                                        value 1;
+                                        description "Generate AIS frame for any defect in CCM state machine";
+                                    }
+                                    enum mac-rem-err-xcon {
+                                        value 2;
+                                        description "Generate AIS frame for def-mac-status defect or higher";
+                                    }
                                 }
                                 default "all-def";
                                 description "Lowest priority defect allowed to generate fault alarm";
@@ -6308,7 +6443,7 @@ submodule nokia-conf-svc-vpls {
                         enum qinq-c-tag-c-tag               { value 2; }
                         enum qinq-s-tag-c-tag               { value 3; }
                     }
-                    description "VC forwarding action";
+                    description "VLAN tag processing action";
                 }
 
                 leaf etree-root-leaf-tag {
@@ -6344,6 +6479,13 @@ submodule nokia-conf-svc-vpls {
                     sros-ext:auto-restart-to-modify;
                     default "ether";
                     description "Type of virtual circuit (VC) associated with the SDP binding; VPLS not supported";
+                }
+
+                leaf adv-service-mtu {
+                    type int32 {
+                        range "0..9782";
+                    }
+                    description "Advertise service MTU value";
                 }
 
                 leaf-list apply-groups {
@@ -6686,7 +6828,7 @@ submodule nokia-conf-svc-vpls {
 
                     leaf protected-src-mac-violation-action {
                         type types-services:sdp-protected-src-mac-violation-action;
-                        description "Action to take whenever a relearn request for a protected MAC is received";
+                        description "Action taken after a relearn request for protected MAC";
                     }
 
                 } // container fdb
@@ -7345,8 +7487,14 @@ submodule nokia-conf-svc-vpls {
 
                             leaf low-priority-defect {
                                 type enumeration {
-                                    enum all-def                        { value 1; }
-                                    enum mac-rem-err-xcon               { value 2; }
+                                    enum all-def {
+                                        value 1;
+                                        description "Generate AIS frame for any defect in CCM state machine";
+                                    }
+                                    enum mac-rem-err-xcon {
+                                        value 2;
+                                        description "Generate AIS frame for def-mac-status defect or higher";
+                                    }
                                 }
                                 default "all-def";
                                 description "Lowest priority defect allowed to generate fault alarm";
@@ -7908,6 +8056,13 @@ submodule nokia-conf-svc-vpls {
                             path "../../../../../qos/shared-policers/policer/shared-policer-name";
                         }
                         description "Ingress shared policer";
+                    }
+
+                    leaf filter-set {
+                        type leafref {
+                            path "../../../../../filter/filter-set/filter-set-name";
+                        }
+                        description "Filter-set name";
                     }
 
                     container qos {
@@ -8510,12 +8665,12 @@ submodule nokia-conf-svc-vpls {
                                     type int32 {
                                         range "0..4094";
                                     }
-                                    description "Outer ingress VLAN translation for two service delimiting VLAN values";
+                                    description "Outer S-tag value for ingress QinQ VLAN translation";
                                 }
 
                                 leaf c-tag {
                                     type types-services:qinq-vlan-translation-ctag;
-                                    description "Inner ingress vlan translation for two service delimiting vlan values";
+                                    description "Inner C-tag value for ingress QinQ VLAN translation";
                                 }
 
                             }
@@ -8555,6 +8710,7 @@ submodule nokia-conf-svc-vpls {
                         }
 
                         leaf burst {
+                            status obsolete;
                             type types-qos:aggr-policer-burst;
                             default "default";
                             description "Aggregate policer burst";
@@ -8568,8 +8724,30 @@ submodule nokia-conf-svc-vpls {
 
                         leaf cbs {
                             type types-qos:aggr-policer-cbs;
-                            units "kilobytes";
+                            units "kilobits";
                             description "Aggregate policer CBS";
+                        }
+
+                        leaf mbs {
+                            type types-qos:aggr-policer-mbs;
+                            units "kilobits";
+                            default "default";
+                            description "Aggregate policer mbs";
+                        }
+
+                        leaf algorithm-type {
+                            type enumeration {
+                                enum trtcm-ds {
+                                    value 1;
+                                    description "Use the TRTCM non-coupled mode";
+                                }
+                                enum trtcm-ds-coupled {
+                                    value 2;
+                                    description "Use the TRTCM coupled mode";
+                                }
+                            }
+                            default "trtcm-ds-coupled";
+                            description "Policer algorithm type";
                         }
 
                     } // container aggregate-policer
@@ -8677,6 +8855,25 @@ submodule nokia-conf-svc-vpls {
                             type boolean;
                             default "false";
                             description "Mark top Q-tags";
+                        }
+
+                        leaf burst-limit {
+                            type types-qos:vlan-qos-burst-limit;
+                            description "Maximum traffic burst size for SAP egress";
+                        }
+
+                        leaf latency-budget {
+                            type uint32 {
+                                range "1..1000000";
+                            }
+                            units "microseconds";
+                            description "SAP egress latency budget";
+                        }
+
+                        leaf sink-excess-bw {
+                            type boolean;
+                            default "false";
+                            description "Use virtual flows to sink excess bandwidth";
                         }
 
                         container sap-egress {
@@ -10325,7 +10522,7 @@ submodule nokia-conf-svc-vpls {
                     leaf discard-unknown-source {
                         type boolean;
                         default "false";
-                        description "Discard frames with unknown source";
+                        description "Discard packets with unknown destination MAC addresses";
                     }
 
                     leaf limit-mac-move {
@@ -10360,7 +10557,7 @@ submodule nokia-conf-svc-vpls {
 
                     leaf protected-src-mac-violation-action {
                         type types-services:sap-protected-src-mac-violation-action;
-                        description "Action to take whenever a relearn request for a protected MAC is received";
+                        description "Action taken after a relearn request for protected MAC";
                     }
 
                     leaf discard-unprotected-dest-mac {
@@ -10525,6 +10722,7 @@ submodule nokia-conf-svc-vpls {
                     } // container router
 
                 } // container l2tpv3-session
+
 
                 container spb {
                     presence "Enable the spb context";
@@ -11469,6 +11667,13 @@ submodule nokia-conf-svc-vpls {
                             description "Threshold time limit for the one-way delay test";
                         }
 
+                        leaf monitor-oper-group {
+                            type leafref {
+                                path "../../../../../oper-group/name";
+                            }
+                            description "Operational group to monitor";
+                        }
+
                         leaf-list apply-groups {
                             type leafref {
                                 path "../../../../../../groups/group/name";
@@ -11537,8 +11742,14 @@ submodule nokia-conf-svc-vpls {
 
                             leaf low-priority-defect {
                                 type enumeration {
-                                    enum all-def                        { value 1; }
-                                    enum mac-rem-err-xcon               { value 2; }
+                                    enum all-def {
+                                        value 1;
+                                        description "Generate AIS frame for any defect in CCM state machine";
+                                    }
+                                    enum mac-rem-err-xcon {
+                                        value 2;
+                                        description "Generate AIS frame for def-mac-status defect or higher";
+                                    }
                                 }
                                 default "all-def";
                                 description "Lowest priority defect allowed to generate fault alarm";

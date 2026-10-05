@@ -14,7 +14,7 @@ submodule nokia-state-filter {
     include nokia-state-filter-ip-exception;
     include nokia-state-openflow;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -37,7 +37,7 @@ submodule nokia-state-filter {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-11-27";
+    revision "2025-10-30";
 
     grouping state-filter {
         container filter {
@@ -49,7 +49,7 @@ submodule nokia-state-filter {
 
                 leaf redirect-policy-name {
                     type types-sros:named-item;
-                    description "Redirect policy name";
+                    description "The redirect-policy identifier.";
                 }
 
                 leaf active-destination {
@@ -88,7 +88,7 @@ submodule nokia-state-filter {
 
                     leaf destination-address {
                         type types-sros:ip-unicast-address;
-                        description "IP address and type of destination";
+                        description "IP address and type of the destination.";
                     }
 
                     leaf oper-priority {
@@ -119,7 +119,7 @@ submodule nokia-state-filter {
                     }
 
                     container ping-test {
-                        description "Enable the ping-test context";
+                        description "Enter the ping-test context";
 
                         leaf hold-down-remain {
                             type uint32 {
@@ -152,7 +152,7 @@ submodule nokia-state-filter {
                     } // container ping-test
 
                     container unicast-rt-test {
-                        description "Enable the unicast-rt-test context";
+                        description "Enter the unicast-rt-test context";
 
                         leaf last-action {
                             type types-filter:redirect-policy-test-last-action;
@@ -182,7 +182,7 @@ submodule nokia-state-filter {
 
                 leaf binding-name {
                     type types-sros:named-item;
-                    description "Binding name";
+                    description "The redirect-policy-binding identifier.";
                 }
 
                 leaf oper-state {
@@ -200,18 +200,18 @@ submodule nokia-state-filter {
                         type leafref {
                             path "../../../redirect-policy/redirect-policy-name";
                         }
-                        description "Redirect policy name";
+                        description "The redirect-policy identifier.";
                     }
 
                     list destination {
                         key "destination-address";
-                        description "Add a list entry for destination";
+                        description "Enter the destination list instance";
 
                         leaf destination-address {
                             type leafref {
                                 path "../../../../redirect-policy[redirect-policy-name=current()/../../redirect-policy-name]/destination/destination-address";
                             }
-                            description "IP address of redirect policy destination to binding";
+                            description "IP address and type of the destination.";
                         }
 
                         leaf own-oper-state {
@@ -233,7 +233,7 @@ submodule nokia-state-filter {
 
                 leaf log-id {
                     type types-filter:filter-log-id;
-                    description "Filter log identifier";
+                    description "The filter log identifier.";
                 }
 
                 container destination {
@@ -364,7 +364,7 @@ submodule nokia-state-filter {
 
                     leaf prefix-list-name {
                         type types-sros:named-item;
-                        description "IP prefix list name";
+                        description "The prefix-list-name specifies the name given to this prefix list.";
                     }
 
                     container apply-path {
@@ -378,7 +378,7 @@ submodule nokia-state-filter {
                                 type uint32 {
                                     range "1..255";
                                 }
-                                description "BGP peers auto-generation configuration index";
+                                description "This object specifies an index for this list.";
                             }
 
                             list prefix {
@@ -394,10 +394,49 @@ submodule nokia-state-filter {
 
                         } // list bgp-peers
 
+                        list interfaces {
+                            key "criterion-index";
+                            description "Enter the interfaces list instance";
+
+                            leaf criterion-index {
+                                type uint32 {
+                                    range "1..255";
+                                }
+                                description "This object specifies an index for this list.";
+                            }
+
+                            list prefix {
+                                key "prefix";
+                                description "Enter the prefix list instance";
+
+                                leaf prefix {
+                                    type types-sros:ipv4-prefix;
+                                    description "prefix.";
+                                }
+
+                            } // list prefix
+
+                        } // list interfaces
+
 
 
                     } // container apply-path
 
+                    container generated-prefixes {
+                        description "Enter the generated-prefixes context";
+
+                        list prefix {
+                            key "ip-prefix";
+                            description "Enter the prefix list instance";
+
+                            leaf ip-prefix {
+                                type types-sros:ipv4-prefix;
+                                description "Add IP prefix to the list.";
+                            }
+
+                        } // list prefix
+
+                    } // container generated-prefixes
 
                 } // list ip-prefix-list
 
@@ -407,7 +446,7 @@ submodule nokia-state-filter {
 
                     leaf prefix-list-name {
                         type types-sros:named-item;
-                        description "IP prefix list name";
+                        description "The prefix-list-name specifies the name given to this prefix list.";
                     }
 
                     container apply-path {
@@ -421,7 +460,7 @@ submodule nokia-state-filter {
                                 type uint32 {
                                     range "1..255";
                                 }
-                                description "BGP peers auto-generation configuration index";
+                                description "This object specifies an index for this list.";
                             }
 
                             list prefix {
@@ -437,9 +476,48 @@ submodule nokia-state-filter {
 
                         } // list bgp-peers
 
+                        list interfaces {
+                            key "criterion-index";
+                            description "Enter the interfaces list instance";
+
+                            leaf criterion-index {
+                                type uint32 {
+                                    range "1..255";
+                                }
+                                description "This object specifies an index for this list.";
+                            }
+
+                            list prefix {
+                                key "prefix";
+                                description "Enter the prefix list instance";
+
+                                leaf prefix {
+                                    type types-sros:ipv6-prefix;
+                                    description "prefix.";
+                                }
+
+                            } // list prefix
+
+                        } // list interfaces
+
 
                     } // container apply-path
 
+                    container generated-prefixes {
+                        description "Enter the generated-prefixes context";
+
+                        list prefix {
+                            key "ipv6-prefix";
+                            description "Enter the prefix list instance";
+
+                            leaf ipv6-prefix {
+                                type types-sros:ipv6-prefix;
+                                description "Add IPv6 prefix to the list.";
+                            }
+
+                        } // list prefix
+
+                    } // container generated-prefixes
 
                 } // list ipv6-prefix-list
 
@@ -451,7 +529,9 @@ submodule nokia-state-filter {
 
                 leaf filter-name {
                     type types-filter:filter-name;
-                    description "Filter name";
+                    description
+                        "The value of this object specifies the name to associate
+                         with this filter.";
                 }
 
                 leaf origin {
@@ -577,7 +657,12 @@ submodule nokia-state-filter {
 
                     leaf entry-id {
                         type types-filter:entry-id;
-                        description "ID for a match criteria and the corresponding action";
+                        description
+                            "This is the secondary index for the entry. Filters can have multiple entries. Each
+                             entry is identified by the respective filter-id and entry-id.
+
+                             Refer to the description of entry-id for more info on the allowed values for this
+                             object.";
                     }
 
                     leaf inserted-by {
@@ -697,6 +782,95 @@ submodule nokia-state-filter {
                             type types-filter:entry-id;
                             description "Indicates entry-id of embedded filter which was inserted at this position.";
                         }
+
+                        container nlri {
+                            description "Enter the nlri context";
+
+                            leaf destination-prefix {
+                                type string {
+                                    length "1..24";
+                                }
+                                description "Provides information about component type Destination Prefix.";
+                            }
+
+                            leaf source-prefix {
+                                type string {
+                                    length "1..24";
+                                }
+                                description "Provides information about component type Source Prefix.";
+                            }
+
+                            leaf ip-protocol {
+                                type string {
+                                    length "1..24";
+                                }
+                                description "Provides information about component type IP protocol.";
+                            }
+
+                            leaf port {
+                                type string {
+                                    length "1..128";
+                                }
+                                description "Provides information about component type Port.";
+                            }
+
+                            leaf destination-port {
+                                type string {
+                                    length "1..128";
+                                }
+                                description "Provides information about component type Destination Port.";
+                            }
+
+                            leaf source-port {
+                                type string {
+                                    length "1..128";
+                                }
+                                description "Provides information about component type Source Port.";
+                            }
+
+                            leaf icmp-type {
+                                type string {
+                                    length "1..24";
+                                }
+                                description "Provides information about component type ICMP Type.";
+                            }
+
+                            leaf icmp-code {
+                                type string {
+                                    length "1..24";
+                                }
+                                description "Provides information about component type ICMP Code.";
+                            }
+
+                            leaf tcp-flags {
+                                type string {
+                                    length "1..128";
+                                }
+                                description "Provides information about component type TCP flags.";
+                            }
+
+                            leaf packet-length {
+                                type string {
+                                    length "1..128";
+                                }
+                                description "Provides information about component type Packet Length.";
+                            }
+
+                            leaf dscp {
+                                type string {
+                                    length "1..24";
+                                }
+                                description "Provides information about component type DSCP.";
+                            }
+
+                            leaf fragment {
+                                type string {
+                                    length "1..128";
+                                }
+                                description "Provides information about component type Fragment.";
+                            }
+
+                        } // container nlri
 
                     } // container embedding
 
@@ -961,7 +1135,7 @@ submodule nokia-state-filter {
                     } // container statistics
 
                     container action {
-                        description "Enable the action context";
+                        description "Enter the action context";
 
                         leaf pbr-target-status {
                             type types-filter:pbr-target-status;
@@ -969,7 +1143,7 @@ submodule nokia-state-filter {
                         }
 
                         container secondary {
-                            description "Enable the secondary context";
+                            description "Enter the secondary context";
 
                             leaf pbr-target-status {
                                 type types-filter:pbr-target-status;
@@ -994,14 +1168,14 @@ submodule nokia-state-filter {
                             type leafref {
                                 path "../../../../ip-filter/filter-name";
                             }
-                            description "IPv4 policy to be embedded in the filter";
+                            description "Specifies the id of the filter to be inserted into this filter";
                         }
 
                         leaf offset {
                             type types-filter:embed-offset {
                                 range "0..2097150";
                             }
-                            description "Offset of the embedded filter policy";
+                            description "Specifies the offset of inserted entries.";
                         }
 
                         leaf oper-state {
@@ -1027,7 +1201,7 @@ submodule nokia-state-filter {
 
                         leaf offset {
                             type types-filter:embed-offset;
-                            description "Offset of the inserted entries";
+                            description "Specifies the offset of inserted entries.";
                         }
 
                         leaf oper-state {
@@ -1055,14 +1229,16 @@ submodule nokia-state-filter {
                             type leafref {
                                 path "../../../../../openflow/of-switch/name";
                             }
-                            description "Referenced Hybrid OpenFlow Switch (OFS) name";
+                            description
+                                "Openflow switch which contains the flowtable
+                                 to be inserted in the parent filter.";
                         }
 
                         leaf offset {
                             type types-filter:embed-offset {
                                 range "0..2097150";
                             }
-                            description "Offset of the embedded filter policy";
+                            description "Specifies the offset of inserted entries.";
                         }
 
                         leaf oper-state {
@@ -1306,7 +1482,9 @@ submodule nokia-state-filter {
 
                 leaf filter-name {
                     type types-filter:filter-name;
-                    description "Filter name";
+                    description
+                        "The value of this object specifies the name to associate
+                         with this filter.";
                 }
 
                 leaf origin {
@@ -1432,7 +1610,12 @@ submodule nokia-state-filter {
 
                     leaf entry-id {
                         type types-filter:entry-id;
-                        description "ID for a match criteria and the corresponding action";
+                        description
+                            "This is the secondary index for the entry. Filters can have multiple entries. Each
+                             entry is identified by the respective filter-id and entry-id.
+
+                             Refer to the description of entry-id for more info on the allowed values for this
+                             object.";
                     }
 
                     leaf inserted-by {
@@ -1552,6 +1735,102 @@ submodule nokia-state-filter {
                             type types-filter:entry-id;
                             description "Indicates entry-id of embedded filter which was inserted at this position.";
                         }
+
+                        container nlri {
+                            description "Enter the nlri context";
+
+                            leaf destination-ipv6-prefix {
+                                type string {
+                                    length "1..64";
+                                }
+                                description "Provides information about component type Destination IPv6 Prefix.";
+                            }
+
+                            leaf source-ipv6-prefix {
+                                type string {
+                                    length "1..64";
+                                }
+                                description "Provides information about component type Source IPv6 Prefix.";
+                            }
+
+                            leaf upper-layer-protocol {
+                                type string {
+                                    length "1..24";
+                                }
+                                description "Provides information about component type Upper-Layer Protocol.";
+                            }
+
+                            leaf port {
+                                type string {
+                                    length "1..128";
+                                }
+                                description "Provides information about component type Port.";
+                            }
+
+                            leaf destination-port {
+                                type string {
+                                    length "1..128";
+                                }
+                                description "Provides information about component type Destination Port.";
+                            }
+
+                            leaf source-port {
+                                type string {
+                                    length "1..128";
+                                }
+                                description "Provides information about component type Source Port.";
+                            }
+
+                            leaf icmpv6-type {
+                                type string {
+                                    length "1..24";
+                                }
+                                description "Provides information about component type ICMPv6 Type.";
+                            }
+
+                            leaf icmpv6-code {
+                                type string {
+                                    length "1..24";
+                                }
+                                description "Provides information about component type ICMPv6 Code.";
+                            }
+
+                            leaf tcp-flags {
+                                type string {
+                                    length "1..128";
+                                }
+                                description "Provides information about component type TCP Flags.";
+                            }
+
+                            leaf packet-length {
+                                type string {
+                                    length "1..128";
+                                }
+                                description "Provides information about component type Packet Length.";
+                            }
+
+                            leaf dscp {
+                                type string {
+                                    length "1..24";
+                                }
+                                description "Provides information about component type DSCP.";
+                            }
+
+                            leaf fragment {
+                                type string {
+                                    length "1..128";
+                                }
+                                description "Provides information about component type Fragment.";
+                            }
+
+                            leaf flow-label {
+                                type string {
+                                    length "1..24";
+                                }
+                                description "Provides information about component type Flow Label.";
+                            }
+
+                        } // container nlri
 
                     } // container embedding
 
@@ -1816,7 +2095,7 @@ submodule nokia-state-filter {
                     } // container statistics
 
                     container action {
-                        description "Enable the action context";
+                        description "Enter the action context";
 
                         leaf pbr-target-status {
                             type types-filter:pbr-target-status;
@@ -1824,7 +2103,7 @@ submodule nokia-state-filter {
                         }
 
                         container secondary {
-                            description "Enable the secondary context";
+                            description "Enter the secondary context";
 
                             leaf pbr-target-status {
                                 type types-filter:pbr-target-status;
@@ -1849,14 +2128,14 @@ submodule nokia-state-filter {
                             type leafref {
                                 path "../../../../ipv6-filter/filter-name";
                             }
-                            description "IPv6 policy to be embedded in the filter";
+                            description "Specifies the id of the filter to be inserted into this filter";
                         }
 
                         leaf offset {
                             type types-filter:embed-offset {
                                 range "0..2097150";
                             }
-                            description "Offset of the embedded filter policy";
+                            description "Specifies the offset of inserted entries.";
                         }
 
                         leaf oper-state {
@@ -1882,7 +2161,7 @@ submodule nokia-state-filter {
 
                         leaf offset {
                             type types-filter:embed-offset;
-                            description "Offset of the inserted entries";
+                            description "Specifies the offset of inserted entries.";
                         }
 
                         leaf oper-state {
@@ -1910,14 +2189,16 @@ submodule nokia-state-filter {
                             type leafref {
                                 path "../../../../../openflow/of-switch/name";
                             }
-                            description "Referenced Hybrid OpenFlow Switch (OFS) name";
+                            description
+                                "Openflow switch which contains the flowtable
+                                 to be inserted in the parent filter.";
                         }
 
                         leaf offset {
                             type types-filter:embed-offset {
                                 range "0..2097150";
                             }
-                            description "Offset of the embedded filter policy";
+                            description "Specifies the offset of inserted entries.";
                         }
 
                         leaf oper-state {
@@ -2156,7 +2437,9 @@ submodule nokia-state-filter {
 
                 leaf filter-name {
                     type types-filter:filter-name;
-                    description "Filter name";
+                    description
+                        "The value of this object specifies the name to associate
+                         with this filter.";
                 }
 
                 leaf origin {
@@ -2212,7 +2495,12 @@ submodule nokia-state-filter {
 
                     leaf entry-id {
                         type types-filter:entry-id;
-                        description "ID for a match criteria and the corresponding action";
+                        description
+                            "This is the secondary index for the entry. Filters can have multiple entries. Each
+                             entry is identified by the respective filter-id and entry-id.
+
+                             Refer to the description of entry-id for more info on the allowed values for this
+                             object.";
                     }
 
                     leaf inserted-by {
@@ -2588,7 +2876,7 @@ submodule nokia-state-filter {
                     } // container statistics
 
                     container action {
-                        description "Enable the action context";
+                        description "Enter the action context";
 
                         leaf pbr-target-status {
                             type types-filter:pbr-target-status;
@@ -2596,7 +2884,7 @@ submodule nokia-state-filter {
                         }
 
                         container secondary {
-                            description "Enable the secondary context";
+                            description "Enter the secondary context";
 
                             leaf pbr-target-status {
                                 type types-filter:pbr-target-status;
@@ -2800,7 +3088,9 @@ submodule nokia-state-filter {
 
                                     leaf filter-name {
                                         type types-filter:filter-name;
-                                        description "Filter name";
+                                        description
+                                            "The value of this object specifies the name to associate
+                                             with this filter.";
                                     }
 
                                     list entry {
@@ -2809,7 +3099,12 @@ submodule nokia-state-filter {
 
                                         leaf entry-id {
                                             type types-filter:entry-id;
-                                            description "ID for a match criteria and the corresponding action";
+                                            description
+                                                "This is the secondary index for the entry. Filters can have multiple entries. Each
+                                                 entry is identified by the respective filter-id and entry-id.
+
+                                                 Refer to the description of entry-id for more info on the allowed values for this
+                                                 object.";
                                         }
 
                                     } // list entry
@@ -2822,7 +3117,9 @@ submodule nokia-state-filter {
 
                                     leaf filter-name {
                                         type types-filter:filter-name;
-                                        description "Filter name";
+                                        description
+                                            "The value of this object specifies the name to associate
+                                             with this filter.";
                                     }
 
                                     list entry {
@@ -2831,7 +3128,12 @@ submodule nokia-state-filter {
 
                                         leaf entry-id {
                                             type types-filter:entry-id;
-                                            description "ID for a match criteria and the corresponding action";
+                                            description
+                                                "This is the secondary index for the entry. Filters can have multiple entries. Each
+                                                 entry is identified by the respective filter-id and entry-id.
+
+                                                 Refer to the description of entry-id for more info on the allowed values for this
+                                                 object.";
                                         }
 
                                     } // list entry
@@ -2844,7 +3146,9 @@ submodule nokia-state-filter {
 
                                     leaf filter-name {
                                         type types-filter:filter-name;
-                                        description "Filter name";
+                                        description
+                                            "The value of this object specifies the name to associate
+                                             with this filter.";
                                     }
 
                                     list entry {
@@ -2853,7 +3157,12 @@ submodule nokia-state-filter {
 
                                         leaf entry-id {
                                             type types-filter:entry-id;
-                                            description "ID for a match criteria and the corresponding action";
+                                            description
+                                                "This is the secondary index for the entry. Filters can have multiple entries. Each
+                                                 entry is identified by the respective filter-id and entry-id.
+
+                                                 Refer to the description of entry-id for more info on the allowed values for this
+                                                 object.";
                                         }
 
                                     } // list entry
@@ -2871,7 +3180,9 @@ submodule nokia-state-filter {
 
                                     leaf filter-name {
                                         type types-filter:filter-name;
-                                        description "Filter name";
+                                        description
+                                            "The value of this object specifies the name to associate
+                                             with this filter.";
                                     }
 
                                     list entry {
@@ -2880,7 +3191,12 @@ submodule nokia-state-filter {
 
                                         leaf entry-id {
                                             type types-filter:entry-id;
-                                            description "ID for a match criteria and the corresponding action";
+                                            description
+                                                "This is the secondary index for the entry. Filters can have multiple entries. Each
+                                                 entry is identified by the respective filter-id and entry-id.
+
+                                                 Refer to the description of entry-id for more info on the allowed values for this
+                                                 object.";
                                         }
 
                                     } // list entry
@@ -2893,7 +3209,9 @@ submodule nokia-state-filter {
 
                                     leaf filter-name {
                                         type types-filter:filter-name;
-                                        description "Filter name";
+                                        description
+                                            "The value of this object specifies the name to associate
+                                             with this filter.";
                                     }
 
                                     list entry {
@@ -2902,7 +3220,12 @@ submodule nokia-state-filter {
 
                                         leaf entry-id {
                                             type types-filter:entry-id;
-                                            description "ID for a match criteria and the corresponding action";
+                                            description
+                                                "This is the secondary index for the entry. Filters can have multiple entries. Each
+                                                 entry is identified by the respective filter-id and entry-id.
+
+                                                 Refer to the description of entry-id for more info on the allowed values for this
+                                                 object.";
                                         }
 
                                     } // list entry
@@ -2915,7 +3238,9 @@ submodule nokia-state-filter {
 
                                     leaf filter-name {
                                         type types-filter:filter-name;
-                                        description "Filter name";
+                                        description
+                                            "The value of this object specifies the name to associate
+                                             with this filter.";
                                     }
 
                                     list entry {
@@ -2924,7 +3249,12 @@ submodule nokia-state-filter {
 
                                         leaf entry-id {
                                             type types-filter:entry-id;
-                                            description "ID for a match criteria and the corresponding action";
+                                            description
+                                                "This is the secondary index for the entry. Filters can have multiple entries. Each
+                                                 entry is identified by the respective filter-id and entry-id.
+
+                                                 Refer to the description of entry-id for more info on the allowed values for this
+                                                 object.";
                                         }
 
                                     } // list entry
@@ -2940,6 +3270,339 @@ submodule nokia-state-filter {
                 } // list card
 
             } // container overload
+
+            list policer {
+                key "policer-name";
+                description "Enter the policer list instance";
+
+                leaf policer-name {
+                    type types-sros:named-item;
+                    description "Policer name.";
+                }
+
+                container statistics {
+                    description "Enter the statistics context";
+
+                    container instance {
+                        description "Enter the instance context";
+
+                        container system {
+                            description "Enter the system context";
+
+                            container ingress {
+                                description "Enter the ingress context";
+
+                                leaf offered-pkt {
+                                    type yang:zero-based-counter64;
+                                    description "Indicates how many egress packets were subjected to filter this policer instance.";
+                                }
+
+                                leaf offered-byte {
+                                    type yang:zero-based-counter64;
+                                    description
+                                        "Indicates the number of bytes of all egress packets that were subjected to
+                                         this filter policer instance.";
+                                }
+
+                                leaf forwarded-pkt {
+                                    type yang:zero-based-counter64;
+                                    description
+                                        "Indicates how many egress packets which were subjected to filter this policer
+                                         instance were forwarded.";
+                                }
+
+                                leaf forwarded-byte {
+                                    type yang:zero-based-counter64;
+                                    description
+                                        "Indicates the number of bytes of all egress packets which were subjected
+                                         to filter policer were forwarded.";
+                                }
+
+                                leaf dropped-pkt {
+                                    type yang:zero-based-counter64;
+                                    description
+                                        "Indicates how many egress packets which were subjected to filter policer
+                                         were dropped.";
+                                }
+
+                                leaf dropped-byte {
+                                    type yang:zero-based-counter64;
+                                    description
+                                        "Indicates the number of bytes of all egress packets which were subjected
+                                         to filter policer were dropped.";
+                                }
+
+                            } // container ingress
+
+                            container egress {
+                                description "Enter the egress context";
+
+                                leaf offered-pkt {
+                                    type yang:zero-based-counter64;
+                                    description "Indicates how many egress packets were subjected to filter this policer instance.";
+                                }
+
+                                leaf offered-byte {
+                                    type yang:zero-based-counter64;
+                                    description
+                                        "Indicates the number of bytes of all egress packets that were subjected to
+                                         this filter policer instance.";
+                                }
+
+                                leaf forwarded-pkt {
+                                    type yang:zero-based-counter64;
+                                    description
+                                        "Indicates how many egress packets which were subjected to filter this policer
+                                         instance were forwarded.";
+                                }
+
+                                leaf forwarded-byte {
+                                    type yang:zero-based-counter64;
+                                    description
+                                        "Indicates the number of bytes of all egress packets which were subjected
+                                         to filter policer were forwarded.";
+                                }
+
+                                leaf dropped-pkt {
+                                    type yang:zero-based-counter64;
+                                    description
+                                        "Indicates how many egress packets which were subjected to filter policer
+                                         were dropped.";
+                                }
+
+                                leaf dropped-byte {
+                                    type yang:zero-based-counter64;
+                                    description
+                                        "Indicates the number of bytes of all egress packets which were subjected
+                                         to filter policer were dropped.";
+                                }
+
+                            } // container egress
+
+                        } // container system
+
+                        container filter {
+                            description "Enter the filter context";
+
+                            list ip {
+                                key "name";
+                                description "Enter the ip list instance";
+
+                                leaf name {
+                                    type types-sros:named-item-64-or-empty;
+                                    description "Filter policer instance name.";
+                                }
+
+                                leaf filter-id {
+                                    type types-filter:filter-id;
+                                    description "Filter policer instance filter Id.";
+                                }
+
+                                container ingress {
+                                    description "Enter the ingress context";
+
+                                    leaf offered-pkt {
+                                        type yang:zero-based-counter64;
+                                        description "Indicates how many egress packets were subjected to filter this policer instance.";
+                                    }
+
+                                    leaf offered-byte {
+                                        type yang:zero-based-counter64;
+                                        description
+                                            "Indicates the number of bytes of all egress packets that were subjected to
+                                             this filter policer instance.";
+                                    }
+
+                                    leaf forwarded-pkt {
+                                        type yang:zero-based-counter64;
+                                        description
+                                            "Indicates how many egress packets which were subjected to filter this policer
+                                             instance were forwarded.";
+                                    }
+
+                                    leaf forwarded-byte {
+                                        type yang:zero-based-counter64;
+                                        description
+                                            "Indicates the number of bytes of all egress packets which were subjected
+                                             to filter policer were forwarded.";
+                                    }
+
+                                    leaf dropped-pkt {
+                                        type yang:zero-based-counter64;
+                                        description
+                                            "Indicates how many egress packets which were subjected to filter policer
+                                             were dropped.";
+                                    }
+
+                                    leaf dropped-byte {
+                                        type yang:zero-based-counter64;
+                                        description
+                                            "Indicates the number of bytes of all egress packets which were subjected
+                                             to filter policer were dropped.";
+                                    }
+
+                                } // container ingress
+
+                                container egress {
+                                    description "Enter the egress context";
+
+                                    leaf offered-pkt {
+                                        type yang:zero-based-counter64;
+                                        description "Indicates how many egress packets were subjected to filter this policer instance.";
+                                    }
+
+                                    leaf offered-byte {
+                                        type yang:zero-based-counter64;
+                                        description
+                                            "Indicates the number of bytes of all egress packets that were subjected to
+                                             this filter policer instance.";
+                                    }
+
+                                    leaf forwarded-pkt {
+                                        type yang:zero-based-counter64;
+                                        description
+                                            "Indicates how many egress packets which were subjected to filter this policer
+                                             instance were forwarded.";
+                                    }
+
+                                    leaf forwarded-byte {
+                                        type yang:zero-based-counter64;
+                                        description
+                                            "Indicates the number of bytes of all egress packets which were subjected
+                                             to filter policer were forwarded.";
+                                    }
+
+                                    leaf dropped-pkt {
+                                        type yang:zero-based-counter64;
+                                        description
+                                            "Indicates how many egress packets which were subjected to filter policer
+                                             were dropped.";
+                                    }
+
+                                    leaf dropped-byte {
+                                        type yang:zero-based-counter64;
+                                        description
+                                            "Indicates the number of bytes of all egress packets which were subjected
+                                             to filter policer were dropped.";
+                                    }
+
+                                } // container egress
+
+                            } // list ip
+
+                            list ipv6 {
+                                key "name";
+                                description "Enter the ipv6 list instance";
+
+                                leaf name {
+                                    type types-sros:named-item-64-or-empty;
+                                    description "Filter policer instance name.";
+                                }
+
+                                leaf filter-id {
+                                    type types-filter:filter-id;
+                                    description "Filter policer instance filter Id.";
+                                }
+
+                                container ingress {
+                                    description "Enter the ingress context";
+
+                                    leaf offered-pkt {
+                                        type yang:zero-based-counter64;
+                                        description "Indicates how many egress packets were subjected to filter this policer instance.";
+                                    }
+
+                                    leaf offered-byte {
+                                        type yang:zero-based-counter64;
+                                        description
+                                            "Indicates the number of bytes of all egress packets that were subjected to
+                                             this filter policer instance.";
+                                    }
+
+                                    leaf forwarded-pkt {
+                                        type yang:zero-based-counter64;
+                                        description
+                                            "Indicates how many egress packets which were subjected to filter this policer
+                                             instance were forwarded.";
+                                    }
+
+                                    leaf forwarded-byte {
+                                        type yang:zero-based-counter64;
+                                        description
+                                            "Indicates the number of bytes of all egress packets which were subjected
+                                             to filter policer were forwarded.";
+                                    }
+
+                                    leaf dropped-pkt {
+                                        type yang:zero-based-counter64;
+                                        description
+                                            "Indicates how many egress packets which were subjected to filter policer
+                                             were dropped.";
+                                    }
+
+                                    leaf dropped-byte {
+                                        type yang:zero-based-counter64;
+                                        description
+                                            "Indicates the number of bytes of all egress packets which were subjected
+                                             to filter policer were dropped.";
+                                    }
+
+                                } // container ingress
+
+                                container egress {
+                                    description "Enter the egress context";
+
+                                    leaf offered-pkt {
+                                        type yang:zero-based-counter64;
+                                        description "Indicates how many egress packets were subjected to filter this policer instance.";
+                                    }
+
+                                    leaf offered-byte {
+                                        type yang:zero-based-counter64;
+                                        description
+                                            "Indicates the number of bytes of all egress packets that were subjected to
+                                             this filter policer instance.";
+                                    }
+
+                                    leaf forwarded-pkt {
+                                        type yang:zero-based-counter64;
+                                        description
+                                            "Indicates how many egress packets which were subjected to filter this policer
+                                             instance were forwarded.";
+                                    }
+
+                                    leaf forwarded-byte {
+                                        type yang:zero-based-counter64;
+                                        description
+                                            "Indicates the number of bytes of all egress packets which were subjected
+                                             to filter policer were forwarded.";
+                                    }
+
+                                    leaf dropped-pkt {
+                                        type yang:zero-based-counter64;
+                                        description
+                                            "Indicates how many egress packets which were subjected to filter policer
+                                             were dropped.";
+                                    }
+
+                                    leaf dropped-byte {
+                                        type yang:zero-based-counter64;
+                                        description
+                                            "Indicates the number of bytes of all egress packets which were subjected
+                                             to filter policer were dropped.";
+                                    }
+
+                                } // container egress
+
+                            } // list ipv6
+
+                        } // container filter
+
+                    } // container instance
+
+                } // container statistics
+
+            } // list policer
 
             uses state-filter-ip-exception;
             uses state-filter-ip-exception-ipv6-exception;

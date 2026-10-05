@@ -8,7 +8,7 @@ module nokia-types-card {
 
     import nokia-sros-yang-extensions     { prefix "sros-ext"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -31,7 +31,7 @@ module nokia-types-card {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2024-05-22";
+    revision "2026-04-08";
 
     typedef iom-card-slot {
         type uint32 {
@@ -86,6 +86,11 @@ module nokia-types-card {
             enum cpm-2se                        { value 128; }
             enum cpm-ixr-e2                     { value 137; }
             enum cpm-ixr-e2c                    { value 145; }
+            enum cpm-ixr-e3x                    { value 150; }
+            enum cpm-sar                        { value 154; }
+            enum cpm-ixr-e3c                    { value 156; }
+            enum cpm-ixr-e2n                    { value 163; }
+            enum cpm-ixr-e2n-s                  { value 165; }
         }
         description "Specifies an SR OS series Control Plane Module type.";
     }
@@ -121,6 +126,11 @@ module nokia-types-card {
             enum cpm-2se                        { value 128; }
             enum cpm-ixr-e2                     { value 137; }
             enum cpm-ixr-e2c                    { value 145; }
+            enum cpm-ixr-e3x                    { value 150; }
+            enum cpm-sar                        { value 154; }
+            enum cpm-ixr-e3c                    { value 156; }
+            enum cpm-ixr-e2n                    { value 163; }
+            enum cpm-ixr-e2n-s                  { value 165; }
         }
         description "Specifies an SR OS series Control Plane Module type.";
     }
@@ -129,10 +139,8 @@ module nokia-types-card {
         type enumeration {
             enum xcm-x20                        { value 37; }
             enum imm40-10gb-sfp                 { value 46; }
-            enum imm4-100gb-cxp                 { value 50; }
             enum iom4-e                         { value 56; }
             enum iom-a                          { value 57; }
-            enum imm-1pac-fp3                   { value 59; }
             enum imm-2pac-fp3                   { value 60; }
             enum iom4-e-hs                      { value 62; }
             enum imm4-100gb-cfp4                { value 65; }
@@ -177,6 +185,11 @@ module nokia-types-card {
             enum xcmc-2se                       { value 141; }
             enum imm12-sfp28+2-qsfp28           { value 144; }
             enum dms24-800g-qsfpdd-1            { value 146; }
+            enum imm16-sfp112+15-sfp56+6-qsfpdd { value 149; }
+            enum iom-sar                        { value 153; }
+            enum imm4-qsfp28+16-sfp28+8-sfp56   { value 155; }
+            enum imm4-sfp+4-sfp+                { value 162; }
+            enum imm4-sfp+4-sfp+-s              { value 164; }
         }
         description "Specifies an SR OS series I/O Module type.";
     }
@@ -187,10 +200,8 @@ module nokia-types-card {
             enum unassigned                     { value 1; }
             enum xcm-x20                        { value 37; }
             enum imm40-10gb-sfp                 { value 46; }
-            enum imm4-100gb-cxp                 { value 50; }
             enum iom4-e                         { value 56; }
             enum iom-a                          { value 57; }
-            enum imm-1pac-fp3                   { value 59; }
             enum imm-2pac-fp3                   { value 60; }
             enum iom4-e-hs                      { value 62; }
             enum imm4-100gb-cfp4                { value 65; }
@@ -235,6 +246,11 @@ module nokia-types-card {
             enum xcmc-2se                       { value 141; }
             enum imm12-sfp28+2-qsfp28           { value 144; }
             enum dms24-800g-qsfpdd-1            { value 146; }
+            enum imm16-sfp112+15-sfp56+6-qsfpdd { value 149; }
+            enum iom-sar                        { value 153; }
+            enum imm4-qsfp28+16-sfp28+8-sfp56   { value 155; }
+            enum imm4-sfp+4-sfp+                { value 162; }
+            enum imm4-sfp+4-sfp+-s              { value 164; }
         }
         description "Specifies an SR OS series I/O Module type.";
     }
@@ -439,17 +455,11 @@ module nokia-types-card {
         type enumeration {
             enum x12-400g-qsfpdd                { value 47; }
             enum x6-200g-cfp2-dco               { value 48; }
-            enum cx20-10g-sfp                   { value 96; }
-            enum cx2-100g-cfp                   { value 97; }
             enum p10-10g-sfp                    { value 98; }
             enum p1-100g-cfp                    { value 99; }
-            enum p3-40g-qsfp                    { value 106; }
             enum p6-10g-sfp                     { value 108; }
             enum x40-10g-sfp                    { value 111; }
             enum m40-10g-sfp                    { value 112; }
-            enum x4-100g-cxp                    { value 113; }
-            enum cx6-40g-qsfp                   { value 114; }
-            enum m4-100g-cxp                    { value 115; }
             enum p20-1gb-sfp                    { value 116; }
             enum s36-100gb-qsfp28-3.6t          { value 117; }
             enum p-isa2-ms                      { value 118; }
@@ -458,19 +468,16 @@ module nokia-types-card {
             enum isa2-tunnel                    { value 121; }
             enum isa2-bb                        { value 122; }
             enum x4-100g-cfp2                   { value 123; }
-            enum cx72-1g-csfp                   { value 124; }
             enum maxp1-100gb-cfp                { value 126; }
             enum ma4-10gb-sfp+                  { value 127; }
             enum maxp10-10gb-sfp+               { value 129; }
             enum me10-10gb-sfp+                 { value 130; }
             enum ma2-10gb-sfp+12-1gb-sfp        { value 132; }
-            enum maxp6-10gb-sfp+1-40gb-qsfp+    { value 133; }
             enum ma44-1gb-csfp                  { value 134; }
             enum ma20-1gb-tx                    { value 135; }
             enum m20-10g-sfp+                   { value 136; }
             enum me1-100gb-cfp2                 { value 137; }
             enum m4-100g-cfp4                   { value 139; }
-            enum p1-100g-tun-b                  { value 140; }
             enum maxp1-100gb-cfp2               { value 141; }
             enum maxp1-100gb-cfp4               { value 142; }
             enum isa-ms-v                       { value 148; }
@@ -482,12 +489,10 @@ module nokia-types-card {
             enum me-isa2-ms-e                   { value 154; }
             enum me40-1gb-csfp                  { value 158; }
             enum m4-1g-tx+20-1g-sfp+6-10g-sfp+  { value 159; }
-            enum me2-100gb-cfp4                 { value 160; }
             enum me6-10gb-sfp+                  { value 161; }
             enum isa2-video                     { value 162; }
             enum me2-100gb-qsfp28               { value 163; }
             enum i6-10/100eth-tx                { value 164; }
-            enum x2-100g-tun                    { value 165; }
             enum i2-sdi                         { value 166; }
             enum i2-cellular                    { value 167; }
             enum me12-10/1gb-sfp+               { value 168; }
@@ -542,8 +547,19 @@ module nokia-types-card {
             enum me16-25gb-sfp28+2-100gb-qsfp-b { value 237; }
             enum m10-50g-sfp56                  { value 241; }
             enum m32-1g-csfp                    { value 244; }
+            enum m80-1g-csfp                    { value 245; }
             enum m12-sfp28+2-qsfp28             { value 246; }
+            enum m2-100g-qsfp28+16-10g-sfp+     { value 252; }
             enum d24-800g-qsfpdd-1              { value 253; }
+            enum m10-sfp++6-sfp                 { value 256; }
+            enum m16-sfp112+15-sfp56+6-qsfpdd   { value 259; }
+            enum m4-qsfp28+16-sfp28+8-sfp56     { value 261; }
+            enum m5e2-100g-qsfp28+2-800g-qdd    { value 273; }
+            enum m5e8-100g-sfp112+2-800g-qdd    { value 275; }
+            enum m4-sfp+4-sfp+                  { value 276; }
+            enum m4-sfp+4-sfp+-s                { value 277; }
+            enum m5e10-100g-qsfp28              { value 279; }
+            enum m5e16-100g-sfp112              { value 282; }
         }
         description "Specifies an SROS Media Dependent Adapter (MDA) type";
     }
@@ -554,17 +570,11 @@ module nokia-types-card {
             enum unassigned                     { value 1; }
             enum x12-400g-qsfpdd                { value 47; }
             enum x6-200g-cfp2-dco               { value 48; }
-            enum cx20-10g-sfp                   { value 96; }
-            enum cx2-100g-cfp                   { value 97; }
             enum p10-10g-sfp                    { value 98; }
             enum p1-100g-cfp                    { value 99; }
-            enum p3-40g-qsfp                    { value 106; }
             enum p6-10g-sfp                     { value 108; }
             enum x40-10g-sfp                    { value 111; }
             enum m40-10g-sfp                    { value 112; }
-            enum x4-100g-cxp                    { value 113; }
-            enum cx6-40g-qsfp                   { value 114; }
-            enum m4-100g-cxp                    { value 115; }
             enum p20-1gb-sfp                    { value 116; }
             enum s36-100gb-qsfp28-3.6t          { value 117; }
             enum p-isa2-ms                      { value 118; }
@@ -573,19 +583,16 @@ module nokia-types-card {
             enum isa2-tunnel                    { value 121; }
             enum isa2-bb                        { value 122; }
             enum x4-100g-cfp2                   { value 123; }
-            enum cx72-1g-csfp                   { value 124; }
             enum maxp1-100gb-cfp                { value 126; }
             enum ma4-10gb-sfp+                  { value 127; }
             enum maxp10-10gb-sfp+               { value 129; }
             enum me10-10gb-sfp+                 { value 130; }
             enum ma2-10gb-sfp+12-1gb-sfp        { value 132; }
-            enum maxp6-10gb-sfp+1-40gb-qsfp+    { value 133; }
             enum ma44-1gb-csfp                  { value 134; }
             enum ma20-1gb-tx                    { value 135; }
             enum m20-10g-sfp+                   { value 136; }
             enum me1-100gb-cfp2                 { value 137; }
             enum m4-100g-cfp4                   { value 139; }
-            enum p1-100g-tun-b                  { value 140; }
             enum maxp1-100gb-cfp2               { value 141; }
             enum maxp1-100gb-cfp4               { value 142; }
             enum isa-ms-v                       { value 148; }
@@ -597,12 +604,10 @@ module nokia-types-card {
             enum me-isa2-ms-e                   { value 154; }
             enum me40-1gb-csfp                  { value 158; }
             enum m4-1g-tx+20-1g-sfp+6-10g-sfp+  { value 159; }
-            enum me2-100gb-cfp4                 { value 160; }
             enum me6-10gb-sfp+                  { value 161; }
             enum isa2-video                     { value 162; }
             enum me2-100gb-qsfp28               { value 163; }
             enum i6-10/100eth-tx                { value 164; }
-            enum x2-100g-tun                    { value 165; }
             enum i2-sdi                         { value 166; }
             enum i2-cellular                    { value 167; }
             enum me12-10/1gb-sfp+               { value 168; }
@@ -657,8 +662,19 @@ module nokia-types-card {
             enum me16-25gb-sfp28+2-100gb-qsfp-b { value 237; }
             enum m10-50g-sfp56                  { value 241; }
             enum m32-1g-csfp                    { value 244; }
+            enum m80-1g-csfp                    { value 245; }
             enum m12-sfp28+2-qsfp28             { value 246; }
+            enum m2-100g-qsfp28+16-10g-sfp+     { value 252; }
             enum d24-800g-qsfpdd-1              { value 253; }
+            enum m10-sfp++6-sfp                 { value 256; }
+            enum m16-sfp112+15-sfp56+6-qsfpdd   { value 259; }
+            enum m4-qsfp28+16-sfp28+8-sfp56     { value 261; }
+            enum m5e2-100g-qsfp28+2-800g-qdd    { value 273; }
+            enum m5e8-100g-sfp112+2-800g-qdd    { value 275; }
+            enum m4-sfp+4-sfp+                  { value 276; }
+            enum m4-sfp+4-sfp+-s                { value 277; }
+            enum m5e10-100g-qsfp28              { value 279; }
+            enum m5e16-100g-sfp112              { value 282; }
         }
         description "Specifies an SROS Media Dependent Adapter (MDA) type";
     }
@@ -990,6 +1006,9 @@ module nokia-types-card {
             enum m36-800g-qsfpdd                { value 250; }
             enum mse6-800g-qsfpdd               { value 251; }
             enum m36-400g-qsfp112               { value 254; }
+            enum ms2-100g-qsfp28+2-800g-qsfpdd  { value 267; }
+            enum ms8-100g-sfp112+2-800g-qsfpdd  { value 274; }
+            enum ms24-100g-sfp112               { value 280; }
             enum ms4-400g-qsfpdd+4-100g-qsfp28  { status obsolete; }
         }
         description "Specifies an SROS XIOM Media Dependent Adapter (MDA) type";
@@ -1015,6 +1034,9 @@ module nokia-types-card {
             enum m36-800g-qsfpdd                { value 250; }
             enum mse6-800g-qsfpdd               { value 251; }
             enum m36-400g-qsfp112               { value 254; }
+            enum ms2-100g-qsfp28+2-800g-qsfpdd  { value 267; }
+            enum ms8-100g-sfp112+2-800g-qsfpdd  { value 274; }
+            enum ms24-100g-sfp112               { value 280; }
             enum ms4-400g-qsfpdd+4-100g-qsfp28  { status obsolete; }
         }
         description "Specifies an SROS XIOM Media Dependent Adapter (MDA) type";
@@ -1090,8 +1112,151 @@ module nokia-types-card {
             enum mpls-ecmp                      { value 9; }
             enum ip-routing-ecmp                { value 10; }
             enum srv6-direct-ip-transport       { value 11; }
+            enum tunnel-ecmp                    { value 12; }
+            enum mpls-multicast-frr             { value 13; }
         }
         description "IXR FEC resource owners.";
+    }
+
+    typedef ixr-resource-ppmc-owner {
+        type enumeration {
+            enum interface                      { value 0; }
+            enum rvpls-with-oism                { value 1; }
+            enum sdp-bindings                   { value 2; }
+            enum evpn-bindings                  { value 3; }
+            enum mvpn-nhlfe                     { value 4; }
+        }
+        description "IXR PPMC resource owners.";
+    }
+
+    typedef ixr-resource-fp-available-lifs {
+        type enumeration {
+            enum undetermined                   { value 0; }
+            enum none                           { value 1; }
+            enum standard-only                  { value 2; }
+            enum data-only                      { value 3; }
+            enum standard-and-data              { value 4; }
+        }
+        description "IXR available LIF types for a given Cluster.";
+    }
+
+    typedef flex-group-errors {
+        type enumeration {
+            enum overhead-frame-not-locked {
+                value 1;
+                description "Group does not have overhead frame lock.";
+            }
+            enum deskew-failed {
+                value 2;
+                description "Group member not deskewed.";
+            }
+            enum local-phy-fault {
+                value 3;
+                description "One or more members have a local PHY fault.";
+            }
+            enum remote-phy-fault {
+                value 4;
+                description "One or more members received remote PHY fault.";
+            }
+            enum bad-group-number {
+                value 5;
+                description "One or more PHY instances received a bad group number.";
+            }
+            enum bad-phy-number {
+                value 6;
+                description "One or more PHY instances received a bad PHY number.";
+            }
+            enum bad-phy-instance-number {
+                value 7;
+                description "One or more PHY instances received a bad PHY instance number.";
+            }
+            enum flex-e-map-mismatch {
+                value 8;
+                description "The received FlexE map does not map the local map.";
+            }
+            enum client-calendar-error {
+                value 9;
+                description "One or more PHY instances received an invalid calendar.";
+            }
+            enum calendar-in-use-error {
+                value 10;
+                description "One or more PHY instances received an indication of the wrong calendar in use.";
+            }
+        }
+        description "Indicates the error conditions that exist for the flex group.";
+    }
+
+    typedef flex-member-errors {
+        type enumeration {
+            enum los {
+                value 1;
+                description "No receive signal present.";
+            }
+            enum high-ber {
+                value 2;
+                description "High receive BER.";
+            }
+            enum am-not-locked {
+                value 3;
+                description "Unable to achieve alignment marker lock.";
+            }
+            enum deskew-failed {
+                value 4;
+                description "Unable to deskew this PHY.";
+            }
+            enum remote-phy-fault {
+                value 5;
+                description "PHY has remote fault.";
+            }
+        }
+        description "Indicates error conditions for a member PHY";
+    }
+
+    typedef flex-instance-errors {
+        type enumeration {
+            enum bad-crc {
+                value 1;
+                description "Header CRC failed.";
+            }
+            enum multiframe-not-locked {
+                value 2;
+                description "Cannot achieve multiframe lock.";
+            }
+            enum bad-group-number {
+                value 3;
+                description "Received group number doesn't match local value.";
+            }
+            enum bad-phy-number {
+                value 4;
+                description "Received PHY number doesn't match local value.";
+            }
+            enum bad-phy-instance-number {
+                value 5;
+                description "Received PHY instance number error (duplicate).";
+            }
+            enum flex-e-map-mismatch {
+                value 6;
+                description "The received FlexE map does not match the local map data.";
+            }
+            enum client-calendar-error {
+                value 7;
+                description "The data in the client calendar is not a supported configuration.";
+            }
+            enum calendar-in-use-error {
+                value 8;
+                description "The received calendar in use indicate has wrong value.";
+            }
+        }
+        description "Indicates the error conditions for 100G FlexE PHY instances of a member PHY.";
+    }
+
+    typedef mda-mac-mode {
+        type enumeration {
+            enum 100g                           { value 1; }
+            enum 800g                           { value 2; }
+            enum 10g                            { value 3; }
+        }
+        description "Indicates the MDA MAC modes.";
     }
 
 }

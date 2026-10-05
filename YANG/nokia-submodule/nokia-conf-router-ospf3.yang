@@ -16,7 +16,7 @@ submodule nokia-conf-router-ospf3 {
     include nokia-conf-router;
     include nokia-conf-routing-options;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -39,7 +39,7 @@ submodule nokia-conf-router-ospf3 {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-01-04";
+    revision "2026-07-22";
 
     grouping conf-router-ospf3 {
         list ospf3 {
@@ -488,6 +488,12 @@ submodule nokia-conf-router-ospf3 {
                     description "IGP instance in the BGP-LS NLRI";
                 }
 
+                leaf reachable-ls-only {
+                    type boolean;
+                    default "false";
+                    description "Encode only reachable link-state information";
+                }
+
                 container bgp-ls-identifier {
                     presence "Enable the bgp-ls-identifier context";
                     description "Enable the bgp-ls-identifier context";
@@ -495,7 +501,7 @@ submodule nokia-conf-router-ospf3 {
                     leaf value {
                         type uint32;
                         default "0";
-                        description "BGP-LS identifier sent in the BGP-LS NLRI";
+                        description "BGP-LS ID sent in the BGP-LS NLRI";
                     }
 
                 } // container bgp-ls-identifier
@@ -572,18 +578,14 @@ submodule nokia-conf-router-ospf3 {
                         case local {
 
                             leaf start-label {
-                                type uint32 {
-                                    range "0..524287";
-                                }
+                                type types-sros:prefix-sid-full-range;
                                 sros-ext:auto-restart-to-modify;
                                 default "0";
                                 description "Lower bound value for the local label offset";
                             }
 
                             leaf max-index {
-                                type uint32 {
-                                    range "0..524287";
-                                }
+                                type types-sros:prefix-sid-full-range;
                                 sros-ext:auto-restart-to-modify;
                                 default "1";
                                 description "Upper bound value for the local SID index";
@@ -949,6 +951,13 @@ submodule nokia-conf-router-ospf3 {
                         type boolean;
                         default "true";
                         description "Allow router advertisement capabilities";
+                    }
+
+                    leaf conditional-advertise-prefix {
+                        type leafref {
+                            path "../../../../../policy-options/policy-statement/name";
+                        }
+                        description "Policy to conditionally advertise interface prefixes";
                     }
 
                     leaf interface-type {

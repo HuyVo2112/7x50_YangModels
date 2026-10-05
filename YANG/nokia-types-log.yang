@@ -8,7 +8,7 @@ module nokia-types-log {
 
     import nokia-sros-yang-extensions     { prefix "sros-ext"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -31,7 +31,7 @@ module nokia-types-log {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2024-03-20";
+    revision "2026-07-22";
 
     typedef log-policy-id {
         type uint32 {
@@ -199,6 +199,9 @@ module nokia-types-log {
             enum tmnxAnySecSessionDisabled      { value 2006; }
             enum tmnxAnySecPeerInconsisRxSciDtctd { value 2007; }
             enum tmnxAnySecPeerInconsisRxSciClrd { value 2008; }
+            enum tmnxAnySecMkaSessionEstablished { value 2009; }
+            enum tmnxAnySecMkaSessionEnded      { value 2010; }
+            enum tmnxAnySecEgrVcIndex           { value 2011; }
         }
         description "Events for ANYsec module.";
     }
@@ -554,6 +557,7 @@ module nokia-types-log {
             enum tmnxBsxSubQuarantined          { value 4463; }
             enum tmnxBsxSubQuarantinedClear     { value 4464; }
             enum tmnxBsxUrlFltrWebServOprStateChg { value 4465; }
+            enum tmnxBsxAaSubTethered           { value 4466; }
         }
         description "Events for application-assurance module.";
     }
@@ -944,6 +948,21 @@ module nokia-types-log {
             enum tmnxPowerShelfOutputStatusSwitch { value 6004; }
             enum tmnxPowerShelfOutputStatusDown { value 6005; }
             enum tmnxPowerShelfOutputStatusUp   { value 6006; }
+            enum tmnxEqCardMissing              { value 6007; }
+            enum tmnxEqCardMissingClear         { value 6008; }
+            enum tmnxEqEsaHostPortCrcAlarm      { value 6009; }
+            enum tmnxEqEsaHostPortCrcAlarmClear { value 6010; }
+            enum tmnxEsaFirmwareUpgradeInProgress { value 6011; }
+            enum tmnxEsaFirmwareUpgradeDone     { value 6012; }
+            enum tmnxEsaFirmwareUpgradeFailed   { value 6013; }
+            enum tmnxChassisAntiTheftModeBoot   { value 6014; }
+            enum tmnxChassisAntiTheftUnlocked   { value 6015; }
+            enum tmnxEqLowPowerSwFabModeEnabled { value 6016; }
+            enum tmnxEqLowPowerSwFabModeDisabled { value 6017; }
+            enum tmnxChassisGoldenStatusEvent   { value 6018; }
+            enum tmnxEqFlashDiskFormatStart     { value 6021; }
+            enum tmnxEqFlashDiskFormatFinish    { value 6022; }
+            enum tmnxEsaColdRebooted            { value 6023; }
             enum tmnxIomRsrcUserOversubscribed  { status obsolete; }
             enum tmnxIomRsrcUserOversubscribedClr { status obsolete; }
         }
@@ -1057,6 +1076,7 @@ module nokia-types-log {
             enum tmnxDot1agCfmMepCsfStateChanged { value 2009; }
             enum tmnxDot1agCfmMepFcltyFaultRaise { value 2010; }
             enum tmnxDot1agCfmMepFcltyFaultClear { value 2011; }
+            enum tmnxDot1agCfmMepOperGrpStateChgd { value 2012; }
         }
         description "Events for ethcfm module.";
     }
@@ -1319,6 +1339,12 @@ module nokia-types-log {
             enum tMirrorLiUpSubFailed           { value 2041; }
             enum tMirrorLiUpSubSuccess          { value 2042; }
             enum tMirrorLiUpIeInvalid           { value 2043; }
+            enum tMirrorLiSapUnavailSath        { value 2044; }
+            enum tMirrorLiSapUnavailSathClr     { value 2045; }
+            enum tMirrorLiFltrUnavailSath       { value 2046; }
+            enum tMirrorLiFltrUnavailSathClr    { value 2047; }
+            enum tMirrorLiPortUnavailSath       { value 2048; }
+            enum tMirrorLiPortUnavailSathClr    { value 2049; }
             enum cli_user_login                 { value 2101; }
             enum cli_user_logout                { value 2102; }
             enum cli_user_login_failed          { value 2103; }
@@ -1399,6 +1425,13 @@ module nokia-types-log {
             enum tmnxLogOnlyEventThrottled      { value 2016; }
             enum tmnxLogEventOverrun            { value 2017; }
             enum tmnxLogOnlyEventOverrun        { value 2018; }
+            enum tmnxCustomEvent1               { value 2020; }
+            enum tmnxCustomEvent2               { value 2021; }
+            enum tmnxCustomEvent3               { value 2022; }
+            enum tmnxCustomEvent4               { value 2023; }
+            enum tmnxCustomEvent5               { value 2024; }
+            enum tmnxCustomEvent6               { value 2025; }
+            enum tmnxNetconfNotifyOverrun       { value 2030; }
             enum started                        { status obsolete; }
         }
         description "Events for logger module.";
@@ -1423,6 +1456,12 @@ module nokia-types-log {
             enum tmnxMacsecMkaReplayAttemptDisc { value 2015; }
             enum tmnxMacsecDpReplayAttempt      { value 2016; }
             enum tmnxMacsecSakDelete            { value 2017; }
+            enum tmnxMacsecPrimKeychainNoActKey { value 2018; }
+            enum tmnxMacsecPrimKeychainHasActKey { value 2019; }
+            enum tmnxMacsecRecovKeychainNoActKey { value 2020; }
+            enum tmnxMacsecRecovKeychainHasActKey { value 2021; }
+            enum tmnxMacsecConnAssocCreated     { value 2022; }
+            enum tmnxMacsecConnAssocDeleted     { value 2023; }
         }
         description "Events for macsec module.";
     }
@@ -1501,6 +1540,12 @@ module nokia-types-log {
             enum sourceSapChange                { value 2008; }
             enum sourceSubscriberChange         { value 2009; }
             enum tMirrorSourceIpv6FilterChange  { value 2022; }
+            enum tMirrorSapUnavailSath          { value 2023; }
+            enum tMirrorSapUnavailSathClr       { value 2024; }
+            enum tMirrorFltrUnavailSath         { value 2025; }
+            enum tMirrorFltrUnavailSathClr      { value 2026; }
+            enum tMirrorPortUnavailSath         { value 2027; }
+            enum tMirrorPortUnavailSathClr      { value 2028; }
         }
         description "Events for mirror module.";
     }
@@ -1579,6 +1624,12 @@ module nokia-types-log {
             enum vRtrMplsLspPathManualDegStateChg { value 2035; }
             enum vRtrMplsS2lSubLspPreempted     { value 2036; }
             enum vRtrMplsNodeInIgpOverloadIpv6  { value 2037; }
+            enum tmnxMplsResourceHighUsage      { value 2038; }
+            enum tmnxMplsResourceExhausted      { value 2039; }
+            enum tmnxMplsResourceRecovered      { value 2040; }
+            enum vRtrMplsLspContOptStarted      { value 2041; }
+            enum vRtrMplsLspContMaxLspsExceeded { value 2042; }
+            enum vRtrMplsLspContMinLspsExceeded { value 2043; }
         }
         description "Events for mpls module.";
     }
@@ -1637,6 +1688,7 @@ module nokia-types-log {
             enum tmnxNatPlL2AwMembrBlockUsageHigh { value 2044; }
             enum tmnxNatPlMemberExtBlockUsageHigh { value 2045; }
             enum tmnxNatPlLsnMemberPortUsageHigh { value 2046; }
+            enum tmnxNatDetAddrMapOperStateChngd { value 2047; }
             enum tmnxNatDetPlcyOperStateChanged { status obsolete; }
             enum tmnxNatDetMapOperStateChanged  { status obsolete; }
         }
@@ -1765,7 +1817,10 @@ module nokia-types-log {
 
     typedef pfcp-events {
         type enumeration {
+            enum none                           { value 0; }
             enum tmnxPfcpInvalidIe              { value 2001; }
+            enum tmnxPfcpNoSuchCalltraceProfile { value 2002; }
+            enum tmnxPfcpNoSecondaryInterface   { value 2003; }
         }
         description "Events for PFCP (Packet Forwarding Control Protocol).";
     }
@@ -1870,9 +1925,9 @@ module nokia-types-log {
             enum tmnxCellularBearerModified     { value 2067; }
             enum tmnxEqPortEtherEgressRateChange { value 2068; }
             enum tmnxCellularNoServiceReset     { value 2069; }
-            enum tmnxCellularActiveSimCardChange { value 2070; }
-            enum tmnxPortEtherLoopbackStart     { value 2071; }
-            enum tmnxPortEtherLoopbackStop      { value 2072; }
+            enum tmnxCellularActiveSimChange    { value 2070; }
+            enum tmnxPortEtherLoopbackStarted   { value 2071; }
+            enum tmnxPortEtherLoopbackStopped   { value 2072; }
             enum tmnxPortGnssStatusChange       { value 2073; }
             enum tmnxWlanNetworkConnected       { value 2074; }
             enum tmnxWlanNetworkDisconnected    { value 2075; }
@@ -1888,13 +1943,29 @@ module nokia-types-log {
             enum tmnxCellularRssiAlarm          { value 2085; }
             enum tmnxCellularRssiAlarmClear     { value 2086; }
             enum SFPStatusInvalidFormFactor     { value 2087; }
+            enum SFPStatusModuleFault           { value 2088; }
             enum tmnxDS0ChanGrpLoopbackStarted  { value 2089; }
             enum tmnxDS0ChanGrpLoopbackStopped  { value 2090; }
+            enum tmnxResvPoolUseThreshExcd      { value 2091; }
+            enum tmnxResvPoolUseThreshNotExcd   { value 2092; }
+            enum tmnxTotalPoolUseThreshExcd     { value 2093; }
+            enum tmnxTotalPoolUseThreshNotExcd  { value 2094; }
+            enum tmnxSharedPoolUseThreshExcd    { value 2095; }
+            enum tmnxSharedPoolUseThreshNotExcd { value 2096; }
+            enum tmnxEqPortFlexEGroupAlrm       { value 2097; }
+            enum tmnxEqPortFlexEGroupAlrmClr    { value 2098; }
+            enum tmnxEqPortFlexEMemberAlrm      { value 2099; }
+            enum tmnxEqPortFlexEMemberAlrmClr   { value 2100; }
+            enum tmnxEqPortFlexEMbrPhyInstAlrm  { value 2101; }
+            enum tmnxEqPortFlexEMbrPhyInstAlrmClr { value 2102; }
             enum yellowDiffDelayExceeded        { status obsolete; }
             enum redDiffDelayExceeded           { status obsolete; }
             enum bndlBadEndPtDiscriminator      { status obsolete; }
             enum bundleMlfrMemberLoopback       { status obsolete; }
             enum wtrkAlarms                     { status obsolete; }
+            enum tmnxCellularActiveSimCardChange { status obsolete; }
+            enum tmnxPortEtherLoopbackStart     { status obsolete; }
+            enum tmnxPortEtherLoopbackStop      { status obsolete; }
         }
         description "Events for port module.";
     }
@@ -1908,6 +1979,7 @@ module nokia-types-log {
             enum tmnxPppoeLacSteeringStopped    { value 2005; }
             enum tmnxPppoeLacSteeringFailed     { value 2006; }
             enum tmnxPppoeMaxSessionsOvrExceeded { value 2007; }
+            enum tmnxPppoeLacFragFailed         { value 2008; }
         }
         description "Events for pppoe module.";
     }
@@ -1937,6 +2009,12 @@ module nokia-types-log {
     typedef python-events {
         type enumeration {
             enum tmnxPythonInterpreterRestarted { value 2001; }
+            enum tmnxPythonPreComScrStarted     { value 2002; }
+            enum tmnxPythonPreComScrFinished    { value 2003; }
+            enum tmnxPythonPostComScrStarted    { value 2004; }
+            enum tmnxPythonPostComScrFinished   { value 2005; }
+            enum tmnxPythonPreComScrSkipped     { value 2006; }
+            enum tmnxPythonPostComScrSkipped    { value 2007; }
         }
         description "Events for the PYTHON module.";
     }
@@ -2132,6 +2210,18 @@ module nokia-types-log {
             enum tmnxSysLicenseCleared          { value 2249; }
             enum tmnxSysLicensingStateOk        { value 2250; }
             enum tmnxPkiCertChainCompareCaNoMatch { value 2251; }
+            enum ssh_auth_key_gen               { value 2252; }
+            enum ssh_auth_key_synch_fail        { value 2253; }
+            enum tmnxSSHListeningPortChanged    { value 2254; }
+            enum tmnxTelnetListeningPortChanged { value 2255; }
+            enum tmnxSSHListeningPortOccupied   { value 2256; }
+            enum tmnxTelnetListeningPortOccupied { value 2257; }
+            enum tmnxSSHListeningPortInUse      { value 2258; }
+            enum tmnxTelnetListeningPortInUse   { value 2259; }
+            enum tmnxSysSwDSValidationResult    { value 2260; }
+            enum tacplusUserProfileInvalid      { value 2261; }
+            enum tmnxSSHInvalidPacketLength     { value 2262; }
+            enum tmnxSecureBootDisabledAlarm    { value 2263; }
         }
         description "Events for security module.";
     }
@@ -2145,6 +2235,8 @@ module nokia-types-log {
             enum linkUp                         { value 2005; }
             enum risingAlarm                    { value 2101; }
             enum fallingAlarm                   { value 2102; }
+            enum hcRisingAlarm                  { value 2103; }
+            enum hcFallingAlarm                 { value 2104; }
             enum snmpdError                     { value 2201; }
         }
         description "Events for snmp module.";
@@ -2153,6 +2245,7 @@ module nokia-types-log {
     typedef sr-mpls-events {
         type enumeration {
             enum tmnxSrMplsPfxSidFailure        { value 2001; }
+            enum tmnxSrMplsPfxSidFlexAlgoFailure { value 2002; }
         }
         description "Events for sr-mpls module.";
     }
@@ -2234,7 +2327,6 @@ module nokia-types-log {
             enum iesIfStatusChanged             { value 2108; }
             enum tmnxEndPointTxActiveChanged    { value 2110; }
             enum tmnxSvcSysFdbTableHighUsgClr   { value 2112; }
-            enum svcEvpnMHStandbyStatusChg      { value 2113; }
             enum svcEvpnVxVTepLclBiasAddFailSet { value 2114; }
             enum svcEvpnESVxVTepLclBiasAddFailSet { value 2115; }
             enum svcEvpnVxVTepLclBiasAddFailClr { value 2116; }
@@ -2331,6 +2423,8 @@ module nokia-types-log {
             enum svcTlsProxyNdSvcHiUsgClr       { value 2365; }
             enum svcSiteMinDnTimerStateChg      { value 2366; }
             enum sdpBindReceivedPbbProtSrcMac   { value 2367; }
+            enum svcSrv6TEPHiUsageRaised        { value 2368; }
+            enum svcSrv6TEPHiUsageCleared       { value 2369; }
             enum svcTlsMfibTableFullAlarmRaised { value 2401; }
             enum svcTlsMfibTableFullAlarmCleared { value 2402; }
             enum tmnxSubscriberCreated          { value 2500; }
@@ -2420,7 +2514,17 @@ module nokia-types-log {
             enum svcSrv6TEPEgrBndSvcHiUsgSet    { value 2617; }
             enum svcSrv6TEPEgrBndSvcHiUsgClr    { value 2618; }
             enum tmnxSapMRtCpeChkStatusChange   { value 2619; }
+            enum svcEvpnMplsMldpESLblHiUsgSet   { value 2620; }
+            enum svcEvpnMplsMldpESLblHiUsgClr   { value 2621; }
+            enum svcTlsProxyArpUnauthorizedIP   { value 2622; }
+            enum svcTlsProxyNdUnauthorizedIP    { value 2623; }
+            enum svcRvplsEvpnMcastDestSysHiUsgSet { value 2625; }
+            enum svcRvplsEvpnMcastDestSysHiUsgClr { value 2626; }
+            enum tmnxSubPysrosExec              { value 2627; }
+            enum tmnxSubPysrosExecFail          { value 2628; }
+            enum svcEvpnVxInstMHStandbyStatusChg { value 2629; }
             enum svcTlsVxlanReplicatorChgd      { status obsolete; }
+            enum svcEvpnMHStandbyStatusChg      { status obsolete; }
             enum svcTlsDupVTEPEgrVNIDetected    { status obsolete; }
             enum svcTlsDupVTEPEgrVNICleared     { status obsolete; }
             enum sapAtmPppSessionFailure        { status obsolete; }
@@ -2514,6 +2618,9 @@ module nokia-types-log {
             enum tmnxLastSystemRebootAdmin      { value 2114; }
             enum mdCommitInProgress             { value 2120; }
             enum mdCommitSucceeded              { value 2121; }
+            enum tmnxSysNtcnfListenPortOccupied { value 2122; }
+            enum tmnxSysNtcnfListenOperStateChngd { value 2123; }
+            enum tmnxSysNtcnfSessionDropped     { value 2124; }
             enum tmnxSysVsdServerAvailable      { status obsolete; }
             enum tmnxSysVsdServerUnavailable    { status obsolete; }
             enum tmnxSysXmppServerFunctional    { status obsolete; }
@@ -2705,6 +2812,8 @@ module nokia-types-log {
             enum tmnxVRtrFibVPNOccupancyThreshold { value 2099; }
             enum tmnxVRtrBfdMultiHopFpMismatch  { value 2100; }
             enum vRtrBgpInstanceError           { value 2101; }
+            enum vrtrIfIpTunnelOperStateChange  { value 2102; }
+            enum tmnxVRtrBfdExtModifTxIntrvl    { value 2103; }
         }
         description "Events for vrtr module.";
     }
@@ -2994,7 +3103,7 @@ module nokia-types-log {
         type string {
             length "1..64";
             pattern "(([1-9]|[1-9][0-9]|10[01])|([^\\s0-9_])|([^\\s0-9_]\\P{C}*[^\\s])|([0-9]+[^\\s0-9])|([0-9]+[^0-9]\\P{C}*[^\\s]))" {
-                error-message "must be numeric in range 1..101, or alphanumeric not starting with underscore and without trailing spaces";
+                error-message "must be numeric in range 1..101, or alphanumeric not starting with underscore and without leading or trailing spaces";
             }
         }
         description "The value of log name specifies an event stream log.";

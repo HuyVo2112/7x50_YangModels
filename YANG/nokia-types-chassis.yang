@@ -8,7 +8,7 @@ module nokia-types-chassis {
 
     import nokia-sros-yang-extensions     { prefix "sros-ext"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -31,7 +31,7 @@ module nokia-types-chassis {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-08-18";
+    revision "2025-07-16";
 
     typedef alarm-state {
         type enumeration {
@@ -77,7 +77,7 @@ module nokia-types-chassis {
 
     typedef sat-id {
         type uint32 {
-            range "1..20";
+            range "1..40";
         }
         description "The unique index identifying a satellite";
     }
@@ -88,7 +88,6 @@ module nokia-types-chassis {
             enum es24-1gb-sfp                   { value 6; }
             enum es48-1gb-tx                    { value 7; }
             enum es24-1gb-tx                    { value 8; }
-            enum es64-10gb-sfpp+4-100gb-cfp4    { value 13; }
             enum es24-sass-1gb-sfp              { value 15; }
             enum es48-sass-1gb-sfp              { value 16; }
             enum es24-sasmxp-1gb-sfp            { value 17; }
@@ -108,7 +107,6 @@ module nokia-types-chassis {
             enum es24-1gb-sfp                   { value 6; }
             enum es48-1gb-tx                    { value 7; }
             enum es24-1gb-tx                    { value 8; }
-            enum es64-10gb-sfpp+4-100gb-cfp4    { value 13; }
             enum es24-sass-1gb-sfp              { value 15; }
             enum es48-sass-1gb-sfp              { value 16; }
             enum es24-sasmxp-1gb-sfp            { value 17; }
@@ -207,6 +205,7 @@ module nokia-types-chassis {
             enum soft-reset                     { value 15; }
             enum pre-extension                  { value 16; }
             enum downloading                    { value 17; }
+            enum power-save                     { value 18; }
         }
         description "Indicates the operational status of the hardware component.";
     }

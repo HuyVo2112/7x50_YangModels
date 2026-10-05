@@ -13,7 +13,7 @@ submodule nokia-conf-pxc {
     include nokia-conf-port;
     include nokia-conf-qos;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -36,7 +36,7 @@ submodule nokia-conf-pxc {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-04-18";
+    revision "2026-07-22";
 
     grouping conf-pxc-port-xc {
         container port-xc {
@@ -330,6 +330,18 @@ submodule nokia-conf-pxc {
                         description "Enable FPE for subscrber management extensions";
                     }
 
+                    leaf mvpn-umh-rate-monitoring {
+                        type boolean;
+                        default "false";
+                        description "MVPN UMH Rate Monitoring";
+                    }
+
+                    leaf map-t {
+                        type boolean;
+                        default "false";
+                        description "Associates the MAP-T application with the FPE";
+                    }
+
                     container pw-port-extension {
                         presence "Enable the pw-port-extension context";
                         description "Enable the pw-port-extension context";
@@ -408,6 +420,12 @@ submodule nokia-conf-pxc {
                                 enum termination                    { value 2; }
                             }
                             description "SRv6 FPE application type";
+                        }
+
+                        leaf routed-vpls {
+                            type boolean;
+                            default "false";
+                            description "Enable support for R-VPLS on SRv6 origination FPEs";
                         }
 
                         container interface-a {

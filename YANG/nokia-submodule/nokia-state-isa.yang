@@ -19,7 +19,7 @@ submodule nokia-state-isa {
     include nokia-state-isa-video-group;
     include nokia-state-service;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -42,7 +42,7 @@ submodule nokia-state-isa {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-11-29";
+    revision "2026-07-22";
 
     grouping state-isa {
         container isa {
@@ -54,7 +54,7 @@ submodule nokia-state-isa {
 
                 leaf id {
                     type types-redundancy:tunnel-group-id;
-                    description "Tunnel group ID";
+                    description "The unique identifier of the tunnel group.";
                 }
 
                 leaf oper-state {
@@ -111,7 +111,7 @@ submodule nokia-state-isa {
                     case multi-active {
 
                         container multi-active {
-                            description "Enable the multi-active context";
+                            description "Enter the multi-active context";
 
                             choice group-members {
                                 description "MDA or ESA-VM members of this tunnel group";
@@ -119,11 +119,11 @@ submodule nokia-state-isa {
 
                                     list isa {
                                         key "isa-id";
-                                        description "Add a list entry for isa";
+                                        description "Enter the isa list instance";
 
                                         leaf isa-id {
                                             type types-isa:slot-mda;
-                                            description "ISA ID associated with the tunnel member pool";
+                                            description "The ISA associated with this tunnel group.";
                                         }
 
                                         leaf tunnel-group-in-use {
@@ -141,20 +141,27 @@ submodule nokia-state-isa {
 
                                     list esa {
                                         key "esa-id vm";
-                                        description "Add a list entry for esa";
+                                        description "Enter the esa list instance";
 
                                         leaf esa-id {
                                             type leafref {
                                                 path "../../../../../esa/esa-id";
                                             }
-                                            description "ESA ID";
+                                            description "The ESA associated with this tunnel group.";
                                         }
 
                                         leaf vm {
                                             type leafref {
                                                 path "../../../../../esa[esa-id=current()/../esa-id]/vm/vm-id";
                                             }
-                                            description "ESM-VM ID";
+                                            description "The ESA-VM associated with this tunnel group.";
+                                        }
+
+                                        leaf hash-slot-allocated {
+                                            type uint32;
+                                            description
+                                                "The load balancing hash slots allocated for ESA-VM. The value is only
+                                                 meaningful when the ESA-VM has been selected to be active in a tunnel group.";
                                         }
 
                                         leaf tunnel-group-in-use {
@@ -1533,7 +1540,7 @@ submodule nokia-state-isa {
 
                 leaf name {
                     type types-sros:named-item;
-                    description "ISA tunnel-member pool name";
+                    description "ISA Tunnel Member Pool name";
                 }
 
                 choice group-members {
@@ -1542,11 +1549,11 @@ submodule nokia-state-isa {
 
                         list isa {
                             key "isa-id";
-                            description "Add a list entry for isa";
+                            description "Enter the isa list instance";
 
                             leaf isa-id {
                                 type types-isa:slot-mda;
-                                description "ISA ID associated with the tunnel member pool";
+                                description "The ISA associated with this tunnel group.";
                             }
 
                             leaf tunnel-group-active-in {
@@ -1567,20 +1574,27 @@ submodule nokia-state-isa {
 
                         list esa {
                             key "esa-id vm";
-                            description "Add a list entry for esa";
+                            description "Enter the esa list instance";
 
                             leaf esa-id {
                                 type leafref {
                                     path "../../../../esa/esa-id";
                                 }
-                                description "ESA ID";
+                                description "The ESA associated with this tunnel group.";
                             }
 
                             leaf vm {
                                 type leafref {
                                     path "../../../../esa[esa-id=current()/../esa-id]/vm/vm-id";
                                 }
-                                description "ESM-VM ID";
+                                description "The ESA-VM associated with this tunnel group.";
+                            }
+
+                            leaf hash-slot-allocated {
+                                type uint32;
+                                description
+                                    "The load balancing hash slots allocated for ESA-VM. The value is only
+                                     meaningful when the ESA-VM has been selected to be active in a tunnel group.";
                             }
 
                             leaf tunnel-group-active-in {
@@ -1600,6 +1614,109 @@ submodule nokia-state-isa {
                 }
             } // list tunnel-member-pool
 
+            list map-t-group {
+                key "id";
+                description "Enter the map-t-group list instance";
+
+                leaf id {
+                    type uint32 {
+                        range "1..4";
+                    }
+                    description "Nat-group identifier";
+                }
+
+                leaf oper-state {
+                    type types-sros:oper-state;
+                    description "The operational state of this ISA NAT MAP-T group";
+                }
+
+                list esa {
+                    key "esa-id vm";
+                    description "Enter the esa list instance";
+
+                    leaf esa-id {
+                        type leafref {
+                            path "../../../../esa/esa-id";
+                        }
+                        description "ESA used by the ISA NAT MAP-T group.";
+                    }
+
+                    leaf vm {
+                        type leafref {
+                            path "../../../../esa[esa-id=current()/../esa-id]/vm/vm-id";
+                        }
+                        description "ESA-VM used by the ISA NAT MAP-T group.";
+                    }
+
+                    container resources {
+                        description "Enter the resources context";
+
+                        container fragment-lists {
+                            description "Enter the fragment-lists context";
+
+                            container downstream {
+                                description "Enter the downstream context";
+
+                                leaf value {
+                                    type yang:gauge64;
+                                    description "Actual consumed value";
+                                }
+
+                                leaf max {
+                                    type uint64;
+                                    description "The max value this resource can have, depending on the configuration";
+                                }
+
+                                leaf peak {
+                                    type yang:gauge64;
+                                    description "The peak value for the resource";
+                                }
+
+                                leaf peak-timestamp {
+                                    type types-sros:date-time;
+                                    description "The timestamp when the peak value was observed";
+                                }
+
+                            } // container downstream
+
+                        } // container fragment-lists
+
+                        container fragment-bufs {
+                            description "Enter the fragment-bufs context";
+
+                            container downstream {
+                                description "Enter the downstream context";
+
+                                leaf value {
+                                    type yang:gauge64;
+                                    description "Actual consumed value";
+                                }
+
+                                leaf max {
+                                    type uint64;
+                                    description "The max value this resource can have, depending on the configuration";
+                                }
+
+                                leaf peak {
+                                    type yang:gauge64;
+                                    description "The peak value for the resource";
+                                }
+
+                                leaf peak-timestamp {
+                                    type types-sros:date-time;
+                                    description "The timestamp when the peak value was observed";
+                                }
+
+                            } // container downstream
+
+                        } // container fragment-bufs
+
+                    } // container resources
+
+                } // list esa
+
+            } // list map-t-group
+
             list nat-group {
                 key "id";
                 description "Enter the nat-group list instance";
@@ -1608,7 +1725,7 @@ submodule nokia-state-isa {
                     type uint32 {
                         range "1..4";
                     }
-                    description "NAT group ID";
+                    description "Nat-group identifier";
                 }
 
                 leaf oper-state {
@@ -1632,7 +1749,7 @@ submodule nokia-state-isa {
                         case inter-chassis {
 
                             container inter-chassis {
-                                description "Enable the inter-chassis context";
+                                description "Enter the inter-chassis context";
 
                                 leaf state {
                                     type enumeration {
@@ -1683,7 +1800,7 @@ submodule nokia-state-isa {
 
                                     leaf port-id {
                                         type types-sros:port-named;
-                                        description "Port ID";
+                                        description "The identifier that uniquely identifies the monitor port";
                                     }
 
                                     leaf actual-health-drop {
@@ -1701,7 +1818,7 @@ submodule nokia-state-isa {
                                         type leafref {
                                             path "../../../../../../service/oper-group/name";
                                         }
-                                        description "Operational group name";
+                                        description "The identifier of the operational group";
                                     }
 
                                     leaf actual-health-drop {
@@ -2247,11 +2364,11 @@ submodule nokia-state-isa {
 
                 list mda {
                     key "mda-id";
-                    description "Add a list entry for mda";
+                    description "Enter the mda list instance";
 
                     leaf mda-id {
                         type types-isa:slot-mda;
-                        description "MDA ID for ISA NAT group";
+                        description "An ISA NAT group MDA";
                     }
 
                     leaf layer-2-hosts-bypassed {
@@ -2487,27 +2604,33 @@ submodule nokia-state-isa {
                         } // container fragment-lists
 
                         container fragment-holes {
+                            status obsolete;
                             description "Enter the fragment-holes context";
 
                             container upstream {
+                                status obsolete;
                                 description "Enter the upstream context";
 
                                 leaf value {
+                                    status obsolete;
                                     type yang:gauge64;
                                     description "Actual consumed value";
                                 }
 
                                 leaf max {
+                                    status obsolete;
                                     type uint64;
                                     description "The max value this resource can have, depending on the configuration";
                                 }
 
                                 leaf peak {
+                                    status obsolete;
                                     type yang:gauge64;
                                     description "The peak value for the resource";
                                 }
 
                                 leaf peak-timestamp {
+                                    status obsolete;
                                     type types-sros:date-time;
                                     description "The timestamp when the peak value was observed";
                                 }
@@ -2515,24 +2638,29 @@ submodule nokia-state-isa {
                             } // container upstream
 
                             container downstream {
+                                status obsolete;
                                 description "Enter the downstream context";
 
                                 leaf value {
+                                    status obsolete;
                                     type yang:gauge64;
                                     description "Actual consumed value";
                                 }
 
                                 leaf max {
+                                    status obsolete;
                                     type uint64;
                                     description "The max value this resource can have, depending on the configuration";
                                 }
 
                                 leaf peak {
+                                    status obsolete;
                                     type yang:gauge64;
                                     description "The peak value for the resource";
                                 }
 
                                 leaf peak-timestamp {
+                                    status obsolete;
                                     type types-sros:date-time;
                                     description "The timestamp when the peak value was observed";
                                 }
@@ -3033,7 +3161,7 @@ submodule nokia-state-isa {
                                     }
 
                                     leaf app-data-port-not-available {
-                                        status deprecated;
+                                        status obsolete;
                                         type yang:counter64;
                                         description "Could not allocate ALG pinhole port using arbitrary pool pairing";
                                     }
@@ -3867,20 +3995,20 @@ submodule nokia-state-isa {
 
                 list esa {
                     key "esa-id vm";
-                    description "Add a list entry for esa";
+                    description "Enter the esa list instance";
 
                     leaf esa-id {
                         type leafref {
                             path "../../../../esa/esa-id";
                         }
-                        description "Provisioned ESA ID";
+                        description "ESA used by the ISA NAT group";
                     }
 
                     leaf vm {
                         type leafref {
                             path "../../../../esa[esa-id=current()/../esa-id]/vm/vm-id";
                         }
-                        description "VM ID for the provisioned BB ISA";
+                        description "ESA-VM used by the ISA NAT group";
                     }
 
                     leaf layer-2-hosts-bypassed {
@@ -4116,27 +4244,33 @@ submodule nokia-state-isa {
                         } // container fragment-lists
 
                         container fragment-holes {
+                            status obsolete;
                             description "Enter the fragment-holes context";
 
                             container upstream {
+                                status obsolete;
                                 description "Enter the upstream context";
 
                                 leaf value {
+                                    status obsolete;
                                     type yang:gauge64;
                                     description "Actual consumed value";
                                 }
 
                                 leaf max {
+                                    status obsolete;
                                     type uint64;
                                     description "The max value this resource can have, depending on the configuration";
                                 }
 
                                 leaf peak {
+                                    status obsolete;
                                     type yang:gauge64;
                                     description "The peak value for the resource";
                                 }
 
                                 leaf peak-timestamp {
+                                    status obsolete;
                                     type types-sros:date-time;
                                     description "The timestamp when the peak value was observed";
                                 }
@@ -4144,24 +4278,29 @@ submodule nokia-state-isa {
                             } // container upstream
 
                             container downstream {
+                                status obsolete;
                                 description "Enter the downstream context";
 
                                 leaf value {
+                                    status obsolete;
                                     type yang:gauge64;
                                     description "Actual consumed value";
                                 }
 
                                 leaf max {
+                                    status obsolete;
                                     type uint64;
                                     description "The max value this resource can have, depending on the configuration";
                                 }
 
                                 leaf peak {
+                                    status obsolete;
                                     type yang:gauge64;
                                     description "The peak value for the resource";
                                 }
 
                                 leaf peak-timestamp {
+                                    status obsolete;
                                     type types-sros:date-time;
                                     description "The timestamp when the peak value was observed";
                                 }
@@ -4662,7 +4801,7 @@ submodule nokia-state-isa {
                                     }
 
                                     leaf app-data-port-not-available {
-                                        status deprecated;
+                                        status obsolete;
                                         type yang:counter64;
                                         description "Could not allocate ALG pinhole port using arbitrary pool pairing";
                                     }
@@ -5502,7 +5641,7 @@ submodule nokia-state-isa {
 
                 leaf id {
                     type types-isa:wlan-gw-group-id;
-                    description "WLAN-GW ISA group ID";
+                    description "Unique value which identifies the WLAN-GW group within a chassis in the system";
                 }
 
                 leaf oper-state {
@@ -5519,13 +5658,13 @@ submodule nokia-state-isa {
 
                 list iom {
                     key "slot-number";
-                    description "Add a list entry for iom";
+                    description "Enter the iom list instance";
 
                     leaf slot-number {
                         type leafref {
                             path "../../../../card/slot-number";
                         }
-                        description "IOM slot to use in the WLAN-GW group";
+                        description "IOM slot number";
                     }
 
                     leaf oper-state {
@@ -5539,7 +5678,7 @@ submodule nokia-state-isa {
 
                         leaf mda-id {
                             type types-isa:slot-mda;
-                            description "MDA slot value";
+                            description "MDA slot";
                         }
 
                         leaf oper-state {
@@ -5764,27 +5903,33 @@ submodule nokia-state-isa {
                                 } // container fragment-lists
 
                                 container fragment-holes {
+                                    status obsolete;
                                     description "Enter the fragment-holes context";
 
                                     container upstream {
+                                        status obsolete;
                                         description "Enter the upstream context";
 
                                         leaf value {
+                                            status obsolete;
                                             type yang:gauge64;
                                             description "Actual consumed value";
                                         }
 
                                         leaf max {
+                                            status obsolete;
                                             type uint64;
                                             description "The max value this resource can have, depending on the configuration";
                                         }
 
                                         leaf peak {
+                                            status obsolete;
                                             type yang:gauge64;
                                             description "The peak value for the resource";
                                         }
 
                                         leaf peak-timestamp {
+                                            status obsolete;
                                             type types-sros:date-time;
                                             description "The timestamp when the peak value was observed";
                                         }
@@ -5792,24 +5937,29 @@ submodule nokia-state-isa {
                                     } // container upstream
 
                                     container downstream {
+                                        status obsolete;
                                         description "Enter the downstream context";
 
                                         leaf value {
+                                            status obsolete;
                                             type yang:gauge64;
                                             description "Actual consumed value";
                                         }
 
                                         leaf max {
+                                            status obsolete;
                                             type uint64;
                                             description "The max value this resource can have, depending on the configuration";
                                         }
 
                                         leaf peak {
+                                            status obsolete;
                                             type yang:gauge64;
                                             description "The peak value for the resource";
                                         }
 
                                         leaf peak-timestamp {
+                                            status obsolete;
                                             type types-sros:date-time;
                                             description "The timestamp when the peak value was observed";
                                         }
@@ -6335,7 +6485,7 @@ submodule nokia-state-isa {
                                             }
 
                                             leaf app-data-port-not-available {
-                                                status deprecated;
+                                                status obsolete;
                                                 type yang:counter64;
                                                 description "Could not allocate ALG pinhole port using arbitrary pool pairing";
                                             }
@@ -7183,11 +7333,11 @@ submodule nokia-state-isa {
 
                 list mda {
                     key "mda-id";
-                    description "Add a list entry for mda";
+                    description "Enter the mda list instance";
 
                     leaf mda-id {
                         type types-isa:slot-mda;
-                        description "MDA slot value";
+                        description "MDA slot";
                     }
 
                     leaf oper-state {
@@ -7412,27 +7562,33 @@ submodule nokia-state-isa {
                             } // container fragment-lists
 
                             container fragment-holes {
+                                status obsolete;
                                 description "Enter the fragment-holes context";
 
                                 container upstream {
+                                    status obsolete;
                                     description "Enter the upstream context";
 
                                     leaf value {
+                                        status obsolete;
                                         type yang:gauge64;
                                         description "Actual consumed value";
                                     }
 
                                     leaf max {
+                                        status obsolete;
                                         type uint64;
                                         description "The max value this resource can have, depending on the configuration";
                                     }
 
                                     leaf peak {
+                                        status obsolete;
                                         type yang:gauge64;
                                         description "The peak value for the resource";
                                     }
 
                                     leaf peak-timestamp {
+                                        status obsolete;
                                         type types-sros:date-time;
                                         description "The timestamp when the peak value was observed";
                                     }
@@ -7440,24 +7596,29 @@ submodule nokia-state-isa {
                                 } // container upstream
 
                                 container downstream {
+                                    status obsolete;
                                     description "Enter the downstream context";
 
                                     leaf value {
+                                        status obsolete;
                                         type yang:gauge64;
                                         description "Actual consumed value";
                                     }
 
                                     leaf max {
+                                        status obsolete;
                                         type uint64;
                                         description "The max value this resource can have, depending on the configuration";
                                     }
 
                                     leaf peak {
+                                        status obsolete;
                                         type yang:gauge64;
                                         description "The peak value for the resource";
                                     }
 
                                     leaf peak-timestamp {
+                                        status obsolete;
                                         type types-sros:date-time;
                                         description "The timestamp when the peak value was observed";
                                     }
@@ -7983,7 +8144,7 @@ submodule nokia-state-isa {
                                         }
 
                                         leaf app-data-port-not-available {
-                                            status deprecated;
+                                            status obsolete;
                                             type yang:counter64;
                                             description "Could not allocate ALG pinhole port using arbitrary pool pairing";
                                         }
@@ -8829,20 +8990,20 @@ submodule nokia-state-isa {
 
                 list esa {
                     key "esa-id vm";
-                    description "Add a list entry for esa";
+                    description "Enter the esa list instance";
 
                     leaf esa-id {
                         type leafref {
                             path "../../../../esa/esa-id";
                         }
-                        description "ESA ID";
+                        description "ESA used by the ISA WLAN-GW group";
                     }
 
                     leaf vm {
                         type leafref {
                             path "../../../../esa[esa-id=current()/../esa-id]/vm/vm-id";
                         }
-                        description "VM ID";
+                        description "ESA-VM used by the ISA WLAN-GW group";
                     }
 
                     leaf oper-state {
@@ -9067,27 +9228,33 @@ submodule nokia-state-isa {
                             } // container fragment-lists
 
                             container fragment-holes {
+                                status obsolete;
                                 description "Enter the fragment-holes context";
 
                                 container upstream {
+                                    status obsolete;
                                     description "Enter the upstream context";
 
                                     leaf value {
+                                        status obsolete;
                                         type yang:gauge64;
                                         description "Actual consumed value";
                                     }
 
                                     leaf max {
+                                        status obsolete;
                                         type uint64;
                                         description "The max value this resource can have, depending on the configuration";
                                     }
 
                                     leaf peak {
+                                        status obsolete;
                                         type yang:gauge64;
                                         description "The peak value for the resource";
                                     }
 
                                     leaf peak-timestamp {
+                                        status obsolete;
                                         type types-sros:date-time;
                                         description "The timestamp when the peak value was observed";
                                     }
@@ -9095,24 +9262,29 @@ submodule nokia-state-isa {
                                 } // container upstream
 
                                 container downstream {
+                                    status obsolete;
                                     description "Enter the downstream context";
 
                                     leaf value {
+                                        status obsolete;
                                         type yang:gauge64;
                                         description "Actual consumed value";
                                     }
 
                                     leaf max {
+                                        status obsolete;
                                         type uint64;
                                         description "The max value this resource can have, depending on the configuration";
                                     }
 
                                     leaf peak {
+                                        status obsolete;
                                         type yang:gauge64;
                                         description "The peak value for the resource";
                                     }
 
                                     leaf peak-timestamp {
+                                        status obsolete;
                                         type types-sros:date-time;
                                         description "The timestamp when the peak value was observed";
                                     }
@@ -9638,7 +9810,7 @@ submodule nokia-state-isa {
                                         }
 
                                         leaf app-data-port-not-available {
-                                            status deprecated;
+                                            status obsolete;
                                             type yang:counter64;
                                             description "Could not allocate ALG pinhole port using arbitrary pool pairing";
                                         }
@@ -10913,6 +11085,11 @@ submodule nokia-state-isa {
                                 description "Number of UE packets filtered because of various reasons";
                             }
 
+                            leaf captive-portal-url-too-big {
+                                type yang:counter64;
+                                description "Captive portal URL is too big";
+                            }
+
                         } // container ue-errors
 
                         container bd-errors {
@@ -11121,6 +11298,11 @@ submodule nokia-state-isa {
                             leaf dns-override-ignored {
                                 type yang:counter64;
                                 description "Secondary DNS override ignored because no Primary DNS override received";
+                            }
+
+                            leaf out-of-ue-group-resources {
+                                type yang:counter64;
+                                description "Out of resources because of too many UE groups";
                             }
 
                         } // container radius
@@ -11383,6 +11565,30 @@ submodule nokia-state-isa {
 
                             } // container vlan-ranges
 
+                            container ue-groups {
+                                description "Enter the ue-groups context";
+
+                                leaf max {
+                                    type yang:counter64;
+                                    description "Maximum possible value of this resource";
+                                }
+
+                                leaf value {
+                                    type yang:counter64;
+                                    description "Actual value of this resource";
+                                }
+
+                                leaf peak {
+                                    type yang:counter64;
+                                    description "Peak value of this resource";
+                                }
+
+                                leaf peak-timestamp {
+                                    type types-sros:date-time;
+                                    description "The time the system reached the peak value of this resource";
+                                }
+
+                            } // container ue-groups
 
                             container ues {
                                 description "Enter the ues context";
@@ -11860,24 +12066,29 @@ submodule nokia-state-isa {
                             } // container fragment-lists
 
                             container fragment-holes {
+                                status obsolete;
                                 description "Enter the fragment-holes context";
 
                                 leaf max {
+                                    status obsolete;
                                     type yang:counter64;
                                     description "Maximum possible value of this resource";
                                 }
 
                                 leaf value {
+                                    status obsolete;
                                     type yang:counter64;
                                     description "Actual value of this resource";
                                 }
 
                                 leaf peak {
+                                    status obsolete;
                                     type yang:counter64;
                                     description "Peak value of this resource";
                                 }
 
                                 leaf peak-timestamp {
+                                    status obsolete;
                                     type types-sros:date-time;
                                     description "The time the system reached the peak value of this resource";
                                 }
@@ -11919,6 +12130,82 @@ submodule nokia-state-isa {
 
                 } // list member
 
+                list isa-aa {
+                    key "mda-id";
+                    description "Enter the isa-aa list instance";
+
+                    leaf mda-id {
+                        type types-isa:slot-mda;
+                        description "AA ISA used by the ISA WLAN-GW group";
+                    }
+
+                    leaf oper-state {
+                        type enumeration {
+                            enum down                           { value 0; }
+                            enum active                         { value 1; }
+                            enum standby                        { value 2; }
+                            enum needs-audit                    { value 3; }
+                            enum out-of-resources               { value 4; }
+                        }
+                        description "The operational state of the AA ISA or ESA-VM";
+                    }
+
+                    list isa-bb {
+                        key "bb-mda-id";
+                        description "Enter the isa-bb list instance";
+
+                        leaf bb-mda-id {
+                            type types-isa:slot-mda;
+                            description "BB ISA used by the ISA WLAN-GW group";
+                        }
+
+                    } // list isa-bb
+
+                } // list isa-aa
+
+                list esa-aa {
+                    key "esa-id vm";
+                    description "Enter the esa-aa list instance";
+
+                    leaf esa-id {
+                        type types-esa:esa-id;
+                        description "AA ESA used by the ISA WLAN-GW group";
+                    }
+
+                    leaf vm {
+                        type types-esa:vm-id;
+                        description "AA ESA-VM used by the ISA WLAN-GW group";
+                    }
+
+                    leaf oper-state {
+                        type enumeration {
+                            enum down                           { value 0; }
+                            enum active                         { value 1; }
+                            enum standby                        { value 2; }
+                            enum needs-audit                    { value 3; }
+                            enum out-of-resources               { value 4; }
+                        }
+                        description "The operational state of the AA ISA or ESA-VM";
+                    }
+
+                    list esa-bb {
+                        key "bb-esa-id bb-vm";
+                        description "Enter the esa-bb list instance";
+
+                        leaf bb-esa-id {
+                            type types-esa:esa-id;
+                            description "BB ESA used by the ISA WLAN-GW group";
+                        }
+
+                        leaf bb-vm {
+                            type types-esa:vm-id;
+                            description "BB ESA-VM used by the ISA WLAN-GW group";
+                        }
+
+                    } // list esa-bb
+
+                } // list esa-aa
+
             } // list wlan-gw-group
 
             list lns-group {
@@ -11927,7 +12214,7 @@ submodule nokia-state-isa {
 
                 leaf id {
                     type types-l2tp:lns-group-id;
-                    description "LNS group ID";
+                    description "The lns tunnel-group identifier";
                 }
 
                 leaf oper-state {
@@ -11941,7 +12228,7 @@ submodule nokia-state-isa {
 
                     leaf mda-id {
                         type types-isa:slot-mda;
-                        description "MDA ID for the ISA LNS group";
+                        description "The MDA-id";
                     }
 
                     leaf oper-state {
@@ -11989,14 +12276,14 @@ submodule nokia-state-isa {
                         type leafref {
                             path "../../../../esa/esa-id";
                         }
-                        description "ESA ID";
+                        description "ESA used by the ISA LNS group";
                     }
 
                     leaf vm {
                         type leafref {
                             path "../../../../esa[esa-id=current()/../esa-id]/vm/vm-id";
                         }
-                        description "VM ID";
+                        description "ESA-VM used by the ISA LNS group";
                     }
 
                     leaf oper-state {

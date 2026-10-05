@@ -10,7 +10,7 @@ submodule nokia-state-chassis {
     import nokia-types-sros               { prefix "types-sros"; }
     import nokia-types-system             { prefix "types-system"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -33,7 +33,7 @@ submodule nokia-state-chassis {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2024-07-08";
+    revision "2025-03-12";
 
     grouping state-chassis {
         list chassis {
@@ -42,14 +42,14 @@ submodule nokia-state-chassis {
 
             leaf chassis-class {
                 type types-chassis:chassis-class;
-                description "Functional use of the physical chassis";
+                description "The general purpose functional use of the physical chassis.";
             }
 
             leaf chassis-number {
                 type uint32 {
                     range "1..100";
                 }
-                description "Unique index to identify this physical chassis";
+                description "The unique index identifying this physical chassis.";
             }
 
             leaf name {
@@ -63,8 +63,8 @@ submodule nokia-state-chassis {
                     enum master                         { value 2; }
                     enum extension                      { value 3; }
                     enum ethernet-satellite             { value 6; }
-                    enum tdm-satellite                  { value 7; }
                     enum power-shelf                    { value 10; }
+                    enum tdm-satellite                  { status obsolete; }
                 }
                 description
                     "The role in which the physical chassis performs while
@@ -1084,7 +1084,7 @@ submodule nokia-state-chassis {
                     type uint32 {
                         range "1..31";
                     }
-                    description "Unique identifier index for a power supply tray in the chassis";
+                    description "The unique identifier index for a power supply tray in the chassis.";
                 }
 
                 leaf equipped-type {
@@ -1331,7 +1331,7 @@ submodule nokia-state-chassis {
                     type uint32 {
                         range "1..31";
                     }
-                    description "Unique identifier index for a power supply tray in the chassis";
+                    description "The unique identifier index for a power supply tray in the chassis.";
                 }
 
                 leaf equipped-type {
@@ -1492,7 +1492,7 @@ submodule nokia-state-chassis {
                     type uint32 {
                         range "1..12";
                     }
-                    description "Unique identifier index for a power control module in the chassis";
+                    description "The unique identifier index for a power control module in the chassis.";
                 }
 
                 leaf equipped-type {
@@ -1653,7 +1653,7 @@ submodule nokia-state-chassis {
                     type uint32 {
                         range "1..12";
                     }
-                    description "Unique identifier for a power module in chassis";
+                    description "The unique identifier index for a power shelf in the chassis.";
                 }
 
                 leaf equipped-type {
@@ -1845,7 +1845,7 @@ submodule nokia-state-chassis {
                     type uint32 {
                         range "1..2";
                     }
-                    description "Unique identifier index for a power shelf in chassis";
+                    description "The unique identifier index for a power shelf in the chassis.";
                 }
 
                 leaf equipped-type {
@@ -2117,7 +2117,7 @@ submodule nokia-state-chassis {
                         type uint32 {
                             range "1..12";
                         }
-                        description "Unique identifier for a power module in chassis";
+                        description "The unique identifier index for a power shelf in the chassis.";
                     }
 
                     leaf equipped-type {
@@ -2302,6 +2302,57 @@ submodule nokia-state-chassis {
                 } // list power-module
 
             } // list power-shelf
+
+            list flash {
+                key "flash-id";
+                description "Enter the flash list instance";
+
+                leaf flash-id {
+                    type types-system:cpm-flash-id;
+                    description "The unique identifier index for a flash device.";
+                }
+
+                leaf oper-state {
+                    type types-system:device-state;
+                    description "Current status of this flash unit.";
+                }
+
+                leaf serial-number {
+                    type types-sros:description-or-empty;
+                    description "The serial number for this flash unit.";
+                }
+
+                leaf firmware-revision {
+                    type types-sros:description-or-empty;
+                    description "The firmware revision number for this flash unit.";
+                }
+
+                leaf model-number {
+                    type types-sros:description-or-empty;
+                    description "The model number for this flash unit.";
+                }
+
+                leaf capacity {
+                    type uint32;
+                    units "kilobytes";
+                    description "Indicates the maximum size of this flash unit.";
+                }
+
+                leaf free-space {
+                    type uint32;
+                    units "kilobytes";
+                    description "Indicates the amount of free space remaining on this flash unit.";
+                }
+
+                leaf percent-used {
+                    type uint32;
+                    units "percent";
+                    description
+                        "Indicates the amount used for this flash unit as a percentage
+                         of total capacity.";
+                }
+
+            } // list flash
 
         } // list chassis
 

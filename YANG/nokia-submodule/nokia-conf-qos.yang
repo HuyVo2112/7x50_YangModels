@@ -13,7 +13,7 @@ submodule nokia-conf-qos {
 
     include nokia-conf-groups;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -36,7 +36,7 @@ submodule nokia-conf-qos {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2024-03-04";
+    revision "2026-07-22";
 
     grouping conf-qos {
         container qos {
@@ -1673,6 +1673,21 @@ submodule nokia-conf-qos {
                         description "Enforce overall in-profile burst limit to CIR bucket";
                     }
 
+                    leaf algorithm-type {
+                        type enumeration {
+                            enum trtcm-ds {
+                                value 1;
+                                description "Use the TRTCM non-coupled mode";
+                            }
+                            enum trtcm-ds-coupled {
+                                value 2;
+                                description "Use the TRTCM coupled mode";
+                            }
+                        }
+                        default "trtcm-ds-coupled";
+                        description "Policer algorithm type";
+                    }
+
                     leaf-list apply-groups {
                         type leafref {
                             path "../../../../groups/group/name";
@@ -3039,11 +3054,27 @@ submodule nokia-conf-qos {
                         }
 
                         leaf sample-interval {
+                            status obsolete;
                             type uint32 {
                                 range "1..8";
                             }
                             default "1";
                             description "Interval for sampling the child's offered rate";
+                        }
+
+                        leaf avg-frame-overhead-mode {
+                            type enumeration {
+                                enum auto {
+                                    value 1;
+                                    description "Automatically calculate average frame overhead";
+                                }
+                                enum from-queue {
+                                    value 2;
+                                    description "Manually configure average frame overhead";
+                                }
+                            }
+                            default "auto";
+                            description "Method of average frame overhead calculation";
                         }
 
                         container add {
@@ -4181,6 +4212,40 @@ submodule nokia-conf-qos {
                                 description "Target queue delay for forwarding packets through queue";
                             }
 
+                            leaf agg-shaper-weight {
+                                type types-qos:weight {
+                                    range "1..100";
+                                }
+                                default "1";
+                                description "Aggregate shaper weight of the queue-group queue";
+                            }
+
+                            leaf sched-class {
+                                type union {
+                                    type uint32 {
+                                        range "1..6";
+                                    }
+                                    type enumeration {
+                                        enum auto                           { value 0; }
+                                    }
+                                }
+                                default "auto";
+                                description "Scheduling class for the queue-group queue";
+                            }
+
+                            leaf fir-burst-limit {
+                                type union {
+                                    type types-qos:bytes {
+                                        range "1..102400";
+                                    }
+                                    type enumeration {
+                                        enum auto                           { value -1; }
+                                    }
+                                }
+                                default "auto";
+                                description "Burst limit for the FIR";
+                            }
+
                             leaf hs-alt-port-class-pool {
                                 type boolean;
                                 default "false";
@@ -4445,6 +4510,49 @@ submodule nokia-conf-qos {
 
                         } // list queue
 
+                        container sched-class-elevation {
+                            description "Enter the sched-class-elevation context";
+
+                            list sched-class {
+                                key "class-id";
+                                description "Enter the sched-class list instance";
+
+                                leaf class-id {
+                                    type uint32 {
+                                        range "1..6";
+                                    }
+                                    description "Scheduling class ID";
+                                }
+
+                                leaf weight {
+                                    type uint32 {
+                                        range "1..8";
+                                    }
+                                    default "1";
+                                    description "Weight of the schedule class";
+                                }
+
+                                leaf-list apply-groups {
+                                    type leafref {
+                                        path "../../../../../../../groups/group/name";
+                                    }
+                                    max-elements 8;
+                                    ordered-by user;
+                                    description "Apply a configuration group at this level";
+                                }
+
+                                leaf-list apply-groups-exclude {
+                                    type leafref {
+                                        path "../../../../../../../groups/group/name";
+                                    }
+                                    max-elements 8;
+                                    ordered-by user;
+                                    description "Exclude a configuration group at this level";
+                                }
+
+                            } // list sched-class
+
+                        } // container sched-class-elevation
 
                         list policer {
                             key "policer-id";
@@ -4702,6 +4810,23 @@ submodule nokia-conf-qos {
                             } // container adaptation-rule
 
                         } // list hs-wrr-group
+
+                        container hw-agg-shaper-queues {
+                            description "Enter the hw-agg-shaper-queues context";
+
+                            leaf queue-set-size {
+                                type union {
+                                    type int32 {
+                                        range "2..8";
+                                    }
+                                    type enumeration {
+                                        enum non-shaper-queues              { value 0; }
+                                    }
+                                }
+                                description "Queue-set size override for the FP resource policy";
+                            }
+
+                        } // container hw-agg-shaper-queues
 
                     } // list queue-group
 
@@ -6596,7 +6721,7 @@ submodule nokia-conf-qos {
 
             list vlan-qos-policy {
                 key "vlan-qos-policy-name";
-                max-elements 511;
+                max-elements 2047;
                 description "Enter the vlan-qos-policy list instance";
 
                 leaf vlan-qos-policy-name {
@@ -6623,6 +6748,16 @@ submodule nokia-conf-qos {
                     }
                     default "no-stats";
                     description "Statistics mode of the VLAN QoS policy";
+                }
+
+                leaf queue-allocation {
+                    type enumeration {
+                        enum four-queue                     { value 1; }
+                        enum eight-queue                    { value 2; }
+                    }
+                    sros-ext:immutable;
+                    default "eight-queue";
+                    description "Queue allocation mode for the policy";
                 }
 
                 leaf-list apply-groups {
@@ -6827,7 +6962,7 @@ submodule nokia-conf-qos {
                                             range "1..2";
                                         }
                                         default "1";
-                                        description "Specifies the weight profile identifier of vlan-qos policy that needs to be used by the arbiter to which this queue would be feeding to.";
+                                        description "Weight profile of VLAN QoS policy";
                                     }
 
                                     leaf pir-weight {
@@ -6836,7 +6971,7 @@ submodule nokia-conf-qos {
                                             range "1..253";
                                         }
                                         default "1";
-                                        description "Specifies the weight that needs to be used by the arbiter to which this queue would be feeding to.";
+                                        description "Weight used by arbiter to which queue feeds into";
                                     }
 
                                     container percent-rate {
@@ -6850,7 +6985,7 @@ submodule nokia-conf-qos {
                                                 fraction-digits 2;
                                             }
                                             default "100.00";
-                                            description "Specifies the administrative PIR percent.";
+                                            description "Administrative PIR";
                                         }
 
                                         leaf cir {
@@ -6860,7 +6995,7 @@ submodule nokia-conf-qos {
                                                 fraction-digits 2;
                                             }
                                             default "0.00";
-                                            description "Specifies the administrative CIR percent.";
+                                            description "Administrative CIR";
                                         }
 
                                     } // container percent-rate
@@ -6881,7 +7016,7 @@ submodule nokia-conf-qos {
                                             range "1..253";
                                         }
                                         default "1";
-                                        description "Specifies the weight that needs to be used by the arbiter to which this queue would be feeding to.";
+                                        description "Weight for arbiter to which queue feeds into";
                                     }
 
                                     container percent-rate {
@@ -6895,7 +7030,7 @@ submodule nokia-conf-qos {
                                                 fraction-digits 2;
                                             }
                                             default "100.00";
-                                            description "Specifies the administrative PIR percent.";
+                                            description "Administrative PIR";
                                         }
 
                                         leaf cir {
@@ -6905,7 +7040,7 @@ submodule nokia-conf-qos {
                                                 fraction-digits 2;
                                             }
                                             default "0.00";
-                                            description "Specifies the administrative CIR percent.";
+                                            description "Administrative CIR";
                                         }
 
                                     } // container percent-rate
@@ -6926,7 +7061,7 @@ submodule nokia-conf-qos {
                                             range "1..253";
                                         }
                                         default "1";
-                                        description "Specifies the weight that needs to be used by the arbiter to which this queue would be feeding to.";
+                                        description "Weight used by the arbiter which queue feeds into";
                                     }
 
                                     container percent-rate {
@@ -6940,7 +7075,7 @@ submodule nokia-conf-qos {
                                                 fraction-digits 2;
                                             }
                                             default "100.00";
-                                            description "Specifies the administrative PIR percent.";
+                                            description "Administrative PIR";
                                         }
 
                                         leaf cir {
@@ -6950,7 +7085,7 @@ submodule nokia-conf-qos {
                                                 fraction-digits 2;
                                             }
                                             default "0.00";
-                                            description "Specifies the administrative CIR percent.";
+                                            description "Administrative CIR";
                                         }
 
                                     } // container percent-rate
@@ -7056,7 +7191,7 @@ submodule nokia-conf-qos {
 
                 leaf port-speed {
                     type uint32 {
-                        range "10|25|40|50|100|200|400";
+                        range "1|10|25|40|50|100|200|400";
                     }
                     units "gigabps";
                     default "100";
@@ -7431,6 +7566,45 @@ submodule nokia-conf-qos {
 
                 } // list lsp-exp
 
+                list prec {
+                    key "prec-value";
+                    description "Enter the prec list instance";
+
+                    leaf prec-value {
+                        type types-qos:precedence-value;
+                        description "IP precedence value";
+                    }
+
+                    leaf fc {
+                        type types-sros:fc-name;
+                        description "Forwarding class";
+                    }
+
+                    leaf profile {
+                        type types-qos:profile;
+                        description "Default profile for ingress traffic";
+                    }
+
+                    leaf-list apply-groups {
+                        type leafref {
+                            path "../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Apply a configuration group at this level";
+                    }
+
+                    leaf-list apply-groups-exclude {
+                        type leafref {
+                            path "../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Exclude a configuration group at this level";
+                    }
+
+                } // list prec
+
             } // list ingress-classification-policy
 
             list network-ingress {
@@ -7577,6 +7751,21 @@ submodule nokia-conf-qos {
                         description "Mode for collecting statistics";
                     }
 
+                    leaf algorithm-type {
+                        type enumeration {
+                            enum trtcm-ds {
+                                value 1;
+                                description "Use the TRTCM non-coupled mode";
+                            }
+                            enum trtcm-ds-coupled {
+                                value 2;
+                                description "Use the TRTCM coupled mode";
+                            }
+                        }
+                        default "trtcm-ds-coupled";
+                        description "Policer algorithm type";
+                    }
+
                     leaf-list apply-groups {
                         type leafref {
                             path "../../../../groups/group/name";
@@ -7618,7 +7807,7 @@ submodule nokia-conf-qos {
                         leaf pir {
                             type union {
                                 type uint32 {
-                                    range "144..1000000000";
+                                    range "1..1000000000";
                                 }
                                 type enumeration {
                                     enum max                            { value -1; }
@@ -8131,47 +8320,6 @@ submodule nokia-conf-qos {
                         description "Average packet-to-frame encapsulation overhead";
                     }
 
-                    leaf burst-limit {
-                        type union {
-                            type types-qos:bytes {
-                                range "1..14000000";
-                            }
-                            type enumeration {
-                                enum auto                           { value -1; }
-                            }
-                        }
-                        default "auto";
-                        description "Explicit shaping burst size of a queue";
-                    }
-
-                    leaf cbs {
-                        type union {
-                            type types-qos:bytes {
-                                range "0..1048576";
-                            }
-                            type enumeration {
-                                enum auto                           { value -1; }
-                            }
-                        }
-                        units "kilobytes";
-                        default "auto";
-                        description "Reserved buffer space for the queue";
-                    }
-
-                    leaf mbs {
-                        type union {
-                            type types-qos:bytes {
-                                range "0..1073741824";
-                            }
-                            type enumeration {
-                                enum auto                           { value -1; }
-                            }
-                        }
-                        units "bytes";
-                        default "auto";
-                        description "Buffer space allowed for the queue";
-                    }
-
                     leaf packet-byte-offset {
                         type int32 {
                             range "-64..32";
@@ -8255,6 +8403,116 @@ submodule nokia-conf-qos {
                         description "Exclude a configuration group at this level";
                     }
 
+                    choice burst-limit-or-delay-time {
+                        default "burst-limit";
+                        case burst-limit {
+
+                            leaf burst-limit {
+                                type union {
+                                    type types-qos:bytes {
+                                        range "1..14000000";
+                                    }
+                                    type enumeration {
+                                        enum auto                           { value -1; }
+                                    }
+                                }
+                                default "auto";
+                                description "Explicit shaping burst size of a queue";
+                            }
+
+                        }
+                        case burst-limit-delay-time {
+
+                            leaf burst-limit-delay-time {
+                                type types-sros:buffer-size-delay-time;
+                                units "microseconds";
+                                description "Burst limit as a function of time delay";
+                            }
+
+                        }
+                    }
+                    choice cbs-or-delay-time-or-delay-percent {
+                        default "cbs";
+                        case cbs {
+
+                            leaf cbs {
+                                type union {
+                                    type types-qos:bytes {
+                                        range "0..1048576";
+                                    }
+                                    type enumeration {
+                                        enum auto                           { value -1; }
+                                    }
+                                }
+                                units "kilobytes";
+                                default "auto";
+                                description "Reserved buffer space for the queue";
+                            }
+
+                        }
+                        case cbs-delay-percent {
+
+                            leaf cbs-delay-percent {
+                                type decimal64 {
+                                    range "0.00..100.00";
+                                    fraction-digits 2;
+                                }
+                                units "percent";
+                                description "CBS as a portion of SAP latency budget";
+                            }
+
+                        }
+                        case cbs-delay-time {
+
+                            leaf cbs-delay-time {
+                                type types-sros:buffer-size-delay-time;
+                                units "microseconds";
+                                description "CBS as a function of time delay";
+                            }
+
+                        }
+                    }
+                    choice mbs-or-delay-time-or-delay-percent {
+                        default "mbs";
+                        case mbs {
+
+                            leaf mbs {
+                                type union {
+                                    type types-qos:bytes {
+                                        range "0..1073741824";
+                                    }
+                                    type enumeration {
+                                        enum auto                           { value -1; }
+                                    }
+                                }
+                                units "bytes";
+                                default "auto";
+                                description "Buffer space allowed for the queue";
+                            }
+
+                        }
+                        case mbs-delay-percent {
+
+                            leaf mbs-delay-percent {
+                                type decimal64 {
+                                    range "0.00..100.00";
+                                    fraction-digits 2;
+                                }
+                                units "percent";
+                                description "MBS as a portion of SAP latency budget";
+                            }
+
+                        }
+                        case mbs-delay-time {
+
+                            leaf mbs-delay-time {
+                                type types-sros:buffer-size-delay-time;
+                                units "microseconds";
+                                description "MBS as a function of time delay";
+                            }
+
+                        }
+                    }
                     choice rate-or-percent-rate {
                         default "rate";
                         case rate {
@@ -8557,7 +8815,7 @@ submodule nokia-conf-qos {
                     }
 
                     leaf stat-mode {
-                        type types-qos:egress-policer-stat-mode;
+                        type types-qos:sap-egress-policer-stat-mode;
                         default "minimal";
                         description "Mode of statistics collected by the policer";
                     }
@@ -9656,7 +9914,7 @@ submodule nokia-conf-qos {
                             type uint32 {
                                 range "1..6";
                             }
-                            description "Scheduling class associated with this SAP egress";
+                            description "Scheduling class ID";
                         }
 
                         leaf weight {
@@ -9996,6 +10254,21 @@ submodule nokia-conf-qos {
                     }
                     default "default";
                     description "Port scheduler H-QoS algorithm";
+                }
+
+                leaf accounting-mode {
+                    type enumeration {
+                        enum auto {
+                            value 1;
+                            description "Count below-CIR and above-CIR packets together";
+                        }
+                        enum separate-below-cir {
+                            value 2;
+                            description "Count below-CIR and above-CIR packets separately";
+                        }
+                    }
+                    default "auto";
+                    description "Accounting mode of the port scheduler policy";
                 }
 
                 leaf-list apply-groups {
@@ -11592,6 +11865,13 @@ submodule nokia-conf-qos {
                             description "Enable hardware aggregate shapers for SAPs";
                         }
 
+                        leaf queue-groups {
+                            type boolean;
+                            sros-ext:card-auto-reset-on-modify;
+                            default "false";
+                            description "Enable hardware aggregate shapers for queue-groups";
+                        }
+
                     } // container hw-agg-shapers
 
                     container queue-sets {
@@ -12033,6 +12313,46 @@ submodule nokia-conf-qos {
 
                 } // list dscp
 
+                list prec {
+                    key "prec-value";
+                    description "Enter the prec list instance";
+
+                    leaf prec-value {
+                        type types-qos:precedence-value;
+                        description "IP precedence value";
+                    }
+
+                    leaf fc {
+                        type types-sros:fc-name;
+                        description "Forwarding class";
+                    }
+
+                    leaf profile {
+                        type types-qos:profile;
+                        default "in";
+                        description "Default profile to use for ingress traffic";
+                    }
+
+                    leaf-list apply-groups {
+                        type leafref {
+                            path "../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Apply a configuration group at this level";
+                    }
+
+                    leaf-list apply-groups-exclude {
+                        type leafref {
+                            path "../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Exclude a configuration group at this level";
+                    }
+
+                } // list prec
+
             } // list dscp-fc-map
 
             list lsp-exp-fc-map {
@@ -12435,6 +12755,37 @@ submodule nokia-conf-qos {
                         description "Collected statistics mode";
                     }
 
+                    leaf algorithm-type {
+                        type enumeration {
+                            enum trtcm-ds {
+                                value 1;
+                                description "Use the TRTCM non-coupled mode";
+                            }
+                            enum trtcm-ds-coupled {
+                                value 2;
+                                description "Use the TRTCM coupled mode";
+                            }
+                        }
+                        default "trtcm-ds-coupled";
+                        description "Policer algorithm type";
+                    }
+
+                    leaf association-type {
+                        type enumeration {
+                            enum qos {
+                                value 1;
+                                description "Use the policer as a QoS filter";
+                            }
+                            enum filter {
+                                value 2;
+                                description "Use the policer as a filter entry rate limiter";
+                            }
+                        }
+                        sros-ext:immutable;
+                        default "qos";
+                        description "Policer association type";
+                    }
+
                     leaf-list apply-groups {
                         type leafref {
                             path "../../../../groups/group/name";
@@ -12475,6 +12826,7 @@ submodule nokia-conf-qos {
                 } // list policer
 
             } // container shared-policers
+
 
         } // container qos
 

@@ -12,7 +12,7 @@ submodule nokia-state-system-ptp {
     import nokia-types-services           { prefix "types-services"; }
     import nokia-types-sros               { prefix "types-sros"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -35,7 +35,7 @@ submodule nokia-state-system-ptp {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-09-15";
+    revision "2025-10-30";
 
     grouping state-system-ptp {
         container ptp {
@@ -121,14 +121,36 @@ submodule nokia-state-system-ptp {
                     }
 
                     leaf offset-from-master {
+                        status deprecated;
                         type types-ptp:time-interval-type;
+                        description
+                            "The current value of the time difference between
+                             a master and a slave clock as computed by the slave.
+
+                             This leaf is deprecated and replaced by offset-from-master-ns";
+                    }
+
+                    leaf offset-from-master-ns {
+                        type int32;
+                        units "nanoseconds";
                         description
                             "The current value of the time difference between
                              a master and a slave clock as computed by the slave.";
                     }
 
                     leaf mean-path-delay {
+                        status deprecated;
                         type types-ptp:time-interval-type;
+                        description
+                            "The current value of the mean propagation time between
+                             a master and a slave clock as computed by the slave.
+
+                              This leaf is deprecated and replaced by mean-delay-ns";
+                    }
+
+                    leaf mean-delay-ns {
+                        type int32;
+                        units "nanoseconds";
                         description
                             "The current value of the mean propagation time between
                              a master and a slave clock as computed by the slave.";
@@ -136,9 +158,12 @@ submodule nokia-state-system-ptp {
 
                     leaf last-calc-time {
                         type yang:date-and-time;
-                        description
-                            "The time when offset-from-master and mean-path-delay
-                             were last calculated.";
+                        description "The time when offset-from-master-ns was last calculated.";
+                    }
+
+                    leaf mean-delay-last-calc-time {
+                        type yang:date-and-time;
+                        description "The time when mean-delay-ns was last calculated.";
                     }
 
                     leaf sync-uncertain {
@@ -566,6 +591,21 @@ submodule nokia-state-system-ptp {
                              where the timestamp point is at the operating system kernel.";
                     }
 
+                    leaf peer-delay-request {
+                        type yang:counter64;
+                        description "The accumulated packet statistics for PTP Pdelay_Req messages.";
+                    }
+
+                    leaf peer-delay-response {
+                        type yang:counter64;
+                        description "The accumulated packet statistics for PTP Pdelay_Resp messages.";
+                    }
+
+                    leaf peer-delay-response-follow-up {
+                        type yang:counter64;
+                        description "The accumulated packet statistics for PTP Pdelay_Resp_Follow_Up messages.";
+                    }
+
                     container discards {
                         description "Enter the discards context";
 
@@ -604,6 +644,20 @@ submodule nokia-state-system-ptp {
                                  clock is running in freeerun.";
                         }
 
+                        leaf id-in-path-trace-tlv {
+                            type yang:counter64;
+                            description
+                                "The clockIdentiy for the local clock was found in a PATH_TRACE TLV in a received Announce message.
+                                 This may indicate a network timing loop.";
+                        }
+
+                        leaf steps-removed-exceeded {
+                            type yang:counter64;
+                            description
+                                "The number of times the local clock dropped a packet because the 'stepsRemoved' field in the
+                                 ingress header exceeded the max steps removed configured.";
+                        }
+
                         leaf peer-disabled {
                             type yang:counter64;
                             description
@@ -619,6 +673,22 @@ submodule nokia-state-system-ptp {
                         }
 
                     } // container discards
+
+                    list announce-tlv {
+                        key "tlv-type";
+                        description "Enter the announce-tlv list instance";
+
+                        leaf tlv-type {
+                            type types-ptp:announce-packet-tlv-type;
+                            description "Specifies the announce tlv type.";
+                        }
+
+                        leaf count {
+                            type yang:counter64;
+                            description "The count of the announce TLVs for the given tlv-type.";
+                        }
+
+                    } // list announce-tlv
 
                     list signalling-tlv {
                         key "tlv-type message-type";
@@ -723,6 +793,21 @@ submodule nokia-state-system-ptp {
                             description
                                 "The rate of PTP packets of all other types
                                  transmitted or received by the local PTP clock.";
+                        }
+
+                        leaf peer-delay-request {
+                            type yang:counter64;
+                            description "The rate of PTP Pdelay_Req packets transmitted or received by the local PTP clock.";
+                        }
+
+                        leaf peer-delay-response {
+                            type yang:counter64;
+                            description "The rate of PTP Pdelay_Resp packets transmitted or received by the local PTP clock.";
+                        }
+
+                        leaf peer-delay-response-follow-up {
+                            type yang:counter64;
+                            description "The rate of PTP Pdelay_Resp_Follow_Up packets transmitted or received by the local PTP clock.";
                         }
 
                     } // container multicast-message-rates
@@ -837,7 +922,7 @@ submodule nokia-state-system-ptp {
 
                         leaf ip-address {
                             type types-sros:ip-address;
-                            description "IP address of the remote PTP peer";
+                            description "The address of the PTP peer.";
                         }
 
                         leaf grandmaster-identity {
@@ -868,18 +953,51 @@ submodule nokia-state-system-ptp {
                         }
 
                         leaf apts-asymmetry {
+                            status obsolete;
                             type int64;
                             units "nanoseconds";
                             description
                                 "Indicates the computed asymmetry between the local clock and the peer.
 
                                  This is updated while the local clock has GNSS lock and the local clock is
-                                 exchanging PTP event messages with the peer.";
+                                 exchanging PTP event messages with the peer.
+
+                                 This leaf was obsoleted in Release 24.3 and was replaced by offset-from-local-clock";
                         }
 
                         leaf apts-asymmetry-last-update {
+                            status obsolete;
                             type yang:date-and-time;
-                            description "The date and time the apts-asymmetry was last computed.";
+                            description
+                                "The date and time the apts-asymmetry was last computed.
+
+                                 This leaf was obsoleted in Release 24.3 and was replaced by offset-last-update";
+                        }
+
+                        leaf offset-from-local-clock {
+                            status deprecated;
+                            type int64;
+                            units "nanoseconds";
+                            description
+                                "Indicates the time offset between the clock recovered from the peer and
+                                 the local clock's time. This time offset may be caused by delay
+                                 asymmetry in the path between the peer clock and the local clock.
+
+                                 This leaf is deprecated and replaced by offset-from-local-clock-ns";
+                        }
+
+                        leaf offset-from-local-clock-ns {
+                            type int32;
+                            units "nanoseconds";
+                            description
+                                "Indicates the time offset between the clock recovered from the peer and
+                                 the local clock's time. This time offset may be caused by delay
+                                 asymmetry in the path between the peer clock and the local clock.";
+                        }
+
+                        leaf offset-last-update {
+                            type yang:date-and-time;
+                            description "The date and time the offset-from-local-clock-ns was last computed.";
                         }
 
                         leaf backup-source {
@@ -932,6 +1050,67 @@ submodule nokia-state-system-ptp {
                             description
                                 "The reference point used to generate the PTP timestamp
                                  for the last received PTP event packet.";
+                        }
+
+                        leaf monitor-time-state {
+                            type enumeration {
+                                enum disabled                       { value 0; }
+                                enum initial                        { value 1; }
+                                enum acquiring                      { value 2; }
+                                enum locked                         { value 3; }
+                                enum holdover                       { value 4; }
+                            }
+                            description
+                                "The state of the time recovery process on a port or peer
+                                 where monitor-receiver has been enabled.";
+                        }
+
+                        leaf state-last-changed {
+                            type yang:date-and-time;
+                            description "Indicates the time when the time recovery process last changed state.";
+                        }
+
+                        leaf offset-from-master {
+                            status deprecated;
+                            type types-ptp:time-interval-type;
+                            description
+                                "The current value of the time difference between
+                                 a master clock and a slave clock as computed by the slave.
+
+                                 This leaf is deprecated and replaced by offset-from-master-ns";
+                        }
+
+                        leaf offset-from-master-ns {
+                            type int32;
+                            units "nanoseconds";
+                            description
+                                "The current value of the time difference between
+                                 a master clock and a slave clock as computed by the slave.";
+                        }
+
+                        leaf mean-path-delay {
+                            status deprecated;
+                            type types-ptp:time-interval-type;
+                            description
+                                "The current value of the mean propagation time between
+                                 a master clock and a slave clock as computed by the slave.
+
+                                 This leaf is deprecated and replaced by mean-path-delay-ns";
+                        }
+
+                        leaf mean-path-delay-ns {
+                            type int32;
+                            units "nanoseconds";
+                            description
+                                "The current value of the mean propagation time between
+                                 a master clock and a slave clock as computed by the slave.";
+                        }
+
+                        leaf last-calc-time {
+                            type yang:date-and-time;
+                            description
+                                "The time when offset-from-master-ns and mean-path-delay-ns
+                                 were last calculated.";
                         }
 
                         container grandmaster-clock-quality {
@@ -1002,6 +1181,313 @@ submodule nokia-state-system-ptp {
 
                         } // container last-rx-port
 
+                        container performance-monitoring {
+                            description "Enter the performance-monitoring context";
+
+                            list record {
+                                key "index";
+                                description "Enter the record list instance";
+
+                                leaf index {
+                                    type uint32 {
+                                        range "0..98 | 501..516";
+                                    }
+                                    description
+                                        "Index to specific record in the list. Values supported are:
+                                         0 : current 15 minute interval,
+                                         1..96 : completed 15 minute interval in last 24 hours,
+                                         97 : current 24 hour interval,
+                                         98 : previous 24 hour interval,
+                                         501 : current 1 minute interval,
+                                         502..516 : completed 1 minute interval in last 15 minutes";
+                                }
+
+                                leaf measurement-valid {
+                                    type boolean;
+                                    description
+                                        "This flag indicates the data can be correctly interpreted. Validity is
+                                         implementation specific and may be defined in a PTP Profile.
+                                         For SROS, as long as the clock received packets and did computations
+                                         during the period for the record, the measurement-valid flag shall
+                                         be true.  If no packets were received, the measurement-valid
+                                         flag shall be false.";
+                                }
+
+                                leaf period-complete {
+                                    type boolean;
+                                    description
+                                        "This flag is set to true when the recording period closes and measurements
+                                         were performed during the entire period (1 minute, 15 minute, or 24 hour).
+
+                                         For example, if the PTP instance is disabled for 5 minutes of
+                                         a 15 minute period, period-complete is false.
+
+                                         The period-complete flag is not related to the
+                                         validity of measurements that were performed.
+
+                                         The period-complete flag applies to all parameters for a
+                                         given measurement period.
+
+                                         A recording period closes at the next boundary for the record type
+                                         15 minute: 0, 15, 30, 45 minutes after the hour. UTC.
+                                         24 hour: 00:00. UTC.
+                                         1 minute: integral minute. UTC.";
+                                }
+
+                                leaf start-time {
+                                    type yang:date-and-time;
+                                    description "Time at which the recording started. UTC.";
+                                }
+
+                                leaf duration {
+                                    type uint32;
+                                    units "seconds";
+                                    description "The amount of time, in seconds, for which the data for this record was collected";
+                                }
+
+                                leaf average-master-slave-delay {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Average of the MasterSlaveDelay for this interval.
+
+                                         This leaf is deprecated and replaced by average-master-slave-delay-ns";
+                                }
+
+                                leaf minimum-master-slave-delay {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Minimum of the MasterSlaveDelay for this interval.
+
+                                         This leaf is deprecated and replaced by minimum-master-slave-delay-ns";
+                                }
+
+                                leaf maximum-master-slave-delay {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Maximum of the MasterSlaveDelay for this interval.
+
+                                         This leaf is deprecated and replaced by maximum-master-slave-delay-ns";
+                                }
+
+                                leaf stddev-master-slave-delay {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Standard Deviation of the MasterSlaveDelay for this interval.
+
+                                         This leaf is deprecated and replaced by stddev-master-slave-delay-ns";
+                                }
+
+                                leaf average-slave-master-delay {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Average of the Slave Master Delay for this interval.
+
+                                         This leaf is deprecated and replaced by average-slave-master-delay-ns";
+                                }
+
+                                leaf minimum-slave-master-delay {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Minimum of the Slave Master Delay for this interval.
+
+                                         This leaf is deprecated and replaced by minimum-slave-master-delay-ns";
+                                }
+
+                                leaf maximum-slave-master-delay {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Maximum of the Slave Master Delay for this interval.
+
+                                         This leaf is deprecated and replaced by maximum-slave-master-delay-ns";
+                                }
+
+                                leaf stddev-slave-master-delay {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Standard Deviation of the Slave Master Delay for this interval.
+
+                                         This leaf is deprecated and replaced by stddev-slave-master-delay-ns";
+                                }
+
+                                leaf average-mean-path-delay {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Average of the Mean Path Delay for this interval.
+
+                                         This leaf is deprecated and replaced by average-mean-path-delay-ns";
+                                }
+
+                                leaf minimum-mean-path-delay {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Minimum of the Mean Path Delay for this interval.
+
+                                         This leaf is deprecated and replaced by minimum-mean-path-delay-ns";
+                                }
+
+                                leaf maximum-mean-path-delay {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Maximum of the Mean Path Delay for this interval.
+
+                                         This leaf is deprecated and replaced by maximum-mean-path-delay-ns";
+                                }
+
+                                leaf stddev-mean-path-delay {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Standard Deviation of the Mean Path Delay for this interval.
+
+                                         This leaf is deprecated and replaced by stddev-mean-path-delay-ns";
+                                }
+
+                                leaf average-offset-from-master {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Average of the Offset From Master for this interval.
+
+                                         This leaf is deprecated and replaced by average-offset-from-master-ns";
+                                }
+
+                                leaf minimum-offset-from-master {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Minimum of the Offset From Master for this interval.
+
+                                         This leaf is deprecated and replaced by minimum-offset-from-master-ns";
+                                }
+
+                                leaf maximum-offset-from-master {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Maximum of the Offset From Master for this interval.
+
+                                         This leaf is deprecated and replaced by maximum-offset-from-master-ns";
+                                }
+
+                                leaf stddev-offset-from-master {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Standard Deviation of the Offset From Master for this interval.
+
+                                         This leaf is deprecated and replaced by stddev-offset-from-master-ns";
+                                }
+
+                                leaf average-master-slave-delay-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Average of the MasterSlaveDelay for this interval.";
+                                }
+
+                                leaf minimum-master-slave-delay-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Minimum of the MasterSlaveDelay for this interval.";
+                                }
+
+                                leaf maximum-master-slave-delay-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Maximum of the MasterSlaveDelay for this interval.";
+                                }
+
+                                leaf stddev-master-slave-delay-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Standard Deviation of the MasterSlaveDelay for this interval.";
+                                }
+
+                                leaf average-slave-master-delay-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Average of the Slave Master Delay for this interval.";
+                                }
+
+                                leaf minimum-slave-master-delay-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Minimum of the Slave Master Delay for this interval.";
+                                }
+
+                                leaf maximum-slave-master-delay-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Maximum of the Slave Master Delay for this interval.";
+                                }
+
+                                leaf stddev-slave-master-delay-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Standard Deviation of the Slave Master Delay for this interval.";
+                                }
+
+                                leaf average-mean-path-delay-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Average of the Mean Path Delay for this interval.";
+                                }
+
+                                leaf minimum-mean-path-delay-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Minimum of the Mean Path Delay for this interval.";
+                                }
+
+                                leaf maximum-mean-path-delay-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Maximum of the Mean Path Delay for this interval.";
+                                }
+
+                                leaf stddev-mean-path-delay-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Standard Deviation of the Mean Path Delay for this interval.";
+                                }
+
+                                leaf average-offset-from-master-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Average of the Offset From Master for this interval.";
+                                }
+
+                                leaf minimum-offset-from-master-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Minimum of the Offset From Master for this interval.";
+                                }
+
+                                leaf maximum-offset-from-master-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Maximum of the Offset From Master for this interval.";
+                                }
+
+                                leaf stddev-offset-from-master-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Standard Deviation of the Offset From Master for this interval.";
+                                }
+
+                            } // list record
+
+                        } // container performance-monitoring
 
                         list unicast-negotiation {
                             key "direction message-type";
@@ -1162,6 +1648,20 @@ submodule nokia-state-system-ptp {
                                          clock is running in freeerun.";
                                 }
 
+                                leaf id-in-path-trace-tlv {
+                                    type yang:counter64;
+                                    description
+                                        "The clockIdentiy for the local clock was found in a PATH_TRACE TLV in a received Announce message.
+                                         This may indicate a network timing loop.";
+                                }
+
+                                leaf steps-removed-exceeded {
+                                    type yang:counter64;
+                                    description
+                                        "The number of times the local clock dropped a packet because the 'stepsRemoved' field in the
+                                         ingress header exceeded the max steps removed configured.";
+                                }
+
                                 leaf peer-disabled {
                                     type yang:counter64;
                                     description
@@ -1254,6 +1754,38 @@ submodule nokia-state-system-ptp {
                              to the local clock on the Ethernet port.";
                     }
 
+                    leaf mean-link-delay-ns {
+                        type int32;
+                        units "nanoseconds";
+                        description
+                            "The estimated one-way propagation delay on the PTP link, computed using the
+                             peer-to-peer delay mechanism.
+
+                             It represents the 'instantaneous' value of the calculated mean link
+                             delay, using timestamp information from the most recent exchange of
+                             Pdelay_Req, Pdelay_Resp, and possibly Pdelay_Resp_Follow_Up messages.
+
+                             There is no filtering applied to the received messages, and there is
+                             no averaging of this calculation over multiple exchanges of peer delay
+                             messages.
+
+                             The active CPM calculates the mean link delay each time it exchanges
+                             Pdelay_Req, Pdelay_Resp, and possibly Pdelay_Resp_Follow_Up messages
+                             over the link.  The standby CPM does not calculate the mean link
+                             delay, returning a value of 0 for mean-link-delay-ns.
+
+                             The time that this mean link delay was last calculated is provided in
+                             mean-link-delay-last-calc-time.
+
+                             This corresponds to the 'portDS.meanLinkDelay' data set member
+                             defined in IEEE Std 1588-2019.";
+                    }
+
+                    leaf mean-link-delay-last-calc-time {
+                        type yang:date-and-time;
+                        description "The date and time the mean-link-delay-ns was last computed.";
+                    }
+
                     list neighbor {
                         key "mac-address";
                         description "Enter the neighbor list instance";
@@ -1276,18 +1808,51 @@ submodule nokia-state-system-ptp {
                         }
 
                         leaf apts-asymmetry {
+                            status obsolete;
                             type int32;
                             units "nanoseconds";
                             description
                                 "Indicates the computed asymmetry between the local clock and the neighbor.
 
                                  This is updated while the local clock has GNSS lock and the local clock is
-                                 exchanging PTP event messages with the neighbor.";
+                                 exchanging PTP event messages with the neighbor.
+
+                                 This leaf was obsoleted in Release 24.3 and was replaced by offset-from-local-clock";
                         }
 
                         leaf apts-asymmetry-last-update {
+                            status obsolete;
                             type yang:date-and-time;
-                            description "The date and time the apts-asymmetry was last computed.";
+                            description
+                                "The date and time the apts-asymmetry was last computed.
+
+                                 This leaf was obsoleted in Release 24.3 and was replaced by offset-last-update";
+                        }
+
+                        leaf offset-from-local-clock {
+                            status deprecated;
+                            type int64;
+                            units "nanoseconds";
+                            description
+                                "Indicates the time offset between the clock recovered from the neighboring
+                                 clock and the local clock's time. This time offset may be caused by delay
+                                 asymmetry in the path between the neighboring clock and the local clock.
+
+                                 This leaf is deprecated and replaced by offset-from-local-clock-ns";
+                        }
+
+                        leaf offset-from-local-clock-ns {
+                            type int32;
+                            units "nanoseconds";
+                            description
+                                "Indicates the time offset between the clock recovered from the neighboring
+                                 clock and the local clock's time. This time offset may be caused by delay
+                                 asymmetry in the path between the neighboring clock and the local clock.";
+                        }
+
+                        leaf offset-last-update {
+                            type yang:date-and-time;
+                            description "The date and time the offset-from-local-clock-ns was last computed.";
                         }
 
                         leaf backup-source {
@@ -1321,6 +1886,375 @@ submodule nokia-state-system-ptp {
                                  has Packet Timing Signal Fail (PTSF) unusable set.";
                         }
 
+                        leaf monitor-time-state {
+                            type enumeration {
+                                enum disabled                       { value 0; }
+                                enum initial                        { value 1; }
+                                enum acquiring                      { value 2; }
+                                enum locked                         { value 3; }
+                                enum holdover                       { value 4; }
+                            }
+                            description
+                                "The state of the time recovery process on a port or peer
+                                 where monitor-receiver has been enabled.";
+                        }
+
+                        leaf state-last-changed {
+                            type yang:date-and-time;
+                            description "Indicates the time when the time recovery process last changed state.";
+                        }
+
+                        leaf offset-from-master {
+                            status deprecated;
+                            type types-ptp:time-interval-type;
+                            description
+                                "The current value of the time difference between
+                                 a master clock and a slave clock as computed by the slave.
+
+                                 This leaf is deprecated and replaced by offset-from-master-ns";
+                        }
+
+                        leaf offset-from-master-ns {
+                            type int32;
+                            units "nanoseconds";
+                            description
+                                "The current value of the time difference between
+                                 a master clock and a slave clock as computed by the slave.";
+                        }
+
+                        leaf mean-path-delay {
+                            status deprecated;
+                            type types-ptp:time-interval-type;
+                            description
+                                "The current value of the mean propagation time between
+                                 a master clock and a slave clock as computed by the slave.
+
+                                 This leaf is deprecated and replaced by mean-path-delay-ns";
+                        }
+
+                        leaf mean-path-delay-ns {
+                            type int32;
+                            units "nanoseconds";
+                            description
+                                "The current value of the mean propagation time between
+                                 a master clock and a slave clock as computed by the slave.";
+                        }
+
+                        leaf last-calc-time {
+                            type yang:date-and-time;
+                            description
+                                "The time when offset-from-master-ns and mean-path-delay-ns
+                                 were last calculated.";
+                        }
+
+
+                        container performance-monitoring {
+                            description "Enter the performance-monitoring context";
+
+                            list record {
+                                key "index";
+                                description "Enter the record list instance";
+
+                                leaf index {
+                                    type uint32 {
+                                        range "0..98 | 501..516";
+                                    }
+                                    description
+                                        "Index to specific record in the list. Values supported are:
+                                         0 : current 15 minute interval,
+                                         1..96 : completed 15 minute interval in last 24 hours,
+                                         97 : current 24 hour interval,
+                                         98 : previous 24 hour interval,
+                                         501 : current 1 minute interval,
+                                         502..516 : completed 1 minute interval in last 15 minutes";
+                                }
+
+                                leaf measurement-valid {
+                                    type boolean;
+                                    description
+                                        "This flag indicates the data can be correctly interpreted. Validity is
+                                         implementation specific and may be defined in a PTP Profile.
+                                         For SROS, as long as the clock received packets and did computations
+                                         during the period for the record, the measurement-valid flag shall
+                                         be true.  If no packets were received, the measurement-valid
+                                         flag shall be false.";
+                                }
+
+                                leaf period-complete {
+                                    type boolean;
+                                    description
+                                        "This flag is set to true when the recording period closes and measurements
+                                         were performed during the entire period (1 minute, 15 minute, or 24 hour).
+
+                                         For example, if the PTP instance is disabled for 5 minutes of
+                                         a 15 minute period, period-complete is false.
+
+                                         The period-complete flag is not related to the
+                                         validity of measurements that were performed.
+
+                                         The period-complete flag applies to all parameters for a
+                                         given measurement period.
+
+                                         A recording period closes at the next boundary for the record type
+                                         15 minute: 0, 15, 30, 45 minutes after the hour. UTC.
+                                         24 hour: 00:00. UTC.
+                                         1 minute: integral minute. UTC.";
+                                }
+
+                                leaf start-time {
+                                    type yang:date-and-time;
+                                    description "Time at which the recording started. UTC.";
+                                }
+
+                                leaf duration {
+                                    type uint32;
+                                    units "seconds";
+                                    description "The amount of time, in seconds, for which the data for this record was collected";
+                                }
+
+                                leaf average-master-slave-delay {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Average of the MasterSlaveDelay for this interval.
+
+                                         This leaf is deprecated and replaced by average-master-slave-delay-ns";
+                                }
+
+                                leaf minimum-master-slave-delay {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Minimum of the MasterSlaveDelay for this interval.
+
+                                         This leaf is deprecated and replaced by minimum-master-slave-delay-ns";
+                                }
+
+                                leaf maximum-master-slave-delay {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Maximum of the MasterSlaveDelay for this interval.
+
+                                         This leaf is deprecated and replaced by maximum-master-slave-delay-ns";
+                                }
+
+                                leaf stddev-master-slave-delay {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Standard Deviation of the MasterSlaveDelay for this interval.
+
+                                         This leaf is deprecated and replaced by stddev-master-slave-delay-ns";
+                                }
+
+                                leaf average-slave-master-delay {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Average of the Slave Master Delay for this interval.
+
+                                         This leaf is deprecated and replaced by average-slave-master-delay-ns";
+                                }
+
+                                leaf minimum-slave-master-delay {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Minimum of the Slave Master Delay for this interval.
+
+                                         This leaf is deprecated and replaced by minimum-slave-master-delay-ns";
+                                }
+
+                                leaf maximum-slave-master-delay {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Maximum of the Slave Master Delay for this interval.
+
+                                         This leaf is deprecated and replaced by maximum-slave-master-delay-ns";
+                                }
+
+                                leaf stddev-slave-master-delay {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Standard Deviation of the Slave Master Delay for this interval.
+
+                                         This leaf is deprecated and replaced by stddev-slave-master-delay-ns";
+                                }
+
+                                leaf average-mean-path-delay {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Average of the Mean Path Delay for this interval.
+
+                                         This leaf is deprecated and replaced by average-mean-path-delay-ns";
+                                }
+
+                                leaf minimum-mean-path-delay {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Minimum of the Mean Path Delay for this interval.
+
+                                         This leaf is deprecated and replaced by minimum-mean-path-delay-ns";
+                                }
+
+                                leaf maximum-mean-path-delay {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Maximum of the Mean Path Delay for this interval.
+
+                                         This leaf is deprecated and replaced by maximum-mean-path-delay-ns";
+                                }
+
+                                leaf stddev-mean-path-delay {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Standard Deviation of the Mean Path Delay for this interval.
+
+                                         This leaf is deprecated and replaced by stddev-mean-path-delay-ns";
+                                }
+
+                                leaf average-offset-from-master {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Average of the Offset From Master for this interval.
+
+                                         This leaf is deprecated and replaced by average-offset-from-master-ns";
+                                }
+
+                                leaf minimum-offset-from-master {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Minimum of the Offset From Master for this interval.
+
+                                         This leaf is deprecated and replaced by minimum-offset-from-master-ns";
+                                }
+
+                                leaf maximum-offset-from-master {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Maximum of the Offset From Master for this interval.
+
+                                         This leaf is deprecated and replaced by maximum-offset-from-master-ns";
+                                }
+
+                                leaf stddev-offset-from-master {
+                                    status deprecated;
+                                    type types-ptp:time-interval-type;
+                                    description
+                                        "Standard Deviation of the Offset From Master for this interval.
+
+                                         This leaf is deprecated and replaced by stddev-offset-from-master-ns";
+                                }
+
+                                leaf average-master-slave-delay-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Average of the MasterSlaveDelay for this interval.";
+                                }
+
+                                leaf minimum-master-slave-delay-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Minimum of the MasterSlaveDelay for this interval.";
+                                }
+
+                                leaf maximum-master-slave-delay-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Maximum of the MasterSlaveDelay for this interval.";
+                                }
+
+                                leaf stddev-master-slave-delay-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Standard Deviation of the MasterSlaveDelay for this interval.";
+                                }
+
+                                leaf average-slave-master-delay-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Average of the Slave Master Delay for this interval.";
+                                }
+
+                                leaf minimum-slave-master-delay-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Minimum of the Slave Master Delay for this interval.";
+                                }
+
+                                leaf maximum-slave-master-delay-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Maximum of the Slave Master Delay for this interval.";
+                                }
+
+                                leaf stddev-slave-master-delay-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Standard Deviation of the Slave Master Delay for this interval.";
+                                }
+
+                                leaf average-mean-path-delay-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Average of the Mean Path Delay for this interval.";
+                                }
+
+                                leaf minimum-mean-path-delay-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Minimum of the Mean Path Delay for this interval.";
+                                }
+
+                                leaf maximum-mean-path-delay-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Maximum of the Mean Path Delay for this interval.";
+                                }
+
+                                leaf stddev-mean-path-delay-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Standard Deviation of the Mean Path Delay for this interval.";
+                                }
+
+                                leaf average-offset-from-master-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Average of the Offset From Master for this interval.";
+                                }
+
+                                leaf minimum-offset-from-master-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Minimum of the Offset From Master for this interval.";
+                                }
+
+                                leaf maximum-offset-from-master-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Maximum of the Offset From Master for this interval.";
+                                }
+
+                                leaf stddev-offset-from-master-ns {
+                                    type int32;
+                                    units "nanoseconds";
+                                    description "Standard Deviation of the Offset From Master for this interval.";
+                                }
+
+                            } // list record
+
+                        } // container performance-monitoring
 
                     } // list neighbor
 
@@ -1387,6 +2321,37 @@ submodule nokia-state-system-ptp {
                                  where the timestamp point is at the operating system kernel.";
                         }
 
+                        leaf peer-delay-request {
+                            type yang:counter64;
+                            description "The accumulated packet statistics for PTP Pdelay_Req messages.";
+                        }
+
+                        leaf peer-delay-response {
+                            type yang:counter64;
+                            description "The accumulated packet statistics for PTP Pdelay_Resp messages.";
+                        }
+
+                        leaf peer-delay-response-follow-up {
+                            type yang:counter64;
+                            description "The accumulated packet statistics for PTP Pdelay_Resp_Follow_Up messages.";
+                        }
+
+                        list announce-tlv {
+                            key "tlv-type";
+                            description "Enter the announce-tlv list instance";
+
+                            leaf tlv-type {
+                                type types-ptp:announce-packet-tlv-type;
+                                description "Specifies the announce tlv type.";
+                            }
+
+                            leaf count {
+                                type yang:counter64;
+                                description "The count of the announce TLVs for the given tlv-type.";
+                            }
+
+                        } // list announce-tlv
+
                         container discards {
                             description "Enter the discards context";
 
@@ -1423,6 +2388,20 @@ submodule nokia-state-system-ptp {
                                 description
                                     "The accumulated packet statistics for PTP packets dropped because the central
                                      clock is running in freeerun.";
+                            }
+
+                            leaf id-in-path-trace-tlv {
+                                type yang:counter64;
+                                description
+                                    "The clockIdentiy for the local clock was found in a PATH_TRACE TLV in a received Announce message.
+                                     This may indicate a network timing loop.";
+                            }
+
+                            leaf steps-removed-exceeded {
+                                type yang:counter64;
+                                description
+                                    "The number of times the local clock dropped a packet because the 'stepsRemoved' field in the
+                                     ingress header exceeded the max steps removed configured.";
                             }
 
                             leaf ptsf-unusable {
@@ -1493,7 +2472,7 @@ submodule nokia-state-system-ptp {
                         type yang:counter32;
                         description
                             "The number of times that the clock recovery process
-                             detected a large amount of packet loss in the the delay
+                             detected a large amount of packet loss in the delay
                              request/response flow from the remote master clock.";
                     }
 
@@ -1610,88 +2589,258 @@ submodule nokia-state-system-ptp {
                         }
 
                         leaf average-master-slave-delay {
+                            status deprecated;
                             type types-ptp:time-interval-type;
-                            description "Average of the MasterSlaveDelay for this interval.";
+                            description
+                                "Average of the MasterSlaveDelay for this interval.
+
+                                 This leaf is deprecated and replaced by average-master-slave-delay-ns";
                         }
 
                         leaf minimum-master-slave-delay {
+                            status deprecated;
                             type types-ptp:time-interval-type;
-                            description "Minimum of the MasterSlaveDelay for this interval.";
+                            description
+                                "Minimum of the MasterSlaveDelay for this interval.
+
+                                 This leaf is deprecated and replaced by minimum-master-slave-delay-ns";
                         }
 
                         leaf maximum-master-slave-delay {
+                            status deprecated;
                             type types-ptp:time-interval-type;
-                            description "Maximum of the MasterSlaveDelay for this interval.";
+                            description
+                                "Maximum of the MasterSlaveDelay for this interval.
+
+                                 This leaf is deprecated and replaced by maximum-master-slave-delay-ns";
                         }
 
                         leaf stddev-master-slave-delay {
+                            status deprecated;
                             type types-ptp:time-interval-type;
-                            description "Standard Deviation of the MasterSlaveDelay for this interval.";
+                            description
+                                "Standard Deviation of the MasterSlaveDelay for this interval.
+
+                                 This leaf is deprecated and replaced by stddev-master-slave-delay-ns";
                         }
 
                         leaf average-slave-master-delay {
+                            status deprecated;
                             type types-ptp:time-interval-type;
-                            description "Average of the Slave Master Delay for this interval.";
+                            description
+                                "Average of the Slave Master Delay for this interval.
+
+                                 This leaf is deprecated and replaced by average-slave-master-delay-ns";
                         }
 
                         leaf minimum-slave-master-delay {
+                            status deprecated;
                             type types-ptp:time-interval-type;
-                            description "Minimum of the Slave Master Delay for this interval.";
+                            description
+                                "Minimum of the Slave Master Delay for this interval.
+
+                                 This leaf is deprecated and replaced by minimum-slave-master-delay-ns";
                         }
 
                         leaf maximum-slave-master-delay {
+                            status deprecated;
                             type types-ptp:time-interval-type;
-                            description "Maximum of the Slave Master Delay for this interval.";
+                            description
+                                "Maximum of the Slave Master Delay for this interval.
+
+                                 This leaf is deprecated and replaced by maximum-slave-master-delay-ns";
                         }
 
                         leaf stddev-slave-master-delay {
+                            status deprecated;
                             type types-ptp:time-interval-type;
-                            description "Standard Deviation of the Slave Master Delay for this interval.";
+                            description
+                                "Standard Deviation of the Slave Master Delay for this interval.
+
+                                 This leaf is deprecated and replaced by stddev-slave-master-delay-ns";
                         }
 
                         leaf average-mean-path-delay {
+                            status deprecated;
                             type types-ptp:time-interval-type;
-                            description "Average of the Mean Path Delay for this interval.";
+                            description
+                                "Average of the Mean Path Delay for this interval.
+
+                                 This leaf is deprecated and replaced by average-mean-path-delay-ns";
                         }
 
                         leaf minimum-mean-path-delay {
+                            status deprecated;
                             type types-ptp:time-interval-type;
-                            description "Minimum of the Mean Path Delay for this interval.";
+                            description
+                                "Minimum of the Mean Path Delay for this interval.
+
+                                 This leaf is deprecated and replaced by minimum-mean-path-delay-ns";
                         }
 
                         leaf maximum-mean-path-delay {
+                            status deprecated;
                             type types-ptp:time-interval-type;
-                            description "Maximum of the Mean Path Delay for this interval.";
+                            description
+                                "Maximum of the Mean Path Delay for this interval.
+
+                                 This leaf is deprecated and replaced by maximum-mean-path-delay-ns";
                         }
 
                         leaf stddev-mean-path-delay {
+                            status deprecated;
                             type types-ptp:time-interval-type;
-                            description "Standard Deviation of the Mean Path Delay for this interval.";
+                            description
+                                "Standard Deviation of the Mean Path Delay for this interval.
+
+                                 This leaf is deprecated and replaced by stddev-mean-path-delay-ns";
                         }
 
                         leaf average-offset-from-master {
+                            status deprecated;
                             type types-ptp:time-interval-type;
-                            description "Average of the Offset From Master for this interval.";
+                            description
+                                "Average of the Offset From Master for this interval.
+
+                                 This leaf is deprecated and replaced by average-offset-from-master-ns";
                         }
 
                         leaf minimum-offset-from-master {
+                            status deprecated;
                             type types-ptp:time-interval-type;
-                            description "Minimum of the Offset From Master for this interval.";
+                            description
+                                "Minimum of the Offset From Master for this interval.
+
+                                 This leaf is deprecated and replaced by minimum-offset-from-master-ns";
                         }
 
                         leaf maximum-offset-from-master {
+                            status deprecated;
                             type types-ptp:time-interval-type;
-                            description "Maximum of the Offset From Master for this interval.";
+                            description
+                                "Maximum of the Offset From Master for this interval.
+
+                                 This leaf is deprecated and replaced by maximum-offset-from-master-ns";
                         }
 
                         leaf stddev-offset-from-master {
+                            status deprecated;
                             type types-ptp:time-interval-type;
+                            description
+                                "Standard Deviation of the Offset From Master for this interval.
+
+                                 This leaf is deprecated and replaced by stddev-offset-from-master-ns";
+                        }
+
+                        leaf average-master-slave-delay-ns {
+                            type int32;
+                            units "nanoseconds";
+                            description "Average of the MasterSlaveDelay for this interval.";
+                        }
+
+                        leaf minimum-master-slave-delay-ns {
+                            type int32;
+                            units "nanoseconds";
+                            description "Minimum of the MasterSlaveDelay for this interval.";
+                        }
+
+                        leaf maximum-master-slave-delay-ns {
+                            type int32;
+                            units "nanoseconds";
+                            description "Maximum of the MasterSlaveDelay for this interval.";
+                        }
+
+                        leaf stddev-master-slave-delay-ns {
+                            type int32;
+                            units "nanoseconds";
+                            description "Standard Deviation of the MasterSlaveDelay for this interval.";
+                        }
+
+                        leaf average-slave-master-delay-ns {
+                            type int32;
+                            units "nanoseconds";
+                            description "Average of the Slave Master Delay for this interval.";
+                        }
+
+                        leaf minimum-slave-master-delay-ns {
+                            type int32;
+                            units "nanoseconds";
+                            description "Minimum of the Slave Master Delay for this interval.";
+                        }
+
+                        leaf maximum-slave-master-delay-ns {
+                            type int32;
+                            units "nanoseconds";
+                            description "Maximum of the Slave Master Delay for this interval.";
+                        }
+
+                        leaf stddev-slave-master-delay-ns {
+                            type int32;
+                            units "nanoseconds";
+                            description "Standard Deviation of the Slave Master Delay for this interval.";
+                        }
+
+                        leaf average-mean-path-delay-ns {
+                            type int32;
+                            units "nanoseconds";
+                            description "Average of the Mean Path Delay for this interval.";
+                        }
+
+                        leaf minimum-mean-path-delay-ns {
+                            type int32;
+                            units "nanoseconds";
+                            description "Minimum of the Mean Path Delay for this interval.";
+                        }
+
+                        leaf maximum-mean-path-delay-ns {
+                            type int32;
+                            units "nanoseconds";
+                            description "Maximum of the Mean Path Delay for this interval.";
+                        }
+
+                        leaf stddev-mean-path-delay-ns {
+                            type int32;
+                            units "nanoseconds";
+                            description "Standard Deviation of the Mean Path Delay for this interval.";
+                        }
+
+                        leaf average-offset-from-master-ns {
+                            type int32;
+                            units "nanoseconds";
+                            description "Average of the Offset From Master for this interval.";
+                        }
+
+                        leaf minimum-offset-from-master-ns {
+                            type int32;
+                            units "nanoseconds";
+                            description "Minimum of the Offset From Master for this interval.";
+                        }
+
+                        leaf maximum-offset-from-master-ns {
+                            type int32;
+                            units "nanoseconds";
+                            description "Maximum of the Offset From Master for this interval.";
+                        }
+
+                        leaf stddev-offset-from-master-ns {
+                            type int32;
+                            units "nanoseconds";
                             description "Standard Deviation of the Offset From Master for this interval.";
                         }
 
                     } // list record
 
                 } // container performance-monitoring
+
+                container path-trace-ds {
+                    description "Enter the path-trace-ds context";
+
+                    leaf-list sequence {
+                        type types-ptp:clock-identity-type;
+                        description "List of clockIds from the received PATH_TRACE TLV.";
+                    }
+
+                } // container path-trace-ds
 
             } // list instance
 

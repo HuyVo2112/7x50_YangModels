@@ -12,7 +12,7 @@ submodule nokia-state-card-fp {
 
     include nokia-state-qos;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -35,7 +35,7 @@ submodule nokia-state-card-fp {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-11-27";
+    revision "2026-04-08";
 
     grouping state-card-fp {
         list fp {
@@ -44,7 +44,9 @@ submodule nokia-state-card-fp {
 
             leaf fp-number {
                 type types-card:fp-id;
-                description "Forwarding plane within the card";
+                description
+                    "The unique value which uniquely identifies the forwarding plane within
+                     a specific IOM card in the system.";
             }
 
             leaf total-policy-accounting-in-use {
@@ -72,6 +74,301 @@ submodule nokia-state-card-fp {
 
                 container resource-usage {
                     description "Enter the resource-usage context";
+
+                    list direct-mapped-policers {
+                        key "partition";
+                        description "Enter the direct-mapped-policers list instance";
+
+                        leaf partition {
+                            type enumeration {
+                                enum per-fc                         { value 1; }
+                                enum per-fc-unicast-multicast-or-multipoint { value 2; }
+                                enum per-fc-unicast-broadcast-unknown-multicast { value 3; }
+                                enum per-2-fc-unicast-multicast-or-multipoint { value 4; }
+                                enum per-4-fc-unicast-multicast-or-multipoint { value 5; }
+                                enum per-2-fc                       { value 6; }
+                                enum per-4-fc                       { value 7; }
+                            }
+                            description "Indicates the policer pool.";
+                        }
+
+                        leaf total {
+                            type yang:counter32;
+                            description
+                                "Indicates the number of total number of policers in the partition.
+                                 When the value is zero, it indicates that this  resource type is
+                                 not supported on this core.";
+                        }
+
+                        leaf stats-total {
+                            type yang:counter32;
+                            description
+                                "Indicates the number of total number of policers stats in the partition.
+                                 When the value is zero, it indicates that this  resource type is not
+                                 supported on this core.";
+                        }
+
+                        leaf allocated {
+                            type yang:counter32;
+                            description
+                                "Indicates the number of total number of policers allocated
+                                 from the partition.";
+                        }
+
+                        leaf stats-allocated {
+                            type yang:counter32;
+                            description
+                                "Indicates the number of total number of policers stats
+                                  allocated from the partition.";
+                        }
+
+                    } // list direct-mapped-policers
+
+                    container ingress-egress {
+                        description "Enter the ingress-egress context";
+
+                        container floating-policers-entries {
+                            description "Enter the floating-policers-entries context";
+
+                            leaf total {
+                                type yang:counter32;
+                                description
+                                    "Indicates the number of total number of ingress floating
+                                     policers supported on the core.";
+                            }
+
+                            leaf stats-total {
+                                type yang:counter32;
+                                description
+                                    "Indicates the number of total number of ingress floating
+                                     policers stats supported on the core.";
+                            }
+
+                            leaf allocated {
+                                type yang:counter32;
+                                description
+                                    "Indicates the number of total number of  ingress floating
+                                     policers currently allocated on the core.";
+                            }
+
+                            leaf stats-allocated {
+                                type yang:counter32;
+                                description
+                                    "Indicates the number of total number of  ingress floating
+                                     policers stats currently allocated on the core.";
+                            }
+
+                            leaf ingress-stats-acl {
+                                type yang:counter32;
+                                description
+                                    "Indicates the the subset of floating policer stats which are
+                                     currently in use by ingress ACLs for stats collection.";
+                            }
+
+                            leaf ingress-stats-shared-policers {
+                                type yang:counter32;
+                                description
+                                    "Indicates the the subset of floating policer stats which are
+                                     currently in use by shared policers for stats collection.";
+                            }
+
+                        } // container floating-policers-entries
+
+                        container dedicated-policers-entries {
+                            description "Enter the dedicated-policers-entries context";
+
+                            leaf total {
+                                type yang:counter32;
+                                description
+                                    "Indicates the number of total number of ingress dedicated
+                                     policers supported on the core.";
+                            }
+
+                            leaf stats-total {
+                                type yang:counter32;
+                                description
+                                    "Indicates the number of total number of ingress dedicated
+                                     policers stats supported on the core.";
+                            }
+
+                            leaf allocated {
+                                type yang:counter32;
+                                description
+                                    "Indicates the number of total number of  ingress dedicated
+                                     policers currently allocated on the core.";
+                            }
+
+                            leaf stats-allocated {
+                                type yang:counter32;
+                                description
+                                    "Indicates the number of total number of  ingress dedicated
+                                     policers stats currently allocated on the core.";
+                            }
+
+                        } // container dedicated-policers-entries
+
+                        container eight-queue-vlan-voq-entries {
+                            description "Enter the eight-queue-vlan-voq-entries context";
+
+                            leaf total {
+                                type yang:counter32;
+                                description
+                                    "Indicates the number of total number of vlan voqs
+                                     supported on the core.";
+                            }
+
+                            leaf allocated {
+                                type yang:counter32;
+                                description
+                                    "Indicates the number of total number of vlan voqs
+                                     allocated on the core.";
+                            }
+
+                        } // container eight-queue-vlan-voq-entries
+
+                        container sap-entries {
+                            description "Enter the sap-entries context";
+
+                            leaf total {
+                                type yang:counter32;
+                                description
+                                    "Indicates the number of total number of provisioned sap
+                                     entries supported on the core.";
+                            }
+
+                            leaf allocated {
+                                type yang:counter32;
+                                description
+                                    "Indicates the number of total number of provisioned sap
+                                     entries allocated on the core.";
+                            }
+
+                        } // container sap-entries
+
+                        container shared-policer-entries {
+                            description "Enter the shared-policer-entries context";
+
+                            leaf total {
+                                type yang:counter32;
+                                description
+                                    "Indicates the number of total number of shared policers
+                                     entries supported on the core.";
+                            }
+
+                            leaf allocated {
+                                type yang:counter32;
+                                description
+                                    "Indicates the number of total number of shared policers
+                                     entries allocated on the core.";
+                            }
+
+                            leaf stats-total {
+                                type yang:counter32;
+                                description
+                                    "Indicates the number of total number of shared policers
+                                     stats entries supported on the core.";
+                            }
+
+                            leaf stats-allocated {
+                                type yang:counter32;
+                                description
+                                    "Indicates the number of total number of shared policers
+                                     stats entries allocated on the core.";
+                            }
+
+                        } // container shared-policer-entries
+
+                        container four-queue-vlan-voq-entries {
+                            description "Enter the four-queue-vlan-voq-entries context";
+
+                            leaf total {
+                                type yang:counter32;
+                                description
+                                    "Indicates the number of total number of 4-queue vlan qos
+                                     supported on the core.";
+                            }
+
+                            leaf allocated {
+                                type yang:counter32;
+                                description
+                                    "Indicates the number of total number of 4-queue vlan qos
+                                     allocated on the core.";
+                            }
+
+                        } // container four-queue-vlan-voq-entries
+
+                        container filter-shared-policer-entries {
+                            description "Enter the filter-shared-policer-entries context";
+
+                            leaf total {
+                                type yang:counter32;
+                                description
+                                    "Indicates the number of total number of filter shared policers
+                                     entries supported on the core.";
+                            }
+
+                            leaf allocated {
+                                type yang:counter32;
+                                description
+                                    "Indicates the number of total number of filter shared policers
+                                     entries allocated on the core.";
+                            }
+
+                            leaf stats-total {
+                                type yang:counter32;
+                                description
+                                    "Indicates the number of total number of filter shared policers
+                                     stats entries supported on the core.";
+                            }
+
+                            leaf stats-allocated {
+                                type yang:counter32;
+                                description
+                                    "Indicates the number of total number of filter shared policers
+                                     stats entries allocated on the core.";
+                            }
+
+                        } // container filter-shared-policer-entries
+
+                        container scheduler-flow-entries {
+                            description "Enter the scheduler-flow-entries context";
+
+                            leaf total {
+                                type yang:counter32;
+                                description
+                                    "Indicates the number of total number of scheduler flow
+                                     supported on the core.";
+                            }
+
+                            leaf allocated {
+                                type yang:counter32;
+                                description
+                                    "Indicates the number of total number of scheduler flow
+                                     allocated on the core.";
+                            }
+
+                        } // container scheduler-flow-entries
+
+                        container scheduler-interfaces-entries {
+                            description "Enter the scheduler-interfaces-entries context";
+
+                            leaf total {
+                                type yang:counter32;
+                                description
+                                    "Indicates the number of total number of scheduler interfaces
+                                     supported on the core.";
+                            }
+
+                            leaf allocated {
+                                type yang:counter32;
+                                description
+                                    "Indicates the number of total number of scheduler interfaces
+                                     allocated on the core.";
+                            }
+
+                        } // container scheduler-interfaces-entries
+
+                    } // container ingress-egress
 
                     container dram {
                         description "Enter the dram context";
@@ -309,7 +606,7 @@ submodule nokia-state-card-fp {
             } // container egress
 
             container hi-bw-mcast-src {
-                description "Enable the hi-bw-mcast-src context";
+                description "Enter the hi-bw-mcast-src context";
 
                 leaf tap-count {
                     type uint32;
@@ -334,14 +631,14 @@ submodule nokia-state-card-fp {
                             type leafref {
                                 path "../../../../../../qos/queue-group-templates/ingress/queue-group/ingress-queue-group-name";
                             }
-                            description "Queue group name";
+                            description "Specifies the queue-group name.";
                         }
 
                         leaf instance-id {
                             type uint16 {
                                 range "1..65535";
                             }
-                            description "Instance ID";
+                            description "Specifies the instance identifier.";
                         }
 
                         container policer-control-policy {
@@ -353,7 +650,7 @@ submodule nokia-state-card-fp {
 
                                 leaf arbiter-name {
                                     type types-sros:named-item;
-                                    description "Arbiter name";
+                                    description "Specifies the arbiter name.";
                                 }
 
                                 container statistics {
@@ -1073,14 +1370,14 @@ submodule nokia-state-card-fp {
                             type leafref {
                                 path "../../../../../../qos/queue-group-templates/ingress/queue-group/ingress-queue-group-name";
                             }
-                            description "Queue group name";
+                            description "Specifies the queue-group name.";
                         }
 
                         leaf instance-id {
                             type uint16 {
                                 range "1..65535";
                             }
-                            description "Instance ID";
+                            description "Specifies the instance identifier.";
                         }
 
                         container policer-control-policy {
@@ -1092,7 +1389,7 @@ submodule nokia-state-card-fp {
 
                                 leaf arbiter-name {
                                     type types-sros:named-item;
-                                    description "Arbiter name";
+                                    description "Specifies the arbiter name.";
                                 }
 
                                 container statistics {
@@ -1934,8 +2231,307 @@ submodule nokia-state-card-fp {
 
                         leaf name {
                             type types-sros:named-item;
-                            description "Network ingress pool name for the FP";
+                            description "Specifies the unique name of the pool for the FP.";
                         }
+
+                        container pool-depth {
+                            description "Enter the pool-depth context";
+
+                            leaf elapsed-time {
+                                type types-sros:time-interval;
+                                description "Indicated the elapsed time.";
+                            }
+
+                            leaf pool-polling-interval {
+                                type types-sros:time-interval;
+                                description "Indicates the pool polling interval.";
+                            }
+
+                            leaf reserved-pool-last-violation {
+                                type yang:date-and-time;
+                                description "Indicates the last violation time for reserved pool buffers in use.";
+                            }
+
+                            leaf reserved-pool-total-threshold-violations {
+                                type yang:counter32;
+                                description "Indicates the total threshold violations for reserved pool buffers in use.";
+                            }
+
+                            leaf shared-pool-last-violation {
+                                type yang:date-and-time;
+                                description "Indicates the last violation time for shared pool buffers in use.";
+                            }
+
+                            leaf shared-pool-total-threshold-violations {
+                                type yang:counter32;
+                                description "Indicates the total threshold violations for shared pool buffers in use.";
+                            }
+
+                            leaf total-pool-last-violation {
+                                type yang:date-and-time;
+                                description "Indicates the last violation time for total pool buffers in use.";
+                            }
+
+                            leaf total-pool-total-threshold-violations {
+                                type yang:counter32;
+                                description "Indicates the total threshold violations for total pool buffers in use.";
+                            }
+
+                            container total-pool {
+                                description "Enter the total-pool context";
+
+                                leaf depth-0-to-10-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 10 percent.";
+                                }
+
+                                leaf depth-11-to-20-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 20 percent.";
+                                }
+
+                                leaf depth-21-to-30-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 30 percent.";
+                                }
+
+                                leaf depth-31-to-40-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 40 percent.";
+                                }
+
+                                leaf depth-41-to-50-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 50 percent.";
+                                }
+
+                                leaf depth-51-to-60-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 60 percent.";
+                                }
+
+                                leaf depth-61-to-70-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 70 percent.";
+                                }
+
+                                leaf depth-71-to-80-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 80 percent.";
+                                }
+
+                                leaf depth-81-to-90-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 90 percent.";
+                                }
+
+                                leaf depth-91-to-100-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 100 percent.";
+                                }
+
+                            } // container total-pool
+
+                            container shared-pool {
+                                description "Enter the shared-pool context";
+
+                                leaf depth-0-to-10-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 10 percent.";
+                                }
+
+                                leaf depth-11-to-20-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 20 percent.";
+                                }
+
+                                leaf depth-21-to-30-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 30 percent.";
+                                }
+
+                                leaf depth-31-to-40-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 40 percent.";
+                                }
+
+                                leaf depth-41-to-50-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 50 percent.";
+                                }
+
+                                leaf depth-51-to-60-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 60 percent.";
+                                }
+
+                                leaf depth-61-to-70-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 70 percent.";
+                                }
+
+                                leaf depth-71-to-80-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 80 percent.";
+                                }
+
+                                leaf depth-81-to-90-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 90 percent.";
+                                }
+
+                                leaf depth-91-to-100-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 100 percent.";
+                                }
+
+                            } // container shared-pool
+
+                            container reserved-pool {
+                                description "Enter the reserved-pool context";
+
+                                leaf depth-0-to-10-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 10 percent.";
+                                }
+
+                                leaf depth-11-to-20-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 20 percent.";
+                                }
+
+                                leaf depth-21-to-30-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 30 percent.";
+                                }
+
+                                leaf depth-31-to-40-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 40 percent.";
+                                }
+
+                                leaf depth-41-to-50-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 50 percent.";
+                                }
+
+                                leaf depth-51-to-60-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 60 percent.";
+                                }
+
+                                leaf depth-61-to-70-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 70 percent.";
+                                }
+
+                                leaf depth-71-to-80-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 80 percent.";
+                                }
+
+                                leaf depth-81-to-90-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 90 percent.";
+                                }
+
+                                leaf depth-91-to-100-percent {
+                                    type decimal64 {
+                                        fraction-digits 2;
+                                    }
+                                    description "Indicated the depth 0 to 100 percent.";
+                                }
+
+                            } // container reserved-pool
+
+                            container usage-alarm-thresholds {
+                                description "Enter the usage-alarm-thresholds context";
+
+                                leaf total-pool-usage-threshold-exceeded {
+                                    type boolean;
+                                    description
+                                        "Specifies if total pool buffer usage is in violation state and is
+                                         above the configured threshold percentage. When true it is above the
+                                         thresholds. When false it is below the thresholds.";
+                                }
+
+                                leaf shared-pool-usage-threshold-exceeded {
+                                    type boolean;
+                                    description
+                                        "Specifies if shared pool buffer usage is in violation state and is
+                                         above the configured threshold percentage. When true it is above the
+                                         thresholds. When false it is below the thresholds.";
+                                }
+
+                                leaf reserved-pool-usage-threshold-exceeded {
+                                    type boolean;
+                                    description
+                                        "Specifies if reserved pool buffer usage is in violation state and is
+                                         above the configured threshold percentage. When true it is above the
+                                         thresholds. When false it is below the thresholds.";
+                                }
+
+                            } // container usage-alarm-thresholds
+
+                        } // container pool-depth
 
                         container pool-usage {
                             description "Enter the pool-usage context";
@@ -3373,25 +3969,25 @@ submodule nokia-state-card-fp {
                 } // container assigned-non-shaper-queues
 
                 container hw-aggregate-shaper-qset-size1 {
-                    status deprecated;
+                    status obsolete;
                     description "Enter the hw-aggregate-shaper-qset-size1 context";
 
                     leaf total {
-                        status deprecated;
+                        status obsolete;
                         type yang:counter32;
-                        description "The total number of resources.";
+                        description "The total number of resources supported on this FP.";
                     }
 
                     leaf allocated {
-                        status deprecated;
+                        status obsolete;
                         type yang:counter32;
-                        description "The number of resources that are currently allocated.";
+                        description "The total number of resources that are currently allocated on this FP.";
                     }
 
                     leaf free {
-                        status deprecated;
+                        status obsolete;
                         type yang:counter32;
-                        description "The number of free resources that are currently available.";
+                        description "The total number of resources that are remaining free on this FP.";
                     }
 
                 } // container hw-aggregate-shaper-qset-size1
@@ -3577,23 +4173,23 @@ submodule nokia-state-card-fp {
                 } // container hw-aggregate-shaper-schedulers
 
                 container hw-aggregate-shaper-qset-size {
-                    status deprecated;
+                    status obsolete;
                     description "Enter the hw-aggregate-shaper-qset-size context";
 
                     leaf total {
-                        status deprecated;
+                        status obsolete;
                         type yang:counter32;
                         description "The total number of resources supported on this FP.";
                     }
 
                     leaf allocated {
-                        status deprecated;
+                        status obsolete;
                         type yang:counter32;
                         description "The total number of resources that are currently allocated on this FP.";
                     }
 
                     leaf free {
-                        status deprecated;
+                        status obsolete;
                         type yang:counter32;
                         description "The total number of resources that are remaining free on this FP.";
                     }
@@ -3688,6 +4284,66 @@ submodule nokia-state-card-fp {
                         }
 
                     } // container egress-global-lif-map
+
+                    container large-exact-match {
+                        description "Enter the large-exact-match context";
+
+                        leaf total {
+                            type yang:counter32;
+                            description "The total number of resources.";
+                        }
+
+                        leaf allocated {
+                            type yang:counter32;
+                            description "The number of resources that are currently allocated.";
+                        }
+
+                        leaf free {
+                            type yang:counter32;
+                            description "The number of free resources that are currently available.";
+                        }
+
+                    } // container large-exact-match
+
+                    container large-exact-match-1 {
+                        description "Enter the large-exact-match-1 context";
+
+                        leaf total {
+                            type yang:counter32;
+                            description "The total number of resources.";
+                        }
+
+                        leaf allocated {
+                            type yang:counter32;
+                            description "The number of resources that are currently allocated.";
+                        }
+
+                        leaf free {
+                            type yang:counter32;
+                            description "The number of free resources that are currently available.";
+                        }
+
+                    } // container large-exact-match-1
+
+                    container large-exact-match-2 {
+                        description "Enter the large-exact-match-2 context";
+
+                        leaf total {
+                            type yang:counter32;
+                            description "The total number of resources.";
+                        }
+
+                        leaf allocated {
+                            type yang:counter32;
+                            description "The number of resources that are currently allocated.";
+                        }
+
+                        leaf free {
+                            type yang:counter32;
+                            description "The number of free resources that are currently available.";
+                        }
+
+                    } // container large-exact-match-2
 
                     container ingress-decapsulation {
                         description "Enter the ingress-decapsulation context";
@@ -4148,6 +4804,7 @@ submodule nokia-state-card-fp {
                                     enum set-2                          { value 2; }
                                     enum set-3                          { value 3; }
                                     enum set-4                          { value 4; }
+                                    enum none                           { value 9999; }
                                 }
                                 description
                                     "A Set is a group of Cluster or Link-List Banks. A Set of Cluster or Link-List
@@ -4195,8 +4852,33 @@ submodule nokia-state-card-fp {
                                          and Link-Lists Banks can be shared between Phases.";
                                 }
 
+                                container banks {
+                                    description "Enter the banks context";
+
+                                    leaf total {
+                                        type yang:counter32;
+                                        description "The total number of resources.";
+                                    }
+
+                                    leaf allocated {
+                                        type yang:counter32;
+                                        description "The number of resources that are currently allocated.";
+                                    }
+
+                                    leaf free {
+                                        type yang:counter32;
+                                        description "The number of free resources that are currently available.";
+                                    }
+
+                                } // container banks
+
                                 container linked-data {
                                     description "Enter the linked-data context";
+
+                                    leaf available-lifs {
+                                        type types-card:ixr-resource-fp-available-lifs;
+                                        description "Shows the available LIF types for the given Cluster Set.";
+                                    }
 
                                     container banks {
                                         description "Enter the banks context";
@@ -4232,6 +4914,11 @@ submodule nokia-state-card-fp {
 
                                 container non-linked-data {
                                     description "Enter the non-linked-data context";
+
+                                    leaf available-lifs {
+                                        type types-card:ixr-resource-fp-available-lifs;
+                                        description "Shows the available LIF types for the given Cluster Set.";
+                                    }
 
                                     container banks {
                                         description "Enter the banks context";
@@ -4280,6 +4967,7 @@ submodule nokia-state-card-fp {
                                     enum set-2                          { value 2; }
                                     enum set-3                          { value 3; }
                                     enum set-4                          { value 4; }
+                                    enum none                           { value 9999; }
                                 }
                                 description
                                     "A Set is a group of Cluster or Link-List Banks. A Set of Cluster or Link-List

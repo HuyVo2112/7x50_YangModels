@@ -16,8 +16,11 @@ submodule nokia-conf-cflowd {
     include nokia-conf-svc-ies-sub-if;
     include nokia-conf-svc-vprn;
     include nokia-conf-svc-vprn-sub-if;
+    include nokia-conf-system;
+    include nokia-conf-system-security;
+    include nokia-conf-system-security-tls;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -40,7 +43,7 @@ submodule nokia-conf-cflowd {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-03-31";
+    revision "2026-07-22";
 
     grouping conf-cflowd {
         container cflowd {
@@ -75,6 +78,12 @@ submodule nokia-conf-cflowd {
                 description "Analyze the inner IP header of an L2TP packet";
             }
 
+            leaf analyze-srv6-payload {
+                type boolean;
+                default "false";
+                description "Instruct flow data to be based on inner header";
+            }
+
             leaf analyze-v4overv6-traffic {
                 type boolean;
                 default "false";
@@ -83,7 +92,7 @@ submodule nokia-conf-cflowd {
 
             leaf cache-size {
                 type uint32 {
-                    range "1000..2000000";
+                    range "1000..4000000";
                 }
                 units "flows";
                 description "Maximum number of active flows in the flow cache table";
@@ -199,7 +208,7 @@ submodule nokia-conf-cflowd {
                     type uint32 {
                         range "1..5";
                     }
-                    description "The unique specifier of this sample-profile";
+                    description "Sample profile ID";
                 }
 
                 leaf sample-rate {
@@ -219,7 +228,13 @@ submodule nokia-conf-cflowd {
                 leaf slice-selection {
                     type types-cflowd:slice-selection;
                     default "standard";
-                    description "Cflowd sample slice selection for sample profile ID";
+                    description "Cflowd slice selection for sample profile ID";
+                }
+
+                leaf export-ie315 {
+                    type boolean;
+                    default "false";
+                    description "Enable reporting on sample packets using IE315 format";
                 }
 
                 leaf-list apply-groups {
@@ -407,6 +422,12 @@ submodule nokia-conf-cflowd {
                             type boolean;
                             default "false";
                             description "Prevent MPLS flow data from going to collector";
+                        }
+
+                        leaf non-ip {
+                            type boolean;
+                            default "false";
+                            description "Prevent non-IP flow data from going to collector";
                         }
 
                     } // container family

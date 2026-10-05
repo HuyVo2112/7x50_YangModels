@@ -15,7 +15,7 @@ submodule nokia-conf-aaa {
     include nokia-conf-python;
     include nokia-conf-redundancy;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -38,7 +38,7 @@ submodule nokia-conf-aaa {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2024-03-06";
+    revision "2026-07-22";
 
     grouping conf-aaa {
         container aaa {
@@ -678,7 +678,7 @@ submodule nokia-conf-aaa {
                                     enum circuit-id                     { value 1; }
                                     enum remote-id                      { value 2; }
                                 }
-                                description "NAS-Port-Id suffix type";
+                                description "Suffix type to add to the RADIUS NAS port attribute";
                             }
 
                         } // container nas-port-id
@@ -734,7 +734,7 @@ submodule nokia-conf-aaa {
                             enum isa-ip                         { value 1; }
                         }
                         default "system-ip";
-                        description "NAS-IP-Address attribute";
+                        description "RADIUS NAS-IP-Address attribute";
                     }
 
                     leaf python-policy {
@@ -918,10 +918,22 @@ submodule nokia-conf-aaa {
                                 description "Include NAT outside service ID in Alc-Serv-Id attribute";
                             }
 
+                            leaf nat-port-forward-logging {
+                                type boolean;
+                                default "false";
+                                description "Enable logging of port forwards via RADIUS";
+                            }
+
                             leaf nat-port-range-block {
                                 type boolean;
                                 default "false";
                                 description "Include the Alc-Nat-Port-Range attribute";
+                            }
+
+                            leaf nat-port-time {
+                                type boolean;
+                                default "false";
+                                description "Enable the Alc-Nat-Port-Time RADIUS attribute";
                             }
 
                             leaf nat-subscriber-string {
@@ -988,6 +1000,12 @@ submodule nokia-conf-aaa {
                                 type boolean;
                                 default "false";
                                 description "Include the User-Name attribute";
+                            }
+
+                            leaf wlan-custom-user-group {
+                                type boolean;
+                                default "false";
+                                description "Include Wlan-Custom-User-Group attribute";
                             }
 
                             leaf wlan-ssid-vlan {
@@ -1447,7 +1465,7 @@ submodule nokia-conf-aaa {
                             }
                             units "seconds";
                             default "30";
-                            description "Wait time before attempting reconnection to peer";
+                            description "Connection reestablishment timer for the Diameter peer";
                         }
 
                         container ipv4 {
@@ -1535,6 +1553,7 @@ submodule nokia-conf-aaa {
                                 range "1..1000";
                             }
                             units "seconds";
+                            default "30";
                             description "Time between consecutive watchdog messages";
                         }
 

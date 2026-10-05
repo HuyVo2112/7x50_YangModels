@@ -10,7 +10,7 @@ submodule nokia-conf-router-origin-validation {
 
     include nokia-conf-groups;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -33,7 +33,7 @@ submodule nokia-conf-router-origin-validation {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2021-12-06";
+    revision "2026-07-22";
 
     grouping conf-router-origin-validation {
         container origin-validation {
@@ -122,7 +122,7 @@ submodule nokia-conf-router-origin-validation {
                     }
                     units "seconds";
                     default "120";
-                    description "RPKI Connect Retry timer value";
+                    description "RPKI connect retry timer value";
                 }
 
                 leaf description {
@@ -142,7 +142,7 @@ submodule nokia-conf-router-origin-validation {
                     }
                     sros-ext:auto-restart-to-modify;
                     default "323";
-                    description "Destination port number used to contact cache server";
+                    description "Destination port used to connect to the cache server";
                 }
 
                 leaf admin-state {
@@ -196,7 +196,7 @@ submodule nokia-conf-router-origin-validation {
                         }
                         units "seconds";
                         default "600";
-                        description "Length of time that the session is to be considered UP";
+                        description "Length of time that the session is considered Up";
                     }
 
                 } // container refresh-time

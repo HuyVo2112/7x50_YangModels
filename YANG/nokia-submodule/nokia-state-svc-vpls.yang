@@ -23,7 +23,7 @@ submodule nokia-state-svc-vpls {
     include nokia-state-router-segment-routing;
     include nokia-state-service;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -46,7 +46,7 @@ submodule nokia-state-svc-vpls {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2024-08-02";
+    revision "2026-02-11";
 
     grouping state-svc-vpls {
         list vpls {
@@ -55,7 +55,7 @@ submodule nokia-state-svc-vpls {
 
             leaf service-name {
                 type types-services:service-name;
-                description "Administrative service name";
+                description "Name of the service";
             }
 
             leaf oper-service-id {
@@ -109,6 +109,21 @@ submodule nokia-state-svc-vpls {
                          MACs supported by the node has been reached, and thus
                          MAC learning is temporary disabled, and only MAC relearns
                          can take place.";
+                }
+
+                leaf table-high-utilization {
+                    type boolean;
+                    description "Set to 'true' when the FDB table utilization reaches the high watermark and 'false' when it reaches the low watermark.";
+                }
+
+                leaf relearn-attempt-for-pinned-mac-address {
+                    type yang:mac-address;
+                    description "The MAC address being assigned to an interface while pinned.";
+                }
+
+                leaf relearn-attempt-for-pinned-mac-address-last-changed {
+                    type yang:date-and-time;
+                    description "Timestamp when the MAC address being assigned to an interface while pinned was detected.";
                 }
 
                 container statistics {
@@ -180,6 +195,98 @@ submodule nokia-state-svc-vpls {
                     }
 
                 } // container statistics
+
+                container bgp-evpn {
+                    description "Enter the bgp-evpn context";
+
+                    leaf duplicate-mac-address-detected {
+                        type boolean;
+                        description "Indicates if a duplicated MAC address is detected";
+                    }
+
+                    leaf black-hole-dup-mac-address-detected {
+                        type yang:mac-address;
+                        description "The black hole duplicated MAC address";
+                    }
+
+                    leaf black-hole-dup-mac-address-detected-last-changed {
+                        type yang:date-and-time;
+                        description "Timestamp when the black hole duplicated MAC address was detected";
+                    }
+
+                    leaf protected-mac-address-received {
+                        type yang:mac-address;
+                        description "The protected MAC address received";
+                    }
+
+                    leaf protected-mac-address-received-last-changed {
+                        type yang:date-and-time;
+                        description "Timestamp when the protected MAC address was receieved";
+                    }
+
+                } // container bgp-evpn
+
+                container backbone-vpls {
+                    description "Enter the backbone-vpls context";
+
+                    leaf pbb-protected-mac-address-received {
+                        type yang:mac-address;
+                        description "The PBB protected MAC address received";
+                    }
+
+                    leaf pbb-protected-mac-address-received-last-changed {
+                        type yang:date-and-time;
+                        description "Timestamp when the PBB protected MAC address was receieved";
+                    }
+
+                } // container backbone-vpls
+
+                list endpoint {
+                    key "name";
+                    description "Enter the endpoint list instance";
+
+                    leaf name {
+                        type types-sros:named-item;
+                        description "Name of the service endpoint";
+                    }
+
+                    leaf mac-addresses-learned-crossed-high-watermark {
+                        type boolean;
+                        description "Set to 'true' when the numberof MAC addresses in the FDB table for this endpoint reaches the high watermark and 'false' when it reaches the low watermark.";
+                    }
+
+                } // list endpoint
+
+                container card-status {
+                    description "Enter the card-status context";
+
+                    list card {
+                        key "slot-id";
+                        description "Enter the card list instance";
+
+                        leaf slot-id {
+                            type uint32;
+                            description "Slot id";
+                        }
+
+                        leaf allocated {
+                            type uint32;
+                            description "Number of slots allocated";
+                        }
+
+                        leaf pending-allocated {
+                            type uint32;
+                            description "Number of slots pending to be allocated";
+                        }
+
+                        leaf pending-free {
+                            type uint32;
+                            description "Number of slots pending to be free";
+                        }
+
+                    } // list card
+
+                } // container card-status
 
                 list mac {
                     key "address";
@@ -354,6 +461,11 @@ submodule nokia-state-svc-vpls {
                 container table {
                     description "Enter the table context";
 
+                    leaf high-utilization {
+                        type boolean;
+                        description "Set to 'true' when the utilization of the MFIB table reaches the high watermark and 'false' when it reaches the low watermark.";
+                    }
+
                     list mac-based-stream {
                         key "mac-address";
                         description "Enter the mac-based-stream list instance";
@@ -384,7 +496,7 @@ submodule nokia-state-svc-vpls {
 
                             leaf sap-id {
                                 type types-sros:sap;
-                                description "SAP ID";
+                                description "SAP identifier";
                             }
 
                             leaf forwarding-state {
@@ -405,7 +517,10 @@ submodule nokia-state-svc-vpls {
 
                             leaf sdp-bind-id {
                                 type types-services:sdp-bind-id;
-                                description "SDP binding ID";
+                                description
+                                    "SDP Binding identifier as <sdp-id>:<vc-id>.
+                                     sdp-id - [1..32767]
+                                     vc-id - [1..4294967295].";
                             }
 
                             leaf forwarding-state {
@@ -506,7 +621,7 @@ submodule nokia-state-svc-vpls {
 
                             leaf sap-id {
                                 type types-sros:sap;
-                                description "SAP ID";
+                                description "SAP identifier";
                             }
 
                             leaf forwarding-state {
@@ -527,7 +642,10 @@ submodule nokia-state-svc-vpls {
 
                             leaf sdp-bind-id {
                                 type types-services:sdp-bind-id;
-                                description "SDP binding ID";
+                                description
+                                    "SDP Binding identifier as <sdp-id>:<vc-id>.
+                                     sdp-id - [1..32767]
+                                     vc-id - [1..4294967295].";
                             }
 
                             leaf forwarding-state {
@@ -714,7 +832,7 @@ submodule nokia-state-svc-vpls {
 
                             leaf sap-id {
                                 type types-sros:sap;
-                                description "SAP ID";
+                                description "SAP identifier";
                             }
 
                             leaf forwarding-state {
@@ -735,7 +853,10 @@ submodule nokia-state-svc-vpls {
 
                             leaf sdp-bind-id {
                                 type types-services:sdp-bind-id;
-                                description "SDP binding ID";
+                                description
+                                    "SDP Binding identifier as <sdp-id>:<vc-id>.
+                                     sdp-id - [1..32767]
+                                     vc-id - [1..4294967295].";
                             }
 
                             leaf forwarding-state {
@@ -892,6 +1013,41 @@ submodule nokia-state-svc-vpls {
 
             container vxlan {
                 description "Enter the vxlan context";
+
+                container statistics {
+                    description "Enter the statistics context";
+
+                    leaf last-cleared {
+                        type types-sros:date-time;
+                        description "Indicates the time of the last clearing of vpls vxlan statistics.";
+                    }
+
+                    leaf vni-failure-statistics {
+                        type types-sros:date-time;
+                        description "Indicates the VTEP egress VNI failure statistics time";
+                    }
+
+                    leaf vtep {
+                        type uint32;
+                        description "Indicates the number of VTEPs";
+                    }
+
+                    leaf service-multicast-limit {
+                        type uint32;
+                        description "Indicates the vxlan TLS multicast limit";
+                    }
+
+                    leaf system-limit {
+                        type uint32;
+                        description "Indicates the system limit";
+                    }
+
+                    leaf egress-multicast-list-limit {
+                        type uint32;
+                        description "indicates the egress multicast system limit";
+                    }
+
+                } // container statistics
 
                 list instance {
                     key "vxlan-instance";
@@ -1281,7 +1437,7 @@ submodule nokia-state-svc-vpls {
 
                                     leaf group-address {
                                         type types-sros:ipv4-multicast-address;
-                                        description "Group address of static IGMP multicast channel";
+                                        description "Group address of multicast channel.";
                                     }
 
                                     leaf group-type {
@@ -1640,7 +1796,7 @@ submodule nokia-state-svc-vpls {
 
                                     leaf group-address {
                                         type types-sros:ipv6-multicast-address;
-                                        description "Group address of multicast channel";
+                                        description "Group address of multicast channel.";
                                     }
 
                                     leaf group-type {
@@ -2429,7 +2585,7 @@ submodule nokia-state-svc-vpls {
             } // container vxlan
 
             container proxy-arp {
-                description "Enable the proxy-arp context";
+                description "Enter the proxy-arp context";
 
                 list host {
                     key "ip-address";
@@ -2495,7 +2651,7 @@ submodule nokia-state-svc-vpls {
             } // container proxy-arp
 
             container proxy-nd {
-                description "Enable the proxy-nd context";
+                description "Enter the proxy-nd context";
 
                 list host {
                     key "ip-address";
@@ -2624,7 +2780,7 @@ submodule nokia-state-svc-vpls {
                         type leafref {
                             path "../../../../vpls/service-name";
                         }
-                        description "Service name";
+                        description "Backbone VPLS service";
                     }
 
                     leaf oper-isid {
@@ -2659,7 +2815,7 @@ submodule nokia-state-svc-vpls {
             } // container temp-flood
 
             container spb {
-                description "Enable the spb context";
+                description "Enter the spb context";
 
                 list level {
                     key "id";
@@ -2827,7 +2983,7 @@ submodule nokia-state-svc-vpls {
 
                         leaf value {
                             type string {
-                                length "27..9778";
+                                length "56..19558";
                             }
                             description "Contents of the LSP.";
                         }
@@ -3377,14 +3533,14 @@ submodule nokia-state-svc-vpls {
                         type leafref {
                             path "../../../../../router/segment-routing/segment-routing-v6/locator/locator-name";
                         }
-                        description "SRv6 locator name";
+                        description "SRv6 locator name.";
                     }
 
                     container function {
                         description "Enter the function context";
 
                         container end-dt2u {
-                            description "Enable the end-dt2u context";
+                            description "Enter the end-dt2u context";
 
                             leaf oper-value {
                                 type uint32;
@@ -3404,7 +3560,7 @@ submodule nokia-state-svc-vpls {
                         } // container end-dt2u
 
                         container end-dt2m {
-                            description "Enable the end-dt2m context";
+                            description "Enter the end-dt2m context";
 
                             leaf oper-value {
                                 type uint32;
@@ -3435,14 +3591,14 @@ submodule nokia-state-svc-vpls {
                         type leafref {
                             path "../../../../../router/segment-routing/segment-routing-v6/micro-segment-locator/locator-name";
                         }
-                        description "Micro-segment SRv6 locator name";
+                        description "SRv6 locator name.";
                     }
 
                     container function {
                         description "Enter the function context";
 
                         container udt2m {
-                            description "Enable the udt2m context";
+                            description "Enter the udt2m context";
 
                             leaf oper-value {
                                 type uint32;
@@ -3462,7 +3618,7 @@ submodule nokia-state-svc-vpls {
                         } // container udt2m
 
                         container udt2u {
-                            description "Enable the udt2u context";
+                            description "Enter the udt2u context";
 
                             leaf oper-value {
                                 type uint32;
@@ -3581,6 +3737,256 @@ submodule nokia-state-svc-vpls {
 
             container stp {
                 description "Enter the stp context";
+
+                leaf bridge-address {
+                    type yang:mac-address;
+                    description "MAC Address of the bridge";
+                }
+
+                leaf time-since-topology-change {
+                    type uint32;
+                    description "Time since topology change was detected by STP";
+                }
+
+                leaf topology-changes {
+                    type int32;
+                    description "Total number of topology changes detected by STP";
+                }
+
+                leaf designated-root {
+                    type types-sros:bridge-id;
+                    description "The bridge identifier of the root of the spanning tree";
+                }
+
+                leaf root-cost {
+                    type int32;
+                    description "The cost of the path to the root bridge";
+                }
+
+                leaf root-port {
+                    type int32;
+                    description "The port number of the port with the lowest cost path";
+                }
+
+                leaf max-age {
+                    type int32;
+                    description "The maximum age of the stp information learned";
+                }
+
+                leaf oper-hello-time {
+                    type int32;
+                    description "The amount of time between the transmission of Configuration BPDUs";
+                }
+
+                leaf oper-forward-delay {
+                    type int32;
+                    description "The amount of time it takes to change its state when moving towards the forwarding state";
+                }
+
+                leaf oper-state {
+                    type types-sros:up-down-status;
+                    description "The operational status of the stp instance";
+                }
+
+                leaf virtual-root-bridge-status {
+                    type types-sros:up-down-status;
+                    description "The operational status of the Virtual Root Bridge of the stp instance";
+                }
+
+                leaf topology-change-active {
+                    type boolean;
+                    description "Indicates when topology change is currently in progress";
+                }
+
+                leaf primary-bridge {
+                    type types-sros:bridge-id;
+                    description "The bridge ID of the primary bridge being the gateway from the core mesh towards root bridge";
+                }
+
+                leaf bridge-instance-id {
+                    type int32 {
+                        range "0..4095";
+                    }
+                    description "The stp bridge ID chosen by the system";
+                }
+
+                leaf vcp-oper-protocol {
+                    type enumeration {
+                        enum not-applicable                 { value 0; }
+                        enum stp                            { value 1; }
+                        enum rstp                           { value 2; }
+                        enum mstp                           { value 3; }
+                    }
+                    description "Indicates whether stp, rstp, or mstp is running on this VCP";
+                }
+
+                leaf cist-regional-root {
+                    type types-sros:bridge-id;
+                    description "The bridge ID of the regional root of the CIST spanning tree";
+                }
+
+                leaf cist-int-root-cost {
+                    type int32;
+                    description "The cost of the path to the CIST regional root bridge";
+                }
+
+                leaf cist-remaining-hop-count {
+                    type int32;
+                    description "The remaining number of hops";
+                }
+
+                leaf cist-regional-root-port {
+                    type int32;
+                    description "The port number of the port with the lowest cost path";
+                }
+
+                leaf vcp-state {
+                    type enumeration {
+                        enum disabled                       { value 1; }
+                        enum blocking                       { value 2; }
+                        enum listening                      { value 3; }
+                        enum learning                       { value 4; }
+                        enum forwarding                     { value 5; }
+                        enum broken                         { value 6; }
+                        enum discarding                     { value 7; }
+                    }
+                    description "The current state of the VCP";
+                }
+
+                container backbone-vpls {
+                    description "Enter the backbone-vpls context";
+
+                    leaf port-state {
+                        type enumeration {
+                            enum disabled                       { value 1; }
+                            enum blocking                       { value 2; }
+                            enum listening                      { value 3; }
+                            enum learning                       { value 4; }
+                            enum forwarding                     { value 5; }
+                            enum broken                         { value 6; }
+                            enum discarding                     { value 7; }
+                        }
+                        description "The PIP uplink's current state";
+                    }
+
+                    leaf port-role {
+                        type enumeration {
+                            enum master                         { value 0; }
+                            enum root                           { value 1; }
+                            enum designated                     { value 2; }
+                            enum alternate                      { value 3; }
+                            enum backup                         { value 4; }
+                            enum disabled                       { value 5; }
+                        }
+                        description "The current role of the PIP uplink";
+                    }
+
+                    leaf designated-bridge {
+                        type types-sros:bridge-id;
+                        description "The identifier of the designated bridge of the PIP uplink";
+                    }
+
+                    leaf designated-port {
+                        type int32;
+                        description "The identifier of the port on the designated bridge";
+                    }
+
+                    leaf exception {
+                        type enumeration {
+                            enum none                           { value 1; }
+                            enum one-way-communication          { value 2; }
+                            enum downstream-loop-detected       { value 3; }
+                        }
+                        description "Indicates if an stp exception is present on the pip";
+                    }
+
+                    leaf forward-transitions {
+                        type uint32;
+                        description "The number of times the port has transitioned from learned state to forwarding state";
+                    }
+
+                    leaf config-bpdus-received {
+                        type uint32;
+                        description "The number of configuration BPDUs received on this PIP uplink";
+                    }
+
+                    leaf tcn-bpdus-received {
+                        type uint32;
+                        description "The number of topology change notification BPDUs received on this PIP uplink";
+                    }
+
+                    leaf rst-bpdus-received {
+                        type uint32;
+                        description "The number of RST BPDUs recieved on this PIP uplink";
+                    }
+
+                    leaf mst-bpdus-received {
+                        type uint32;
+                        description "The number of MST BPDUs received on this PIP uplink";
+                    }
+
+                    leaf bad-bpdus-received {
+                        type uint32;
+                        description "The number of bad BPDUs received on this PIP uplink";
+                    }
+
+                    leaf config-bpdus-transmitted {
+                        type uint32;
+                        description "The number of configuration BPDUs transmitted on this PIP uplink";
+                    }
+
+                    leaf tcn-bpdus-transmitted {
+                        type uint32;
+                        description "The number of topology change notification BPDUs transmitted on this PIP uplink";
+                    }
+
+                    leaf rst-bpdus-transmitted {
+                        type uint32;
+                        description "The number of RST BPDUs transmitted on this PIP uplink";
+                    }
+
+                    leaf mst-bpdus-transmitted {
+                        type uint32;
+                        description "The number of MST BPDUs transmitted on this PIP uplink";
+                    }
+
+                    leaf oper-state {
+                        type types-sros:up-down-status;
+                        description "The operational status of the stp instance";
+                    }
+
+                    leaf mvpls-prune-state {
+                        type enumeration {
+                            enum not-applicable                 { value 1; }
+                            enum not-pruned                     { value 2; }
+                            enum pruned                         { value 3; }
+                        }
+                        description "The mVPLS prune state of this PIP uplink";
+                    }
+
+                    leaf oper-protocol {
+                        type enumeration {
+                            enum not-applicable                 { value 0; }
+                            enum stp                            { value 1; }
+                            enum rstp                           { value 2; }
+                            enum mstp                           { value 3; }
+                        }
+                        description "The protocol running on this PIP uplink";
+                    }
+
+                    leaf port-num {
+                        type int32 {
+                            range "0..4094";
+                        }
+                        description "The port number associated with this PIP uplink";
+                    }
+
+                    leaf inside-region {
+                        type boolean;
+                        description "Indicates if the network connected to the PIP is in the same MST region";
+                    }
+
+                } // container backbone-vpls
 
                 list mst-instance {
                     key "mst-inst-number";
@@ -3892,7 +4298,7 @@ submodule nokia-state-svc-vpls {
 
                     leaf group-address {
                         type types-sros:ipv4-multicast-address;
-                        description "Group address of static IGMP multicast channel";
+                        description "Group address of multicast channel.";
                     }
 
                     leaf filter-mode {
@@ -3930,7 +4336,7 @@ submodule nokia-state-svc-vpls {
 
                     leaf group-address {
                         type types-sros:ipv4-multicast-address;
-                        description "Group address of static IGMP multicast channel";
+                        description "Group address of multicast channel.";
                     }
 
                     leaf filter-mode {
@@ -4198,7 +4604,7 @@ submodule nokia-state-svc-vpls {
 
                     leaf group-address {
                         type types-sros:ipv6-multicast-address;
-                        description "Group address of multicast channel";
+                        description "Group address of multicast channel.";
                     }
 
                     leaf filter-mode {
@@ -4236,7 +4642,7 @@ submodule nokia-state-svc-vpls {
 
                     leaf group-address {
                         type types-sros:ipv6-multicast-address;
-                        description "Group address of multicast channel";
+                        description "Group address of multicast channel.";
                     }
 
                     leaf filter-mode {
@@ -4281,7 +4687,7 @@ submodule nokia-state-svc-vpls {
             } // container mld-snooping
 
             container pim-snooping {
-                description "Enable the pim-snooping context";
+                description "Enter the pim-snooping context";
 
                 container ipv4 {
                     description "Enter the ipv4 context";
@@ -4486,7 +4892,10 @@ submodule nokia-state-svc-vpls {
 
                             leaf sdp-bind-id {
                                 type types-services:sdp-bind-id;
-                                description "SDP binding ID";
+                                description
+                                    "SDP Binding identifier as <sdp-id>:<vc-id>.
+                                     sdp-id - [1..32767]
+                                     vc-id - [1..4294967295].";
                             }
 
                             leaf port-flags {
@@ -4768,7 +5177,10 @@ submodule nokia-state-svc-vpls {
 
                             leaf sdp-bind-id {
                                 type types-services:sdp-bind-id;
-                                description "SDP binding ID";
+                                description
+                                    "SDP Binding identifier as <sdp-id>:<vc-id>.
+                                     sdp-id - [1..32767]
+                                     vc-id - [1..4294967295].";
                             }
 
                             leaf port-flags {
@@ -6132,7 +6544,7 @@ submodule nokia-state-svc-vpls {
             } // container pim-snooping
 
             container bgp-evpn {
-                description "Enable the bgp-evpn context";
+                description "Enter the bgp-evpn context";
 
                 leaf creation-origin {
                     type types-sros:creation-origin;
@@ -6187,6 +6599,21 @@ submodule nokia-state-svc-vpls {
 
                 } // list local-learned-trusted-mac
 
+                container tunnel {
+                    description "Enter the tunnel context";
+
+                    leaf interface-next-hop {
+                        type int32;
+                        description "EVPN VPLS tunnel interface IP next hop";
+                    }
+
+                    leaf martian-next-hop-limit {
+                        type int32;
+                        description "EVPN VPLS martian tunnel interface IP next hop limit";
+                    }
+
+                } // container tunnel
+
                 list segment-routing-v6 {
                     key "bgp-instance";
                     description "Enter the segment-routing-v6 list instance";
@@ -6199,57 +6626,57 @@ submodule nokia-state-svc-vpls {
                     }
 
                     container destinations {
-                        status deprecated;
+                        status obsolete;
                         description "Enter the destinations context";
 
                         list ethernet-segment-destination {
-                            status deprecated;
+                            status obsolete;
                             key "esi";
                             description "Enter the ethernet-segment-destination list instance";
 
                             leaf esi {
-                                status deprecated;
+                                status obsolete;
                                 type string;
                                 description "Ethernet segment identifier";
                             }
 
                             leaf last-update {
-                                status deprecated;
+                                status obsolete;
                                 type types-sros:date-time;
                                 description "Time this entry was last updated.";
                             }
 
                             list tep {
-                                status deprecated;
+                                status obsolete;
                                 key "tep-address sid-address";
                                 description "Enter the tep list instance";
 
                                 leaf tep-address {
-                                    status deprecated;
+                                    status obsolete;
                                     type types-sros:ip-address;
                                     description "Tunnel endpoint ip-address";
                                 }
 
                                 leaf sid-address {
-                                    status deprecated;
+                                    status obsolete;
                                     type types-sros:ipv6-address;
                                     description "SID ip-address";
                                 }
 
                                 leaf last-update {
-                                    status deprecated;
+                                    status obsolete;
                                     type types-sros:date-time;
                                     description "Time this entry was last updated.";
                                 }
 
                                 leaf oper-state {
-                                    status deprecated;
+                                    status obsolete;
                                     type types-sros:up-down-status;
                                     description "Operational status of srv6 tunnel endpoint";
                                 }
 
                                 leaf oper-flags {
-                                    status deprecated;
+                                    status obsolete;
                                     type types-services:oper-flags;
                                     description "Conditions affecting the operational status of the srv6 tunnel endpoint";
                                 }
@@ -6259,24 +6686,24 @@ submodule nokia-state-svc-vpls {
                         } // list ethernet-segment-destination
 
                         list non-ethernet-segment-destination {
-                            status deprecated;
+                            status obsolete;
                             key "tep-address sid-address";
                             description "Enter the non-ethernet-segment-destination list instance";
 
                             leaf tep-address {
-                                status deprecated;
+                                status obsolete;
                                 type types-sros:ip-address;
                                 description "Tunnel endpoint ip-address";
                             }
 
                             leaf sid-address {
-                                status deprecated;
+                                status obsolete;
                                 type types-sros:ipv6-address;
                                 description "SID ip-address";
                             }
 
                             leaf srv6-type {
-                                status deprecated;
+                                status obsolete;
                                 type enumeration {
                                     enum none                           { value 0; }
                                     enum static                         { value 1; }
@@ -6286,19 +6713,19 @@ submodule nokia-state-svc-vpls {
                             }
 
                             leaf oper-state {
-                                status deprecated;
+                                status obsolete;
                                 type types-sros:up-down-status;
                                 description "Operational status of srv6 tunnel endpoint";
                             }
 
                             leaf oper-flags {
-                                status deprecated;
+                                status obsolete;
                                 type types-services:oper-flags;
                                 description "Conditions affecting the operational status of the srv6 tunnel endpoint";
                             }
 
                             leaf last-update {
-                                status deprecated;
+                                status obsolete;
                                 type types-sros:date-time;
                                 description "Time this entry was last updated.";
                             }
@@ -6328,6 +6755,41 @@ submodule nokia-state-svc-vpls {
 
                     } // list tep
 
+                    container statistics {
+                        description "Enter the statistics context";
+
+                        leaf last-cleared {
+                            type types-sros:date-time;
+                            description "Indicates the time of the last clearing of vpls evpn srv6 statistics.";
+                        }
+
+                        leaf tep-egress-bind-failure-statistics {
+                            type types-sros:date-time;
+                            description "Indicates the TEP egress bind failure statistics time";
+                        }
+
+                        leaf tep {
+                            type uint32;
+                            description "Indicates the number of TEPs";
+                        }
+
+                        leaf service-multicast-limit {
+                            type uint32;
+                            description "Indicates the evpn srv6 TLS multicast limit";
+                        }
+
+                        leaf system-limit {
+                            type uint32;
+                            description "Indicates the system limit";
+                        }
+
+                        leaf egress-multicast-limit {
+                            type uint32;
+                            description "indicates the egress multicast system limit";
+                        }
+
+                    } // container statistics
+
                 } // list segment-routing-v6
 
                 list vxlan {
@@ -6338,7 +6800,7 @@ submodule nokia-state-svc-vpls {
                         type int32 {
                             range "1..2";
                         }
-                        description "BGP instance";
+                        description "BGP instance.";
                     }
 
                     list tep {
@@ -6372,7 +6834,7 @@ submodule nokia-state-svc-vpls {
                         type int32 {
                             range "1..2";
                         }
-                        description "BGP instance";
+                        description "BGP instance.";
                     }
 
                     container ingress {
@@ -6767,7 +7229,7 @@ submodule nokia-state-svc-vpls {
 
                                         leaf group-address {
                                             type types-sros:ipv4-multicast-address;
-                                            description "Group address of static IGMP multicast channel";
+                                            description "Group address of multicast channel.";
                                         }
 
                                         leaf group-type {
@@ -7126,7 +7588,7 @@ submodule nokia-state-svc-vpls {
 
                                         leaf group-address {
                                             type types-sros:ipv6-multicast-address;
-                                            description "Group address of multicast channel";
+                                            description "Group address of multicast channel.";
                                         }
 
                                         leaf group-type {
@@ -7314,12 +7776,52 @@ submodule nokia-state-svc-vpls {
 
                     } // list tep
 
+                    container statistics {
+                        description "Enter the statistics context";
+
+                        leaf last-cleared {
+                            type types-sros:date-time;
+                            description "Indicates the time of the last clearing of vpls evpn-mpls statistics.";
+                        }
+
+                        leaf tep-egress-bind-failure-statistics {
+                            type types-sros:date-time;
+                            description "Indicates the TEP egress bind failure statistics time";
+                        }
+
+                        leaf tep {
+                            type uint32;
+                            description "Indicates the number of TEPs";
+                        }
+
+                        leaf service-multicast-limit {
+                            type uint32;
+                            description "Indicates the evpn-mpls TLS multicast limit";
+                        }
+
+                        leaf system-limit {
+                            type uint32;
+                            description "Indicates the system limit";
+                        }
+
+                        leaf pmsi {
+                            type uint32;
+                            description "indicates the PMSI limit";
+                        }
+
+                        leaf hardware-life-limit {
+                            type uint32;
+                            description "indicates the hardware life limit";
+                        }
+
+                    } // container statistics
+
                 } // list mpls
 
             } // container bgp-evpn
 
             container bgp-vpls {
-                description "Enable the bgp-vpls context";
+                description "Enter the bgp-vpls context";
 
                 leaf l2-vpn-ext-community-pw-template {
                     type string;
@@ -7425,7 +7927,7 @@ submodule nokia-state-svc-vpls {
 
                 leaf name {
                     type types-sros:named-item;
-                    description "Service endpoint name";
+                    description "Name of the service endpoint";
                 }
 
                 leaf revert-time-count-down {
@@ -7490,7 +7992,7 @@ submodule nokia-state-svc-vpls {
                         type uint32 {
                             range "1..4294967295";
                         }
-                        description "MC-EP ID";
+                        description "Multi-chassis end-point identifier.";
                     }
 
                     leaf passive-mode {
@@ -7513,19 +8015,23 @@ submodule nokia-state-svc-vpls {
                         type leafref {
                             path "../../../../../eth-cfm/domain/md-admin-name";
                         }
-                        description "Maintenance Domain (MD) name";
+                        description "A unique administratively assigned name used to identify a domain.";
                     }
 
                     leaf ma-admin-name {
                         type leafref {
                             path "../../../../../eth-cfm/domain[md-admin-name=current()/../md-admin-name]/association/ma-admin-name";
                         }
-                        description "Maintenance Association (MA) name";
+                        description "A unique administratively assigned name used to identify an association.";
                     }
 
                     leaf mep-id {
                         type types-eth-cfm:mep-id-type;
-                        description "Maintenance Endpoint (MEP) ID";
+                        description
+                            "A CFM Virtual Maintenance Endpoint
+
+                             Specifies a local Maintenance association End Point identifier unique
+                             over a given maintanance association.";
                     }
 
                     leaf if-index {
@@ -7780,7 +8286,10 @@ submodule nokia-state-svc-vpls {
 
                 leaf sdp-bind-id {
                     type types-services:sdp-bind-id;
-                    description "SDP binding ID";
+                    description
+                        "SDP Binding identifier as <sdp-id>:<vc-id>.
+                         sdp-id - [1..32767]
+                         vc-id - [1..4294967295].";
                 }
 
                 leaf oper-state {
@@ -7827,6 +8336,7 @@ submodule nokia-state-svc-vpls {
                         bit label-stack-limit-exceeded     { position 31; }
                         bit vccv-bfd-down                  { position 32; }
                         bit stitching-svc-pw-fault         { position 33; }
+                        bit out-of-anysec-resource         { position 34; }
                     }
                     description
                         "This object indicates all the conditions that affect the
@@ -7998,7 +8508,7 @@ submodule nokia-state-svc-vpls {
                 } // container bfd
 
                 container spb {
-                    description "Enable the spb context";
+                    description "Enter the spb context";
 
                     leaf interface {
                         type types-sros:interface-name;
@@ -8405,6 +8915,41 @@ submodule nokia-state-svc-vpls {
                 container fdb {
                     description "Enter the fdb context";
 
+                    leaf protected-mac-address-received {
+                        type yang:mac-address;
+                        description "The protected MAC address received";
+                    }
+
+                    leaf protected-mac-address-received-last-changed {
+                        type yang:date-and-time;
+                        description "Timestamp when the protected MAC address was receieved";
+                    }
+
+                    leaf pbb-protected-mac-address-received {
+                        type yang:mac-address;
+                        description "The PBB protected MAC address received";
+                    }
+
+                    leaf pbb-protected-mac-address-received-last-changed {
+                        type yang:date-and-time;
+                        description "Timestamp when the PBB protected MAC address was receieved";
+                    }
+
+                    leaf table-high-utilization {
+                        type boolean;
+                        description "Set to 'true' when the FDB table utilization reaches the high watermark and 'false' when it reaches the low watermark.";
+                    }
+
+                    leaf non-blockable-move-rate-exceeded-mac-address {
+                        type yang:mac-address;
+                        description "The non-blocking MAC address of the SAP that exceeds the maximum move rate";
+                    }
+
+                    leaf non-blockable-move-rate-exceeded-mac-address-last-changed {
+                        type yang:date-and-time;
+                        description "Timestamp when the non-blocking MAC addresses was detected";
+                    }
+
                     container statistics {
                         description "Enter the statistics context";
 
@@ -8544,6 +9089,227 @@ submodule nokia-state-svc-vpls {
                     } // container mac-move
 
                 } // container fdb
+
+                container stp {
+                    description "Enter the stp context";
+
+                    leaf bpdu-encap {
+                        type enumeration {
+                            enum dynamic                        { value 1; }
+                            enum dot1d                          { value 2; }
+                            enum pvst                           { value 3; }
+                        }
+                        description "B-PDU Encap";
+                    }
+
+                    leaf port-state {
+                        type enumeration {
+                            enum disabled                       { value 1; }
+                            enum blocking                       { value 2; }
+                            enum listening                      { value 3; }
+                            enum learning                       { value 4; }
+                            enum forwarding                     { value 5; }
+                            enum broken                         { value 6; }
+                            enum discarding                     { value 7; }
+                        }
+                        description "The PIP uplink's current state";
+                    }
+
+                    leaf designated-port {
+                        type int32;
+                        description "The identifier of the port on the designated bridge";
+                    }
+
+                    leaf forward-transitions {
+                        type uint32;
+                        description "The number of times the port has transitioned from learned state to forwarding state";
+                    }
+
+                    leaf designated-bridge {
+                        type types-sros:bridge-id;
+                        description "The identifier of the designated bridge of the PIP uplink";
+                    }
+
+                    leaf config-bpdus-received {
+                        type uint32;
+                        description "The number of configuration BPDUs received on this PIP uplink";
+                    }
+
+                    leaf bad-bpdus-received {
+                        type uint32;
+                        description "The number of bad BPDUs received on this PIP uplink";
+                    }
+
+                    leaf config-bpdus-transmitted {
+                        type uint32;
+                        description "The number of configuration BPDUs transmitted on this PIP uplink";
+                    }
+
+                    leaf tcn-bpdus-received {
+                        type uint32;
+                        description "Topology-change B-PDU received";
+                    }
+
+                    leaf tcn-bpdus-transmitted {
+                        type uint32;
+                        description "Topology-change B-PDU transmitted";
+                    }
+
+                    leaf oper-bpdu-encap {
+                        type enumeration {
+                            enum dot1d                          { value 2; }
+                            enum pvst                           { value 3; }
+                        }
+                        description "Oper B-PDU Encap";
+                    }
+
+                    leaf vpn-id {
+                        type uint32;
+                        description "Associated vpn identifier";
+                    }
+
+                    leaf customer-name {
+                        type string;
+                        description "Associated customer name";
+                    }
+
+                    leaf oper-edge {
+                        type boolean;
+                        description "Oper edge";
+                    }
+
+                    leaf port-role {
+                        type enumeration {
+                            enum master                         { value 0; }
+                            enum root                           { value 1; }
+                            enum designated                     { value 2; }
+                            enum alternate                      { value 3; }
+                            enum backup                         { value 4; }
+                            enum disabled                       { value 5; }
+                        }
+                        description "The current role of the PIP uplink";
+                    }
+
+                    leaf oper-protocol {
+                        type enumeration {
+                            enum not-applicable                 { value 0; }
+                            enum stp                            { value 1; }
+                            enum rstp                           { value 2; }
+                            enum mstp                           { value 3; }
+                        }
+                        description "The protocol running on this PIP uplink";
+                    }
+
+                    leaf rst-bpdus-received {
+                        type uint32;
+                        description "The number of RST BPDUs recieved on this PIP uplink";
+                    }
+
+                    leaf rst-bpdus-transmitted {
+                        type uint32;
+                        description "The number of RST BPDUs transmitted on this PIP uplink";
+                    }
+
+                    leaf exception {
+                        type enumeration {
+                            enum none                           { value 1; }
+                            enum one-way-communication          { value 2; }
+                            enum downstream-loop-detected       { value 3; }
+                        }
+                        description "Indicates if an stp exception is present on the pip";
+                    }
+
+                    leaf mst-bpdus-received {
+                        type uint32;
+                        description "The number of MST BPDUs received on this PIP uplink";
+                    }
+
+                    leaf mst-bpdus-transmitted {
+                        type uint32;
+                        description "The number of MST BPDUs transmitted on this PIP uplink";
+                    }
+
+                    leaf receive-designated-bridge {
+                        type types-sros:bridge-id;
+                        description "The identifier of the designated bridge of the PIP uplink";
+                    }
+
+                } // container stp
+
+                container l2pt {
+                    description "Enter the l2pt context";
+
+                    container stp {
+                        description "Enter the stp context";
+
+                        leaf config-bpdus-received {
+                            type uint32;
+                            description "The number of configuration BPDUs received on this PIP uplink";
+                        }
+
+                        leaf config-bpdus-transmitted {
+                            type uint32;
+                            description "The number of configuration BPDUs transmitted on this PIP uplink";
+                        }
+
+                        leaf rst-bpdus-received {
+                            type uint32;
+                            description "The number of RST BPDUs recieved on this PIP uplink";
+                        }
+
+                        leaf rst-bpdus-transmitted {
+                            type uint32;
+                            description "The number of RST BPDUs transmitted on this PIP uplink";
+                        }
+
+                        leaf tcn-bpdus-received {
+                            type uint32;
+                            description "Topology-change B-PDU received";
+                        }
+
+                        leaf tcn-bpdus-transmitted {
+                            type uint32;
+                            description "Topology-change B-PDU transmitted";
+                        }
+
+                        container encap {
+                            description "Enter the encap context";
+
+                            leaf config-bpdus-received {
+                                type uint32;
+                                description "The number of configuration BPDUs received on this PIP uplink";
+                            }
+
+                            leaf config-bpdus-transmitted {
+                                type uint32;
+                                description "The number of configuration BPDUs transmitted on this PIP uplink";
+                            }
+
+                            leaf rst-bpdus-received {
+                                type uint32;
+                                description "The number of RST BPDUs recieved on this PIP uplink";
+                            }
+
+                            leaf rst-bpdus-transmitted {
+                                type uint32;
+                                description "The number of RST BPDUs transmitted on this PIP uplink";
+                            }
+
+                            leaf tcn-bpdus-received {
+                                type uint32;
+                                description "Topology-change B-PDU received";
+                            }
+
+                            leaf tcn-bpdus-transmitted {
+                                type uint32;
+                                description "Topology-change B-PDU transmitted";
+                            }
+
+                        } // container encap
+
+                    } // container stp
+
+                } // container l2pt
 
                 container igmp-snooping {
                     description "Enter the igmp-snooping context";
@@ -8852,7 +9618,7 @@ submodule nokia-state-svc-vpls {
 
                         leaf group-address {
                             type types-sros:ipv4-multicast-address;
-                            description "Group address of static IGMP multicast channel";
+                            description "Group address of multicast channel.";
                         }
 
                         leaf group-type {
@@ -9171,7 +9937,7 @@ submodule nokia-state-svc-vpls {
 
                         leaf group-address {
                             type types-sros:ipv6-multicast-address;
-                            description "Group address of multicast channel";
+                            description "Group address of multicast channel.";
                         }
 
                         leaf group-type {
@@ -9895,19 +10661,23 @@ submodule nokia-state-svc-vpls {
                             type leafref {
                                 path "../../../../../../eth-cfm/domain/md-admin-name";
                             }
-                            description "Maintenance Domain (MD) name";
+                            description "A unique administratively assigned name used to identify a domain.";
                         }
 
                         leaf ma-admin-name {
                             type leafref {
                                 path "../../../../../../eth-cfm/domain[md-admin-name=current()/../md-admin-name]/association/ma-admin-name";
                             }
-                            description "Maintenance Association (MA) name";
+                            description "A unique administratively assigned name used to identify an association.";
                         }
 
                         leaf mep-id {
                             type types-eth-cfm:mep-id-type;
-                            description "Maintenance Endpoint (MEP) ID";
+                            description
+                                "A CFM Virtual Maintenance Endpoint
+
+                                 Specifies a local Maintenance association End Point identifier unique
+                                 over a given maintanance association.";
                         }
 
                         leaf if-index {
@@ -9921,7 +10691,7 @@ submodule nokia-state-svc-vpls {
                         }
 
                         container ais {
-                            description "Enable the ais context";
+                            description "Enter the ais context";
 
                             container received {
                                 description "Enter the received context";
@@ -9958,7 +10728,7 @@ submodule nokia-state-svc-vpls {
                         } // container ais
 
                         container csf {
-                            description "Enable the csf context";
+                            description "Enter the csf context";
 
                             container received {
                                 description "Enter the received context";
@@ -10230,7 +11000,7 @@ submodule nokia-state-svc-vpls {
 
                         leaf primary-vlan {
                             type types-eth-cfm:vlan-id-or-none;
-                            description "VLAN ID to which the MIP is attached";
+                            description "The VLAN ID to which the MIP is attached or none.";
                         }
 
                         leaf instantiated {
@@ -10385,7 +11155,10 @@ submodule nokia-state-svc-vpls {
 
                 leaf sdp-bind-id {
                     type types-services:sdp-bind-id;
-                    description "SDP binding ID";
+                    description
+                        "SDP Binding identifier as <sdp-id>:<vc-id>.
+                         sdp-id - [1..32767]
+                         vc-id - [1..4294967295].";
                 }
 
                 leaf oper-state {
@@ -10432,6 +11205,7 @@ submodule nokia-state-svc-vpls {
                         bit label-stack-limit-exceeded     { position 31; }
                         bit vccv-bfd-down                  { position 32; }
                         bit stitching-svc-pw-fault         { position 33; }
+                        bit out-of-anysec-resource         { position 34; }
                     }
                     description
                         "This object indicates all the conditions that affect the
@@ -10647,6 +11421,68 @@ submodule nokia-state-svc-vpls {
 
                 } // container ethernet-segment
 
+                container stp {
+                    description "Enter the stp context";
+
+                    leaf port-state {
+                        type enumeration {
+                            enum disabled                       { value 1; }
+                            enum blocking                       { value 2; }
+                            enum listening                      { value 3; }
+                            enum learning                       { value 4; }
+                            enum forwarding                     { value 5; }
+                            enum broken                         { value 6; }
+                            enum discarding                     { value 7; }
+                        }
+                        description "The PIP uplink's current state";
+                    }
+
+                    leaf hold-down-timer {
+                        type enumeration {
+                            enum not-active                     { value 1; }
+                            enum active                         { value 2; }
+                        }
+                        description
+                            "When the hold-down timer is active, all traffic coming
+                             from this mesh sdp will be blocked. This timer will be
+                             activated for any of the following cases:
+                             1. when a mesh SDP becomes operational;
+                             2. when a 'disputed' BPDU is received over this mesh sdp;
+                                This is typically a symptom of one way communication
+                                (the peer at the other side of the mesh sdp does not
+                                receive our BPDUs).
+                             3. when a MSTP BPDU from outside the region is received
+                                over this mesh SDP.";
+                    }
+
+                    leaf transition-state {
+                        type enumeration {
+                            enum not-applicable                 { value 1; }
+                            enum waiting-for-agreement          { value 2; }
+                            enum agreement-received             { value 3; }
+                        }
+                        description
+                            "Whether we already received an
+                             agreement from the peer connected via this mesh sdp. RSTP
+                             expects an agreement from every peer after sending a
+                             proposal over the VCP when it wants to transition the latter
+                             to the forwarding state. This object is only relevant when
+                             the role of the VCP is 'designated'. Not receiving an
+                             agreement is typically caused by an improperly configured
+                             sdp or by a non rstp enabled peer.";
+                    }
+
+                    leaf not-in-mst-region {
+                        type boolean;
+                        description
+                            "Whether we received a BPDU from another MST-region on this mesh SDP.
+                             It is up to the operator to make sure bridges connected
+                             via mesh SDPs are in the same MST-region. If not the mesh
+                             will NOT become operational.";
+                    }
+
+                } // container stp
+
                 container igmp-snooping {
                     description "Enter the igmp-snooping context";
 
@@ -10954,7 +11790,7 @@ submodule nokia-state-svc-vpls {
 
                         leaf group-address {
                             type types-sros:ipv4-multicast-address;
-                            description "Group address of static IGMP multicast channel";
+                            description "Group address of multicast channel.";
                         }
 
                         leaf group-type {
@@ -11273,7 +12109,7 @@ submodule nokia-state-svc-vpls {
 
                         leaf group-address {
                             type types-sros:ipv6-multicast-address;
-                            description "Group address of multicast channel";
+                            description "Group address of multicast channel.";
                         }
 
                         leaf group-type {
@@ -11997,19 +12833,23 @@ submodule nokia-state-svc-vpls {
                             type leafref {
                                 path "../../../../../../eth-cfm/domain/md-admin-name";
                             }
-                            description "Maintenance Domain (MD) name";
+                            description "A unique administratively assigned name used to identify a domain.";
                         }
 
                         leaf ma-admin-name {
                             type leafref {
                                 path "../../../../../../eth-cfm/domain[md-admin-name=current()/../md-admin-name]/association/ma-admin-name";
                             }
-                            description "Maintenance Association (MA) name";
+                            description "A unique administratively assigned name used to identify an association.";
                         }
 
                         leaf mep-id {
                             type types-eth-cfm:mep-id-type;
-                            description "Maintenance Endpoint (MEP) ID";
+                            description
+                                "A CFM Virtual Maintenance Endpoint
+
+                                 Specifies a local Maintenance association End Point identifier unique
+                                 over a given maintanance association.";
                         }
 
                         leaf if-index {
@@ -12023,7 +12863,7 @@ submodule nokia-state-svc-vpls {
                         }
 
                         container ais {
-                            description "Enable the ais context";
+                            description "Enter the ais context";
 
                             container received {
                                 description "Enter the received context";
@@ -12060,7 +12900,7 @@ submodule nokia-state-svc-vpls {
                         } // container ais
 
                         container csf {
-                            description "Enable the csf context";
+                            description "Enter the csf context";
 
                             container received {
                                 description "Enter the received context";
@@ -12332,7 +13172,7 @@ submodule nokia-state-svc-vpls {
 
                         leaf primary-vlan {
                             type types-eth-cfm:vlan-id-or-none;
-                            description "VLAN ID to which the MIP is attached";
+                            description "The VLAN ID to which the MIP is attached or none.";
                         }
 
                         leaf instantiated {
@@ -13589,6 +14429,11 @@ submodule nokia-state-svc-vpls {
                                         description "Oper burst FIR.";
                                     }
 
+                                    leaf local-parent-rate {
+                                        type types-qos:kbps;
+                                        description "The local limit rate for the delay budget";
+                                    }
+
                                 } // list hardware-queue
 
                             } // list queue
@@ -14445,6 +15290,27 @@ submodule nokia-state-svc-vpls {
                                         description "The number of forwarded octets.";
                                     }
 
+                                    list lag-member-port {
+                                        key "port";
+                                        description "Enter the lag-member-port list instance";
+
+                                        leaf port {
+                                            type types-sros:port;
+                                            description "Port identifier";
+                                        }
+
+                                        leaf forwarded-packets {
+                                            type yang:counter64;
+                                            description "The number of forwarded packets.";
+                                        }
+
+                                        leaf forwarded-octets {
+                                            type yang:counter64;
+                                            description "The number of forwarded octets.";
+                                        }
+
+                                    } // list lag-member-port
+
                                 } // container statistics
 
                             } // list arbiter
@@ -14475,6 +15341,27 @@ submodule nokia-state-svc-vpls {
                                         type yang:counter64;
                                         description "The number of forwarded octets.";
                                     }
+
+                                    list lag-member-port {
+                                        key "port";
+                                        description "Enter the lag-member-port list instance";
+
+                                        leaf port {
+                                            type types-sros:port;
+                                            description "Port identifier";
+                                        }
+
+                                        leaf forwarded-packets {
+                                            type yang:counter64;
+                                            description "The number of forwarded packets.";
+                                        }
+
+                                        leaf forwarded-octets {
+                                            type yang:counter64;
+                                            description "The number of forwarded octets.";
+                                        }
+
+                                    } // list lag-member-port
 
                                 } // container statistics
 
@@ -15457,6 +16344,11 @@ submodule nokia-state-svc-vpls {
                                         description "Depth CIR.";
                                     }
 
+                                    leaf operational-burst-limit {
+                                        type uint32;
+                                        description "Sepcifies the operational burst-limit value.";
+                                    }
+
                                     leaf operational-exceed-burst {
                                         type types-qos:int64-max;
                                         description "Oper burst exceed.";
@@ -15470,6 +16362,16 @@ submodule nokia-state-svc-vpls {
                                     leaf operational-burst-fir {
                                         type types-qos:int64-max;
                                         description "Oper burst FIR.";
+                                    }
+
+                                    leaf orphan {
+                                        type boolean;
+                                        description "Orphan queue";
+                                    }
+
+                                    leaf local-parent-rate {
+                                        type types-qos:kbps;
+                                        description "The local limit rate for the delay budget";
                                     }
 
                                     container exceed-slope {
@@ -15511,6 +16413,33 @@ submodule nokia-state-svc-vpls {
                                         }
 
                                     } // container low-slope
+
+                                    container aggregate-rate {
+                                        description "Enter the aggregate-rate context";
+
+                                        leaf rate {
+                                            type types-qos:kbps;
+                                            units "kilobps";
+                                            description "Rate";
+                                        }
+
+                                        leaf on-the-wire {
+                                            type types-qos:on-the-wire;
+                                            description "On the wire";
+                                        }
+
+                                        leaf type {
+                                            type types-qos:qos-location;
+                                            description "Aggregate rate type";
+                                        }
+
+                                        leaf vport-rate {
+                                            type types-qos:kbps;
+                                            units "kilobps";
+                                            description "Vport rate";
+                                        }
+
+                                    } // container aggregate-rate
 
                                 } // list hardware-queue
 
@@ -16449,6 +17378,27 @@ submodule nokia-state-svc-vpls {
                                         description "The number of forwarded octets.";
                                     }
 
+                                    list lag-member-port {
+                                        key "port";
+                                        description "Enter the lag-member-port list instance";
+
+                                        leaf port {
+                                            type types-sros:port;
+                                            description "Port identifier";
+                                        }
+
+                                        leaf forwarded-packets {
+                                            type yang:counter64;
+                                            description "The number of forwarded packets.";
+                                        }
+
+                                        leaf forwarded-octets {
+                                            type yang:counter64;
+                                            description "The number of forwarded octets.";
+                                        }
+
+                                    } // list lag-member-port
+
                                 } // container statistics
 
                             } // list arbiter
@@ -16480,13 +17430,480 @@ submodule nokia-state-svc-vpls {
                                         description "The number of forwarded octets.";
                                     }
 
+                                    list lag-member-port {
+                                        key "port";
+                                        description "Enter the lag-member-port list instance";
+
+                                        leaf port {
+                                            type types-sros:port;
+                                            description "Port identifier";
+                                        }
+
+                                        leaf forwarded-packets {
+                                            type yang:counter64;
+                                            description "The number of forwarded packets.";
+                                        }
+
+                                        leaf forwarded-octets {
+                                            type yang:counter64;
+                                            description "The number of forwarded octets.";
+                                        }
+
+                                    } // list lag-member-port
+
                                 } // container statistics
 
+                                list sap-scheduler {
+                                    key "card fp port physical-port";
+                                    description "Enter the sap-scheduler list instance";
+
+                                    leaf card {
+                                        type int32;
+                                        description "Card number";
+                                    }
+
+                                    leaf fp {
+                                        type types-services:fp-any;
+                                        description "FP number";
+                                    }
+
+                                    leaf port {
+                                        type types-services:port-any;
+                                        description "Port information";
+                                    }
+
+                                    leaf physical-port {
+                                        type types-services:port-any;
+                                        description "Physical port";
+                                    }
+
+                                    leaf members {
+                                        type uint32;
+                                        description "Members";
+                                    }
+
+                                    leaf max-pir {
+                                        type types-qos:sched-pir;
+                                        description "Max PIR rate";
+                                    }
+
+                                    leaf oper-pir {
+                                        type types-qos:sched-pir;
+                                        description "Operational PIR rate";
+                                    }
+
+                                    leaf parent-limit-unused-bandwidth {
+                                        type boolean;
+                                        description "Parent limit unused bandwidth";
+                                    }
+
+                                    leaf orphan {
+                                        type boolean;
+                                        description "Orphan";
+                                    }
+
+                                    container within-cir {
+                                        description "Enter the within-cir context";
+
+                                        leaf consumed {
+                                            type types-qos:kbps;
+                                            units "kilobps";
+                                            description "Consumed";
+                                        }
+
+                                        leaf offered {
+                                            type types-qos:kbps;
+                                            units "kilobps";
+                                            description "Offered";
+                                        }
+
+                                        leaf parent-level {
+                                            type int32;
+                                            description "Parent level";
+                                        }
+
+                                    } // container within-cir
+
+                                    container above-cir {
+                                        description "Enter the above-cir context";
+
+                                        leaf consumed {
+                                            type types-qos:kbps;
+                                            units "kilobps";
+                                            description "Consumed";
+                                        }
+
+                                        leaf offered {
+                                            type types-qos:kbps;
+                                            units "kilobps";
+                                            description "Offered";
+                                        }
+
+                                        leaf parent-level {
+                                            type int32;
+                                            description "Parent level";
+                                        }
+
+                                    } // container above-cir
+
+                                    list level {
+                                        key "level-index";
+                                        description "Enter the level list instance";
+
+                                        leaf level-index {
+                                            type int32 {
+                                                range "0..8";
+                                            }
+                                        }
+
+                                        container within-cir {
+                                            description "Enter the within-cir context";
+
+                                            leaf members {
+                                                type uint32;
+                                                description "Members";
+                                            }
+
+                                            leaf consumed {
+                                                type types-qos:kbps;
+                                                units "kilobps";
+                                                description "Consumed";
+                                            }
+
+                                            leaf offered {
+                                                type types-qos:kbps;
+                                                units "kilobps";
+                                                description "Offered";
+                                            }
+
+                                            container sched-hierarchy {
+                                                description "Enter the sched-hierarchy context";
+
+                                                container queue {
+                                                    description "Enter the queue context";
+
+                                                    container sap {
+                                                        description "Enter the sap context";
+
+                                                        list queue {
+                                                            key "member";
+                                                            description "Enter the queue list instance";
+
+                                                            leaf member {
+                                                                type uint32;
+                                                                description "Member information";
+                                                            }
+
+                                                            leaf queue-id {
+                                                                type int32;
+                                                                description "Queue identifier";
+                                                            }
+
+                                                            leaf sap-id {
+                                                                type types-sros:sap;
+                                                                description "SAP identifier";
+                                                            }
+
+                                                            leaf port {
+                                                                type types-sros:port;
+                                                                description "Port identifier";
+                                                            }
+
+                                                        } // list queue
+
+                                                    } // container sap
+
+                                                } // container queue
+
+                                                container scheduler {
+                                                    description "Enter the scheduler context";
+
+                                                    container sap {
+                                                        description "Enter the sap context";
+
+                                                        list scheduler {
+                                                            key "member";
+                                                            description "Enter the scheduler list instance";
+
+                                                            leaf member {
+                                                                type uint32;
+                                                                description "Member information";
+                                                            }
+
+                                                            leaf scheduler-name {
+                                                                type string;
+                                                                description "Name";
+                                                            }
+
+                                                            leaf sap-id {
+                                                                type types-sros:sap;
+                                                                description "SAP identifier";
+                                                            }
+
+                                                        } // list scheduler
+
+                                                        list t0-scheduler {
+                                                            key "member";
+                                                            description "Enter the t0-scheduler list instance";
+
+                                                            leaf member {
+                                                                type uint32;
+                                                                description "Member information";
+                                                            }
+
+                                                            leaf scheduler-name {
+                                                                type string;
+                                                                description "Name";
+                                                            }
+
+                                                            leaf sap-id {
+                                                                type types-sros:sap;
+                                                                description "SAP identifier";
+                                                            }
+
+                                                        } // list t0-scheduler
+
+                                                    } // container sap
+
+                                                } // container scheduler
+
+                                            } // container sched-hierarchy
+
+                                        } // container within-cir
+
+                                        container above-cir {
+                                            description "Enter the above-cir context";
+
+                                            leaf members {
+                                                type uint32;
+                                                description "Members";
+                                            }
+
+                                            leaf consumed {
+                                                type types-qos:kbps;
+                                                units "kilobps";
+                                                description "Consumed";
+                                            }
+
+                                            leaf offered {
+                                                type types-qos:kbps;
+                                                units "kilobps";
+                                                description "Offered";
+                                            }
+
+                                            container sched-hierarchy {
+                                                description "Enter the sched-hierarchy context";
+
+                                                container queue {
+                                                    description "Enter the queue context";
+
+                                                    container sap {
+                                                        description "Enter the sap context";
+
+                                                        list queue {
+                                                            key "member";
+                                                            description "Enter the queue list instance";
+
+                                                            leaf member {
+                                                                type uint32;
+                                                                description "Member information";
+                                                            }
+
+                                                            leaf queue-id {
+                                                                type int32;
+                                                                description "Queue identifier";
+                                                            }
+
+                                                            leaf sap-id {
+                                                                type types-sros:sap;
+                                                                description "SAP identifier";
+                                                            }
+
+                                                            leaf port {
+                                                                type types-sros:port;
+                                                                description "Port identifier";
+                                                            }
+
+                                                        } // list queue
+
+                                                    } // container sap
+
+                                                } // container queue
+
+                                                container scheduler {
+                                                    description "Enter the scheduler context";
+
+                                                    container sap {
+                                                        description "Enter the sap context";
+
+                                                        list scheduler {
+                                                            key "member";
+                                                            description "Enter the scheduler list instance";
+
+                                                            leaf member {
+                                                                type uint32;
+                                                                description "Member information";
+                                                            }
+
+                                                            leaf scheduler-name {
+                                                                type string;
+                                                                description "Name";
+                                                            }
+
+                                                            leaf sap-id {
+                                                                type types-sros:sap;
+                                                                description "SAP identifier";
+                                                            }
+
+                                                        } // list scheduler
+
+                                                        list t0-scheduler {
+                                                            key "member";
+                                                            description "Enter the t0-scheduler list instance";
+
+                                                            leaf member {
+                                                                type uint32;
+                                                                description "Member information";
+                                                            }
+
+                                                            leaf scheduler-name {
+                                                                type string;
+                                                                description "Name";
+                                                            }
+
+                                                            leaf sap-id {
+                                                                type types-sros:sap;
+                                                                description "SAP identifier";
+                                                            }
+
+                                                        } // list t0-scheduler
+
+                                                    } // container sap
+
+                                                } // container scheduler
+
+                                            } // container sched-hierarchy
+
+                                        } // container above-cir
+
+                                    } // list level
+
+                                } // list sap-scheduler
+
                             } // list scheduler
+
+                            list t0-scheduler {
+                                key "card scheduler-name";
+                                description "Enter the t0-scheduler list instance";
+
+                                leaf card {
+                                    type int32;
+                                    description "Card number";
+                                }
+
+                                leaf scheduler-name {
+                                    type string;
+                                    description "Name";
+                                }
+
+                                leaf orphan {
+                                    type boolean;
+                                    description "Orphan";
+                                }
+
+                                leaf members {
+                                    type uint32;
+                                    description "Members";
+                                }
+
+                                container sched-hierarchy {
+                                    description "Enter the sched-hierarchy context";
+
+                                    container queue {
+                                        description "Enter the queue context";
+
+                                        container sap {
+                                            description "Enter the sap context";
+
+                                            list queue {
+                                                key "member";
+                                                description "Enter the queue list instance";
+
+                                                leaf member {
+                                                    type uint32;
+                                                    description "Member information";
+                                                }
+
+                                                leaf queue-id {
+                                                    type int32;
+                                                    description "Queue identifier";
+                                                }
+
+                                                leaf sap-id {
+                                                    type types-sros:sap;
+                                                    description "SAP identifier";
+                                                }
+
+                                                leaf port {
+                                                    type types-sros:port;
+                                                    description "Port identifier";
+                                                }
+
+                                            } // list queue
+
+                                        } // container sap
+
+                                    } // container queue
+
+                                } // container sched-hierarchy
+
+                            } // list t0-scheduler
 
                         } // container scheduler-policy
 
                     } // container qos
+
+                    list agg-rate-state {
+                        key "card fp port physical-port";
+                        description "Enter the agg-rate-state list instance";
+
+                        leaf card {
+                            type int32;
+                            description "Card number";
+                        }
+
+                        leaf fp {
+                            type types-services:fp-any;
+                            description "FP number";
+                        }
+
+                        leaf port {
+                            type types-services:port-any;
+                            description "Port information";
+                        }
+
+                        leaf physical-port {
+                            type types-services:port-any;
+                            description "Physical port";
+                        }
+
+                        leaf rate {
+                            type types-qos:kbps;
+                            units "kilobps";
+                            description "Rate";
+                        }
+
+                        leaf limit-unused-bandwidth {
+                            type boolean;
+                            description "Aggregate rate limit-unused-bandwidth";
+                        }
+
+                        leaf on-the-wire {
+                            type types-qos:on-the-wire;
+                            description "On the wire";
+                        }
+
+                    } // list agg-rate-state
 
                 } // container egress
 
@@ -16619,7 +18036,7 @@ submodule nokia-state-svc-vpls {
 
                         leaf group-address {
                             type types-sros:ipv4-multicast-address;
-                            description "Group address of static IGMP multicast channel";
+                            description "Group address of multicast channel.";
                         }
 
                         leaf source-address {
@@ -16978,7 +18395,7 @@ submodule nokia-state-svc-vpls {
 
                         leaf group-address {
                             type types-sros:ipv4-multicast-address;
-                            description "Group address of static IGMP multicast channel";
+                            description "Group address of multicast channel.";
                         }
 
                         leaf group-type {
@@ -17326,7 +18743,7 @@ submodule nokia-state-svc-vpls {
 
                         leaf group-address {
                             type types-sros:ipv6-multicast-address;
-                            description "Group address of multicast channel";
+                            description "Group address of multicast channel.";
                         }
 
                         leaf group-type {
@@ -18056,6 +19473,139 @@ submodule nokia-state-svc-vpls {
                 container stp {
                     description "Enter the stp context";
 
+                    leaf port-state {
+                        type enumeration {
+                            enum disabled                       { value 1; }
+                            enum blocking                       { value 2; }
+                            enum listening                      { value 3; }
+                            enum learning                       { value 4; }
+                            enum forwarding                     { value 5; }
+                            enum broken                         { value 6; }
+                            enum discarding                     { value 7; }
+                        }
+                        description "The PIP uplink's current state";
+                    }
+
+                    leaf designated-bridge {
+                        type types-sros:bridge-id;
+                        description "The identifier of the designated bridge of the PIP uplink";
+                    }
+
+                    leaf designated-port {
+                        type int32;
+                        description "The identifier of the port on the designated bridge";
+                    }
+
+                    leaf forward-transitions {
+                        type uint32;
+                        description "The number of times the port has transitioned from learned state to forwarding state";
+                    }
+
+                    leaf config-bpdus-received {
+                        type uint32;
+                        description "The number of configuration BPDUs received on this PIP uplink";
+                    }
+
+                    leaf tcn-bpdus-received {
+                        type uint32;
+                        description "The number of topology change notification BPDUs received on this PIP uplink";
+                    }
+
+                    leaf bad-bpdus-received {
+                        type uint32;
+                        description "The number of bad BPDUs received on this PIP uplink";
+                    }
+
+                    leaf config-bpdus-transmitted {
+                        type uint32;
+                        description "The number of configuration BPDUs transmitted on this PIP uplink";
+                    }
+
+                    leaf tcn-bpdus-transmitted {
+                        type uint32;
+                        description "The number of topology change notification BPDUs transmitted on this PIP uplink";
+                    }
+
+                    leaf oper-bpdus-encap {
+                        type enumeration {
+                            enum dynamic                        { value 1; }
+                            enum dot1d                          { value 2; }
+                            enum pvst                           { value 3; }
+                        }
+                        description "The operatiing encsapsulation type used on BPDUs sent and received on this SAP";
+                    }
+
+                    leaf oper-edge {
+                        type boolean;
+                        description "Oper edge";
+                    }
+
+                    leaf port-role {
+                        type enumeration {
+                            enum master                         { value 0; }
+                            enum root                           { value 1; }
+                            enum designated                     { value 2; }
+                            enum alternate                      { value 3; }
+                            enum backup                         { value 4; }
+                            enum disabled                       { value 5; }
+                        }
+                        description "The current role of the PIP uplink";
+                    }
+
+                    leaf oper-protocol {
+                        type enumeration {
+                            enum not-applicable                 { value 0; }
+                            enum stp                            { value 1; }
+                            enum rstp                           { value 2; }
+                            enum mstp                           { value 3; }
+                        }
+                        description "The protocol running on this PIP uplink";
+                    }
+
+                    leaf rst-bpdus-received {
+                        type uint32;
+                        description "The number of RST BPDUs recieved on this PIP uplink";
+                    }
+
+                    leaf rst-bpdus-transmitted {
+                        type uint32;
+                        description "The number of RST BPDUs transmitted on this PIP uplink";
+                    }
+
+                    leaf exception {
+                        type enumeration {
+                            enum none                           { value 1; }
+                            enum one-way-communication          { value 2; }
+                            enum downstream-loop-detected       { value 3; }
+                        }
+                        description "Indicates if an stp exception is present on the pip";
+                    }
+
+                    leaf inside-region {
+                        type boolean;
+                        description "Indicates if the network connected to the PIP is in the same MST region";
+                    }
+
+                    leaf mst-bpdus-received {
+                        type uint32;
+                        description "The number of MST BPDUs received on this PIP uplink";
+                    }
+
+                    leaf mst-bpdus-transmitted {
+                        type uint32;
+                        description "The number of MST BPDUs transmitted on this PIP uplink";
+                    }
+
+                    leaf receive-designated-bridge {
+                        type types-sros:bridge-id;
+                        description "The identifier of the designated bridge of the PIP uplink";
+                    }
+
+                    leaf root-guard-violation {
+                        type boolean;
+                        description "Indicates if there is a root-guard violation.";
+                    }
+
                     list mst-instance {
                         key "mst-inst-number";
                         description "Enter the mst-instance list instance";
@@ -18114,6 +19664,81 @@ submodule nokia-state-svc-vpls {
 
                 } // container stp
 
+                container l2pt {
+                    description "Enter the l2pt context";
+
+                    container stp {
+                        description "Enter the stp context";
+
+                        leaf config-bpdus-received {
+                            type uint32;
+                            description "The number of L2PT configuration BPDUs received on this SAP";
+                        }
+
+                        leaf config-bpdus-transmitted {
+                            type uint32;
+                            description "The number of L2PT configuration BPDUs transmitted on this SAP";
+                        }
+
+                        leaf rst-bpdus-received {
+                            type uint32;
+                            description "The number of L2PT RST BPDUs received on this SAP";
+                        }
+
+                        leaf rst-bpdus-transmitted {
+                            type uint32;
+                            description "The number of L2PT RST configuration BPDUs transmitted on this SAP";
+                        }
+
+                        leaf tcn-bpdus-received {
+                            type uint32;
+                            description "The number of L2PT topology change notification BPDUs received on this SAP";
+                        }
+
+                        leaf tcn-bpdus-transmitted {
+                            type uint32;
+                            description "The number of L2PT topology change notification BPDUs transmitted on this SAP";
+                        }
+
+                        container encap {
+                            description "Enter the encap context";
+
+                            leaf config-bpdus-received {
+                                type uint32;
+                                description "The number of L2PT encapsulated configuration BPDUs received on this SAP";
+                            }
+
+                            leaf config-bpdus-transmitted {
+                                type uint32;
+                                description "The number of L2PT encapsulated configuration BPDUs transmitted on this SAP";
+                            }
+
+                            leaf rst-bpdus-received {
+                                type uint32;
+                                description "The number of L2PT encapsulated RST BPDUs received on this SAP";
+                            }
+
+                            leaf rst-bpdus-transmitted {
+                                type uint32;
+                                description "The number of L2PT encapsulated RST configuration BPDUs transmitted on this SAP";
+                            }
+
+                            leaf tcn-bpdus-received {
+                                type uint32;
+                                description "The number of L2PT encapsulated topology change notification BPDUs received on this SAP";
+                            }
+
+                            leaf tcn-bpdus-transmitted {
+                                type uint32;
+                                description "The number of L2PT encapsulated topology change notification BPDUs transmitted on this SAP";
+                            }
+
+                        } // container encap
+
+                    } // container stp
+
+                } // container l2pt
+
                 container fdb {
                     description "Enter the fdb context";
 
@@ -18130,6 +19755,51 @@ submodule nokia-state-svc-vpls {
                     leaf oper-auto-learn-mac-protect-exclude-list {
                         type types-sros:named-item-or-empty;
                         description "Operational mac protect exclusion list";
+                    }
+
+                    leaf protected-mac-address-received {
+                        type yang:mac-address;
+                        description "The protected MAC address received";
+                    }
+
+                    leaf protected-mac-address-received-last-changed {
+                        type yang:date-and-time;
+                        description "Timestamp when the protected MAC address was receieved";
+                    }
+
+                    leaf pbb-protected-mac-address-received {
+                        type yang:mac-address;
+                        description "The PBB protected MAC address received";
+                    }
+
+                    leaf pbb-protected-mac-address-received-last-changed {
+                        type yang:date-and-time;
+                        description "Timestamp when the PBB protected MAC address was receieved";
+                    }
+
+                    leaf table-high-utilization {
+                        type boolean;
+                        description "Set to 'true' when the FDB table utilization reaches the high watermark and 'false' when it reaches the low watermark.";
+                    }
+
+                    leaf non-blockable-move-rate-exceeded-mac-address {
+                        type yang:mac-address;
+                        description "The non-blocking MAC address of the SAP that exceeds the maximum move rate";
+                    }
+
+                    leaf non-blockable-move-rate-exceeded-mac-address-last-changed {
+                        type yang:date-and-time;
+                        description "Timestamp when the non-blocking MAC addresses was detected";
+                    }
+
+                    leaf mac-move-rate-exceeded-mac-address {
+                        type yang:mac-address;
+                        description "The MAC address of the SAP that exceeds the maximum move rate";
+                    }
+
+                    leaf mac-move-rate-exceeded-mac-address-last-changed {
+                        type yang:date-and-time;
+                        description "Timestamp when the MAC addresses was detected";
                     }
 
                     container mac-move {
@@ -18279,7 +19949,7 @@ submodule nokia-state-svc-vpls {
                 } // container mrp
 
                 container l2tpv3-session {
-                    description "Enable the l2tpv3-session context";
+                    description "Enter the l2tpv3-session context";
 
                     leaf oper-state {
                         type types-sros:oper-state;
@@ -18313,7 +19983,7 @@ submodule nokia-state-svc-vpls {
                 } // container l2tpv3-session
 
                 container spb {
-                    description "Enable the spb context";
+                    description "Enter the spb context";
 
                     leaf interface {
                         type types-sros:interface-name;
@@ -19253,19 +20923,23 @@ submodule nokia-state-svc-vpls {
                             type leafref {
                                 path "../../../../../../eth-cfm/domain/md-admin-name";
                             }
-                            description "Maintenance Domain (MD) name";
+                            description "A unique administratively assigned name used to identify a domain.";
                         }
 
                         leaf ma-admin-name {
                             type leafref {
                                 path "../../../../../../eth-cfm/domain[md-admin-name=current()/../md-admin-name]/association/ma-admin-name";
                             }
-                            description "Maintenance Association (MA) name";
+                            description "A unique administratively assigned name used to identify an association.";
                         }
 
                         leaf mep-id {
                             type types-eth-cfm:mep-id-type;
-                            description "Maintenance Endpoint (MEP) ID";
+                            description
+                                "A CFM Virtual Maintenance Endpoint
+
+                                 Specifies a local Maintenance association End Point identifier unique
+                                 over a given maintanance association.";
                         }
 
                         leaf if-index {
@@ -19278,8 +20952,13 @@ submodule nokia-state-svc-vpls {
                             description "Operational MAC address of the MEP.";
                         }
 
+                        leaf oper-group-state {
+                            type types-sros:up-down-status;
+                            description "MEP state caused by operational group";
+                        }
+
                         container ais {
-                            description "Enable the ais context";
+                            description "Enter the ais context";
 
                             container received {
                                 description "Enter the received context";
@@ -19316,7 +20995,7 @@ submodule nokia-state-svc-vpls {
                         } // container ais
 
                         container csf {
-                            description "Enable the csf context";
+                            description "Enter the csf context";
 
                             container received {
                                 description "Enter the received context";
@@ -19588,7 +21267,7 @@ submodule nokia-state-svc-vpls {
 
                         leaf primary-vlan {
                             type types-eth-cfm:vlan-id-or-none;
-                            description "VLAN ID to which the MIP is attached";
+                            description "The VLAN ID to which the MIP is attached or none.";
                         }
 
                         leaf instantiated {
@@ -19753,7 +21432,7 @@ submodule nokia-state-svc-vpls {
                                 type leafref {
                                     path "../../../../../../oper-group/name";
                                 }
-                                description "Operational group name";
+                                description "The identifier of the operational group";
                             }
 
                             leaf actual-health-drop {
@@ -20061,7 +21740,9 @@ submodule nokia-state-svc-vpls {
 
                 leaf interface-name {
                     type types-sros:interface-name;
-                    description "IP interface name";
+                    description
+                        "The administrative name assigned to this router interface. The interface
+                         name must be unique among entries with the same vRtrID value.";
                 }
 
                 leaf if-index {
@@ -20189,6 +21870,8 @@ submodule nokia-state-svc-vpls {
                             bit pdn-address-mismatch           { position 18; }
                             bit ping-check-failure             { position 19; }
                             bit port-internal-loopback         { position 20; }
+                            bit no-resources-for-srv6-loopback { position 21; }
+                            bit ip-tunnel-not-ready            { position 22; }
                         }
                         description
                             "Indicates the reason for why the interface is operationally down.
@@ -20214,7 +21897,9 @@ submodule nokia-state-svc-vpls {
                                  ip-control-tunnel-down          - The IP tunnel associated to a control-tunnel interface is operationally down.
                                  pdn-address-mismatch            - The IP address learned from the packet data network does not match the configured primary IP address.
                                  ping-check-failure              - The IP interface is or went down because of a ping-template failure.
-                                 port-internal-loopback          - The IP interface is bound to a port that has an internal loopback configured.";
+                                 port-internal-loopback          - The IP interface is bound to a port that has an internal loopback configured.
+                                 no-resources-for-srv6-loopback  - There are not enough resources for the SRv6 locator prefix loopback address.
+                                 ip-tunnel-not-ready             - The IP tunnel associated to an ip-tunnel-interface is not ready.";
                     }
 
                     container icmp {
@@ -20382,7 +22067,7 @@ submodule nokia-state-svc-vpls {
                     } // container icmp
 
                     container primary {
-                        description "Enable the primary context";
+                        description "Enter the primary context";
 
                         leaf oper-address {
                             type types-sros:ip-address;
@@ -20405,7 +22090,7 @@ submodule nokia-state-svc-vpls {
 
                             leaf ipv4-address {
                                 type types-sros:ipv4-address;
-                                description "IPv4 address that corresponds to the physical address";
+                                description "The IPv4 address corresponding to the media-dependent physical address.";
                             }
 
                             leaf oper-state {
@@ -20449,7 +22134,7 @@ submodule nokia-state-svc-vpls {
             } // list interface
 
             container provider-tunnel {
-                description "Enable the provider-tunnel context";
+                description "Enter the provider-tunnel context";
 
                 container inclusive {
                     description "Enter the inclusive context";

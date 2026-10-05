@@ -46,7 +46,7 @@ submodule nokia-conf-subscriber-mgmt {
     include nokia-conf-system;
     include nokia-conf-system-security;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -69,7 +69,7 @@ submodule nokia-conf-subscriber-mgmt {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-12-01";
+    revision "2026-07-22";
 
     grouping conf-subscriber-mgmt {
         container subscriber-mgmt {
@@ -2065,7 +2065,7 @@ submodule nokia-conf-subscriber-mgmt {
                 leaf use-multicast-destination-mac {
                     type boolean;
                     default "false";
-                    description "Use multicast destination mac address for outgoing traffic.";
+                    description "Use multicast destination MAC for outgoing traffic";
                 }
 
                 leaf router-alert-check {
@@ -2318,7 +2318,7 @@ submodule nokia-conf-subscriber-mgmt {
                 leaf use-multicast-destination-mac {
                     type boolean;
                     default "false";
-                    description "Use multicast destination mac address for outgoing traffic.";
+                    description "Use multicast destination MAC for outgoing traffic";
                 }
 
                 leaf router-alert-check {
@@ -2544,7 +2544,6 @@ submodule nokia-conf-subscriber-mgmt {
 
                 list association {
                     key "name";
-                    max-elements 2;
                     description "Enter the association list instance";
 
                     leaf name {
@@ -2585,6 +2584,11 @@ submodule nokia-conf-subscriber-mgmt {
                         units "seconds";
                         default "3600";
                         description "Time to wait for a response to a release request";
+                    }
+
+                    leaf default-calltrace-profile {
+                        type types-sros:named-item;
+                        description "Default profile when the CP-provided profile is unknown";
                     }
 
                     leaf path-restoration-time {
@@ -2683,6 +2687,36 @@ submodule nokia-conf-subscriber-mgmt {
 
                             }
                         }
+                        container node-id {
+                            description "Enter the node-id context";
+
+                            choice format {
+                                default "use-ip-address";
+                                case fqdn {
+
+                                    leaf fully-qualified-domain-name {
+                                        type types-sros:fully-qualified-domain-name {
+                                            pattern "(([a-z0-9_\\-]){1,63}\\.)*([a-z0-9_\\-]){1,63}" {
+                                                error-message "The given string is not valid";
+                                            }
+                                        }
+                                        sros-ext:auto-restart-to-modify;
+                                        description "FQDN used to identify the Node ID";
+                                    }
+
+                                }
+                                case use-ip-address {
+
+                                    leaf use-ip-address {
+                                        type empty;
+                                        sros-ext:auto-restart-to-modify;
+                                        description "Use the configured peer IP address to match the Node ID";
+                                    }
+
+                                }
+                            }
+                        } // container node-id
+
                     } // container peer
 
                     container heartbeat {
@@ -2690,7 +2724,7 @@ submodule nokia-conf-subscriber-mgmt {
 
                         leaf interval {
                             type types-sros:time-duration {
-                                range "5..180";
+                                range "1..180";
                             }
                             units "seconds";
                             default "60";
@@ -2933,6 +2967,13 @@ submodule nokia-conf-subscriber-mgmt {
                     type boolean;
                     default "false";
                     description "Include LAG hashing on Vport";
+                }
+
+                leaf alternate-sub-profile {
+                    type leafref {
+                        path "../../sub-profile/name";
+                    }
+                    description "Alternate subscriber profile to use if threshold is met";
                 }
 
                 leaf-list apply-groups {
@@ -3759,11 +3800,31 @@ submodule nokia-conf-subscriber-mgmt {
 
                 leaf def-instance-sharing {
                     type enumeration {
-                        enum per-sap                        { value 1; }
-                        enum per-session                    { value 2; }
+                        enum per-sap {
+                            value 1;
+                            description "IPoE and PPP sessions share an SPI";
+                        }
+                        enum per-session {
+                            value 2;
+                            description "IPoE and PPP sessions obtain a dedicated SPI per session";
+                        }
                     }
                     default "per-sap";
-                    description "Default SPI sharing method for IPoE or PPPoE sessions";
+                    description "Default SPI sharing method for IPoE and PPPoE sessions";
+                }
+
+                leaf alternate-sla-profile {
+                    type leafref {
+                        path "../../sla-profile/name";
+                    }
+                    description "Alternate SLA profile to use if threshold is met";
+                }
+
+                leaf idle-timeout-policy {
+                    type leafref {
+                        path "../../idle-timeout-policy/name";
+                    }
+                    description "Idle timeout policy for this SLA profile";
                 }
 
                 leaf-list apply-groups {
@@ -4747,6 +4808,180 @@ submodule nokia-conf-subscriber-mgmt {
 
                 } // container ingress
 
+                container aggregate-qos-statistics {
+                    description "Enter the aggregate-qos-statistics context";
+
+                    container egress {
+                        description "Enter the egress context";
+
+                        container queues {
+                            description "Enter the queues context";
+
+                            choice queue-selection {
+                                default "all";
+                                case all {
+
+                                    leaf all {
+                                        type empty;
+                                        description "Select all dynamic and static queues";
+                                    }
+
+                                }
+                                case all-static {
+
+                                    leaf all-static {
+                                        type empty;
+                                        description "Select all static queues";
+                                    }
+
+                                }
+                                case all-dynamic {
+
+                                    leaf all-dynamic {
+                                        type empty;
+                                        description "Select all dynamic queues";
+                                    }
+
+                                }
+                                case none {
+
+                                    leaf none {
+                                        type empty;
+                                        description "Ignore all static and dynamic queues";
+                                    }
+
+                                }
+                                case queue {
+
+                                    leaf-list queue {
+                                        type leafref {
+                                            path "../../../../../../qos/sap-egress[sap-egress-policy-name=current()/../../../../egress/qos/sap-egress/policy-name]/queue/queue-id";
+                                        }
+                                        max-elements 8;
+                                        description "Static queues";
+                                    }
+
+                                }
+                            }
+                        } // container queues
+
+                        container policers {
+                            description "Enter the policers context";
+
+                            choice policer-selection {
+                                default "all-static";
+                                case all {
+
+                                    leaf all {
+                                        type empty;
+                                        description "Select all dynamic and static policers";
+                                    }
+
+                                }
+                                case all-static {
+
+                                    leaf all-static {
+                                        type empty;
+                                        description "Select all static policers";
+                                    }
+
+                                }
+                                case all-dynamic {
+
+                                    leaf all-dynamic {
+                                        type empty;
+                                        description "Select all dynamic policers";
+                                    }
+
+                                }
+                                case none {
+
+                                    leaf none {
+                                        type empty;
+                                        description "Ignore all dynamic and static policers";
+                                    }
+
+                                }
+                                case policer {
+
+                                    leaf-list policer {
+                                        type leafref {
+                                            path "../../../../../../qos/sap-egress[sap-egress-policy-name=current()/../../../../egress/qos/sap-egress/policy-name]/policer/policer-id";
+                                        }
+                                        max-elements 63;
+                                        description "Static policers";
+                                    }
+
+                                }
+                            }
+                        } // container policers
+
+                    } // container egress
+
+
+                } // container aggregate-qos-statistics
+
+                list custom-statistics-group {
+                    key "group-name";
+                    max-elements 1;
+                    description "Enter the custom-statistics-group list instance";
+
+                    leaf group-name {
+                        type types-sros:named-item;
+                        description "Name of the custom statistics group";
+                    }
+
+                    leaf-list apply-groups {
+                        type leafref {
+                            path "../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Apply a configuration group at this level";
+                    }
+
+                    leaf-list apply-groups-exclude {
+                        type leafref {
+                            path "../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Exclude a configuration group at this level";
+                    }
+
+                    container egress {
+                        description "Enter the egress context";
+
+                        container policers {
+                            description "Enter the policers context";
+
+                            choice policer-selection {
+                                default "none";
+                                case none {
+
+                                    leaf none {
+                                        type empty;
+                                        description "Ignore all dynamic and static policers for this group";
+                                    }
+
+                                }
+                                case policer {
+
+                                    leaf-list policer {
+                                        type leafref {
+                                            path "../../../../../../qos/sap-egress[sap-egress-policy-name=current()/../../../../egress/qos/sap-egress/policy-name]/policer/policer-id";
+                                        }
+                                        max-elements 63;
+                                        description "Static policer ID to include for custom statistics";
+                                    }
+
+                                }
+                            }
+                        } // container policers
+
+                    } // container egress
+
+                } // list custom-statistics-group
 
                 container one-time-http-redirection {
                     description "Enter the one-time-http-redirection context";
@@ -4762,6 +4997,7 @@ submodule nokia-conf-subscriber-mgmt {
 
                 container pfcp-mappings {
                     description "Enter the pfcp-mappings context";
+
 
                     container session-qer {
                         description "Enter the session-qer context";
@@ -4960,7 +5196,7 @@ submodule nokia-conf-subscriber-mgmt {
 
                         leaf app-profile-string {
                             type string {
-                                length "1..16";
+                                length "1..32";
                             }
                             description "Application profile string";
                         }
@@ -5129,7 +5365,7 @@ submodule nokia-conf-subscriber-mgmt {
                 leaf cookies {
                     type boolean;
                     default "true";
-                    description "Enable/disable the use of AC-Cookie tags.";
+                    description "Enable use of cookies";
                 }
 
                 leaf force-ppp-mtu-gt-1492 {
@@ -5212,13 +5448,13 @@ submodule nokia-conf-subscriber-mgmt {
                 leaf reject-unconfigured-ncp {
                     type boolean;
                     default "false";
-                    description "Enable/disable reject unconfigured NCP.";
+                    description "Force reject for unconfigured NCP";
                 }
 
                 leaf reply-on-padt {
                     type boolean;
                     default "false";
-                    description "Enable/disable reply on PADT packets.";
+                    description "Enable reply to PADT packets";
                 }
 
                 leaf session-timeout {
@@ -5477,7 +5713,7 @@ submodule nokia-conf-subscriber-mgmt {
 
                                 leaf empty {
                                     type empty;
-                                    description "Configure an empty PPP option.";
+                                    description "Remove PPP option configuration";
                                 }
 
                             }
@@ -6580,7 +6816,7 @@ submodule nokia-conf-subscriber-mgmt {
                     leaf acct-authentic {
                         type boolean;
                         default "false";
-                        description "Enable/disable include of the acct-authentic attribute.";
+                        description "Enable generation of the acct-authentic RADIUS attribute";
                     }
 
                     leaf acct-delay-time {
@@ -6610,7 +6846,7 @@ submodule nokia-conf-subscriber-mgmt {
                     leaf apn {
                         type boolean;
                         default "false";
-                        description "Enable/disable include of the APN attribute.";
+                        description "Enable inclusion of the APN attribute";
                     }
 
                     leaf bonding-active-connections {
@@ -6706,13 +6942,19 @@ submodule nokia-conf-subscriber-mgmt {
                     leaf imei {
                         type boolean;
                         default "false";
-                        description "Enable/disable include of the IMEI attribute.";
+                        description "Enable inclusion of the IMEI attribute";
                     }
 
                     leaf ipv6-address {
                         type boolean;
                         default "false";
                         description "Include the IPv6 address attribute";
+                    }
+
+                    leaf lac-fragmentation {
+                        type boolean;
+                        default "false";
+                        description "Include the L2TP LAC fragmentation attribute";
                     }
 
                     leaf lanext-bridge-id {
@@ -6742,7 +6984,7 @@ submodule nokia-conf-subscriber-mgmt {
                     leaf lanext-vni {
                         type boolean;
                         default "false";
-                        description "Enable/disable include of the lanext-vni attribute.";
+                        description "Enable inclusion of the lanext-vni attribute";
                     }
 
                     leaf mac-address {
@@ -6754,13 +6996,13 @@ submodule nokia-conf-subscriber-mgmt {
                     leaf msisdn {
                         type boolean;
                         default "false";
-                        description "Enable/disable include of the MSISDN attribute.";
+                        description "Enable inclusion of the MSISDN in AAA protocols";
                     }
 
                     leaf nas-identifier {
                         type boolean;
                         default "false";
-                        description "Enable/disable include of the NAS-Identifier attribute.";
+                        description "Enable inclusion of the NAS-Identifier attribute";
                     }
 
                     leaf nat-port-range {
@@ -6814,13 +7056,13 @@ submodule nokia-conf-subscriber-mgmt {
                     leaf tunnel-client-attrs {
                         type boolean;
                         default "false";
-                        description "Enable/disable include of tunnel-client attributes.";
+                        description "Enable inclusion of tunnel-client attributes";
                     }
 
                     leaf tunnel-server-attrs {
                         type boolean;
                         default "false";
-                        description "Enable/disable include of tunnel-server attributes.";
+                        description "Enable inclusion of tunnel-server attributes";
                     }
 
                     leaf user-name {
@@ -6875,6 +7117,12 @@ submodule nokia-conf-subscriber-mgmt {
                         type boolean;
                         default "false";
                         description "Include the IMSI attribute for FWA sessions";
+                    }
+
+                    leaf rat-type {
+                        type boolean;
+                        default "false";
+                        description "Include the RAT Type attribute for FWA sessions";
                     }
 
                     container calling-station-id {
@@ -7198,7 +7446,7 @@ submodule nokia-conf-subscriber-mgmt {
                     leaf apn {
                         type boolean;
                         default "false";
-                        description "Enable/disable include of the APN attribute.";
+                        description "Enable inclusion of the APN attribute";
                     }
 
                     leaf called-station-id {
@@ -7240,7 +7488,7 @@ submodule nokia-conf-subscriber-mgmt {
                     leaf imei {
                         type boolean;
                         default "false";
-                        description "Enable/disable include of the IMEI attribute.";
+                        description "Enable inclusion of the IMEI attribute";
                     }
 
                     leaf mac-address {
@@ -7252,13 +7500,13 @@ submodule nokia-conf-subscriber-mgmt {
                     leaf msisdn {
                         type boolean;
                         default "false";
-                        description "Enable/disable include of the MSISDN attribute.";
+                        description "Enable inclusion of the MSISDN in AAA protocols";
                     }
 
                     leaf nas-identifier {
                         type boolean;
                         default "false";
-                        description "Enable/disable include of the NAS-Identifier attribute.";
+                        description "Enable inclusion of the NAS-Identifier attribute";
                     }
 
                     leaf pppoe-service-name {
@@ -7288,7 +7536,7 @@ submodule nokia-conf-subscriber-mgmt {
                     leaf tunnel-server-attrs {
                         type boolean;
                         default "false";
-                        description "Enable/disable include of tunnel-server attributes.";
+                        description "Enable inclusion of tunnel-server attributes";
                     }
 
                     leaf uli {
@@ -8190,7 +8438,7 @@ submodule nokia-conf-subscriber-mgmt {
                         leaf profiled-traffic-only {
                             type boolean;
                             default "false";
-                            description "Enable/disable profiled-traffic-only.";
+                            description "Apply only profiled traffic for an MSAP";
                         }
 
                         container non-sub-traffic-profiles {
@@ -10176,6 +10424,222 @@ submodule nokia-conf-subscriber-mgmt {
 
             } // list credit-control-policy
 
+            list idle-timeout-policy {
+                key "name";
+                max-elements 255;
+                description "Enter the idle-timeout-policy list instance";
+
+                leaf name {
+                    type types-sros:named-item;
+                    description "Idle timeout policy name";
+                }
+
+                leaf description {
+                    type types-sros:description;
+                    description "Text description";
+                }
+
+                leaf activity-threshold {
+                    type uint32 {
+                        range "1..100000000";
+                    }
+                    units "kilobps";
+                    description "Rate below which idle time starts";
+                }
+
+                leaf timeout {
+                    type uint32 {
+                        range "60..15552000";
+                    }
+                    units "seconds";
+                    description "Idle period before the action is triggered";
+                }
+
+                leaf action {
+                    type enumeration {
+                        enum terminate {
+                            value 1;
+                            description "Delete the subscriber session from the system";
+                        }
+                        enum shcv {
+                            value 2;
+                            description "Perform verification and terminate unresponsive session";
+                        }
+                    }
+                    default "terminate";
+                    description "Action taken after the idle timeout is reached";
+                }
+
+                leaf-list apply-groups {
+                    type leafref {
+                        path "../../../groups/group/name";
+                    }
+                    max-elements 8;
+                    ordered-by user;
+                    description "Apply a configuration group at this level";
+                }
+
+                leaf-list apply-groups-exclude {
+                    type leafref {
+                        path "../../../groups/group/name";
+                    }
+                    max-elements 8;
+                    ordered-by user;
+                    description "Exclude a configuration group at this level";
+                }
+
+                container egress {
+                    description "Enter the egress context";
+
+                    container policers {
+                        description "Enter the policers context";
+
+                        choice policer-selection {
+                            default "none";
+                            case all {
+
+                                leaf all {
+                                    type empty;
+                                    description "Monitor all egress policers for idle time";
+                                }
+
+                            }
+                            case none {
+
+                                leaf none {
+                                    type empty;
+                                    description "Do not monitor egress policers for idle time";
+                                }
+
+                            }
+                            case policer {
+
+                                leaf-list policer {
+                                    type int8 {
+                                        range "1..63";
+                                    }
+                                    max-elements 63;
+                                    description "List of egress policers to monitor for idle time";
+                                }
+
+                            }
+                        }
+                    } // container policers
+
+                    container queues {
+                        description "Enter the queues context";
+
+                        choice queue-selection {
+                            default "none";
+                            case all {
+
+                                leaf all {
+                                    type empty;
+                                    description "Monitor all egress queues for idle time";
+                                }
+
+                            }
+                            case none {
+
+                                leaf none {
+                                    type empty;
+                                    description "Do not monitor egress queues for idle time";
+                                }
+
+                            }
+                            case queue {
+
+                                leaf-list queue {
+                                    type int8 {
+                                        range "1..8";
+                                    }
+                                    max-elements 8;
+                                    description "List of egress queues to monitor for idle time";
+                                }
+
+                            }
+                        }
+                    } // container queues
+
+                } // container egress
+
+                container ingress {
+                    description "Enter the ingress context";
+
+                    container policers {
+                        description "Enter the policers context";
+
+                        choice policer-selection {
+                            default "none";
+                            case all {
+
+                                leaf all {
+                                    type empty;
+                                    description "Monitor all ingress policers for idle time";
+                                }
+
+                            }
+                            case none {
+
+                                leaf none {
+                                    type empty;
+                                    description "Do not monitor ingress policers for idle time";
+                                }
+
+                            }
+                            case policer {
+
+                                leaf-list policer {
+                                    type int8 {
+                                        range "1..63";
+                                    }
+                                    max-elements 63;
+                                    description "List of ingress policers to monitor for idle time";
+                                }
+
+                            }
+                        }
+                    } // container policers
+
+                    container queues {
+                        description "Enter the queues context";
+
+                        choice queue-selection {
+                            default "none";
+                            case all {
+
+                                leaf all {
+                                    type empty;
+                                    description "Monitor all ingress queues for idle time";
+                                }
+
+                            }
+                            case none {
+
+                                leaf none {
+                                    type empty;
+                                    description "Do not monitor ingress queues for idle time";
+                                }
+
+                            }
+                            case queue {
+
+                                leaf-list queue {
+                                    type int8 {
+                                        range "1..32";
+                                    }
+                                    max-elements 32;
+                                    description "List of ingress queues to monitor for idle time";
+                                }
+
+                            }
+                        }
+                    } // container queues
+
+                } // container ingress
+
+            } // list idle-timeout-policy
+
             list router-advertisement-policy {
                 key "name";
                 max-elements 16;
@@ -10464,7 +10928,7 @@ submodule nokia-conf-subscriber-mgmt {
 
                 leaf fast-external-failover {
                     type boolean;
-                    description "Enable/disable BGP fast external failover.";
+                    description "Enable BGP fast external failover";
                 }
 
                 leaf hold-time {
@@ -10856,6 +11320,42 @@ submodule nokia-conf-subscriber-mgmt {
                 }
 
             } // container group-interface-statistics
+
+            container alternate-profile-threshold {
+                description "Enter the alternate-profile-threshold context";
+
+                leaf-list apply-groups {
+                    type leafref {
+                        path "../../../groups/group/name";
+                    }
+                    max-elements 8;
+                    ordered-by user;
+                    description "Apply a configuration group at this level";
+                }
+
+                leaf-list apply-groups-exclude {
+                    type leafref {
+                        path "../../../groups/group/name";
+                    }
+                    max-elements 8;
+                    ordered-by user;
+                    description "Exclude a configuration group at this level";
+                }
+
+                choice threshold-type {
+                    case subscriber-count {
+
+                        leaf subscriber-count {
+                            type uint32 {
+                                range "0..500000";
+                            }
+                            default "0";
+                            description "Subscriber threshold to trigger alternate profile";
+                        }
+
+                    }
+                }
+            } // container alternate-profile-threshold
 
             uses conf-submgt-ancp;
             uses conf-submgt-gtp;

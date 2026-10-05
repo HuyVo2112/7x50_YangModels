@@ -8,12 +8,13 @@ submodule nokia-conf-oam-pm {
     import nokia-types-eth-cfm            { prefix "types-eth-cfm"; }
     import nokia-types-oam                { prefix "types-oam"; }
     import nokia-types-qos                { prefix "types-qos"; }
+    import nokia-types-router             { prefix "types-router"; }
     import nokia-types-sros               { prefix "types-sros"; }
 
     include nokia-conf-groups;
     include nokia-conf-log;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -36,7 +37,7 @@ submodule nokia-conf-oam-pm {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-10-11";
+    revision "2026-07-22";
 
     grouping conf-oam-pm {
         container oam-pm {
@@ -107,9 +108,18 @@ submodule nokia-conf-oam-pm {
 
                     leaf bin-metric {
                         type enumeration {
-                            enum fd                             { value 1; }
-                            enum fdr                            { value 2; }
-                            enum ifdv                           { value 3; }
+                            enum fd {
+                                value 1;
+                                description "Frame Delay";
+                            }
+                            enum fdr {
+                                value 2;
+                                description "Frame Delay Range";
+                            }
+                            enum ifdv {
+                                value 3;
+                                description "Inter-Frame Delay Variation";
+                            }
                         }
                         description "Delay metric bin structure";
                     }
@@ -399,7 +409,7 @@ submodule nokia-conf-oam-pm {
                                         type enumeration {
                                             enum auto {
                                                 value -1;
-                                                description "Automatically assigns a test-id";
+                                                description "Automatically assign a test ID";
                                             }
                                         }
                                     }
@@ -433,7 +443,7 @@ submodule nokia-conf-oam-pm {
                                     units "octets";
                                     sros-ext:auto-restart-to-modify;
                                     default "0";
-                                    description "Size of the pad TLV in the frames sent for the test";
+                                    description "Data TLV size in the frames sent for the test";
                                 }
 
                                 leaf delay-template {
@@ -482,7 +492,7 @@ submodule nokia-conf-oam-pm {
                                         type enumeration {
                                             enum auto {
                                                 value -1;
-                                                description "Automatically assigns a test-id";
+                                                description "Automatically assign a test ID";
                                             }
                                         }
                                     }
@@ -558,7 +568,7 @@ submodule nokia-conf-oam-pm {
                                         type boolean;
                                         sros-ext:auto-restart-to-modify;
                                         default "false";
-                                        description "Increment HLI/CHLI counters regardless of availability";
+                                        description "Increment HLI and CHLI counters despite availability";
                                     }
 
                                     container timing {
@@ -569,6 +579,7 @@ submodule nokia-conf-oam-pm {
                                             type uint32 {
                                                 range "1..50";
                                             }
+                                            units "frames";
                                             sros-ext:auto-restart-to-modify;
                                             description "Number of frames sent in one delta-t";
                                         }
@@ -618,7 +629,7 @@ submodule nokia-conf-oam-pm {
                                             }
                                             units "percent";
                                             mandatory true;
-                                            description "Raise threshold for the average FLR";
+                                            description "Rising threshold for the average FLR";
                                         }
 
                                         leaf clear-threshold {
@@ -912,7 +923,7 @@ submodule nokia-conf-oam-pm {
                                         type enumeration {
                                             enum auto {
                                                 value -1;
-                                                description "Automatically assigns a test-id";
+                                                description "Automatically assign a test ID";
                                             }
                                         }
                                     }
@@ -946,7 +957,7 @@ submodule nokia-conf-oam-pm {
                                     units "octets";
                                     sros-ext:auto-restart-to-modify;
                                     default "0";
-                                    description "Size of the pad TLV in the frames sent for the test";
+                                    description "Data TLV size in the frames sent for the test";
                                 }
 
                                 leaf flr-threshold {
@@ -960,7 +971,7 @@ submodule nokia-conf-oam-pm {
                                     type boolean;
                                     sros-ext:auto-restart-to-modify;
                                     default "false";
-                                    description "Increment HLI/CHLI counters regardless of availability";
+                                    description "Increment HLI and CHLI counters despite availability";
                                 }
 
                                 leaf-list apply-groups {
@@ -991,8 +1002,9 @@ submodule nokia-conf-oam-pm {
                                         type uint32 {
                                             range "1..50";
                                         }
+                                        units "frames";
                                         sros-ext:auto-restart-to-modify;
-                                        description "Number of frames sent in one delta-t";
+                                        description "Frames sent in one Delta-T";
                                     }
 
                                     leaf consec-delta-t {
@@ -1001,7 +1013,7 @@ submodule nokia-conf-oam-pm {
                                         }
                                         sros-ext:auto-restart-to-modify;
                                         default "10";
-                                        description "Number of consecutive delta-t intervals";
+                                        description "Consecutive Delta-t intervals";
                                     }
 
                                     leaf chli-threshold {
@@ -1038,7 +1050,7 @@ submodule nokia-conf-oam-pm {
                                             }
                                             units "percent";
                                             mandatory true;
-                                            description "Raise threshold for the average FLR";
+                                            description "Rising threshold for the average FLR";
                                         }
 
                                         leaf clear-threshold {
@@ -1489,6 +1501,11 @@ submodule nokia-conf-oam-pm {
                                                         presence "Enable the sr-isis context";
                                                         description "Enable the sr-isis context";
 
+                                                        leaf flex-algo {
+                                                            type types-router:flex-algo-id;
+                                                            description "Flex-algorithm to tunnel IP packets for session tests";
+                                                        }
+
                                                         leaf prefix {
                                                             type types-sros:ip-unicast-prefix;
                                                             description "IP prefix to tunnel IP packets for the session tests";
@@ -1510,6 +1527,11 @@ submodule nokia-conf-oam-pm {
                                                     container sr-ospf {
                                                         presence "Enable the sr-ospf context";
                                                         description "Enable the sr-ospf context";
+
+                                                        leaf flex-algo {
+                                                            type types-router:flex-algo-id;
+                                                            description "Flex-algorithm to tunnel IP packets for session tests";
+                                                        }
 
                                                         leaf prefix {
                                                             type types-sros:ipv4-unicast-prefix;
@@ -1547,6 +1569,33 @@ submodule nokia-conf-oam-pm {
                                                         }
 
                                                     } // container sr-ospf3
+
+                                                }
+                                                case mpls-sr-policy {
+
+                                                    container sr-policy {
+                                                        presence "Enable the sr-policy context";
+                                                        description "Enable the sr-policy context";
+
+                                                        leaf color {
+                                                            type uint32;
+                                                            default "0";
+                                                            description "Color for associating the SR policy with an objective";
+                                                        }
+
+                                                        leaf endpoint {
+                                                            type types-sros:ip-address;
+                                                            description "Segment Routing endpoint for the session";
+                                                        }
+
+                                                        leaf segment-list {
+                                                            type uint32 {
+                                                                range "1..32";
+                                                            }
+                                                            description "Segment Routing segment list for the session";
+                                                        }
+
+                                                    } // container sr-policy
 
                                                 }
                                                 case mpls-sr-te {
@@ -1588,7 +1637,7 @@ submodule nokia-conf-oam-pm {
                                         type enumeration {
                                             enum auto {
                                                 value -1;
-                                                description "Automatically assigns a test-id";
+                                                description "Automatically assign a test ID";
                                             }
                                         }
                                     }
@@ -1654,8 +1703,14 @@ submodule nokia-conf-oam-pm {
 
                                 leaf session-sender-type {
                                     type enumeration {
-                                        enum twamp-light                    { value 1; }
-                                        enum stamp                          { value 2; }
+                                        enum twamp-light {
+                                            value 1;
+                                            description "Two-Way Active Measurement Protocol, Light";
+                                        }
+                                        enum stamp {
+                                            value 2;
+                                            description "Simple Two-Way Active Measurement Protocol";
+                                        }
                                     }
                                     sros-ext:auto-restart-to-modify;
                                     default "twamp-light";
@@ -1664,8 +1719,14 @@ submodule nokia-conf-oam-pm {
 
                                 leaf timestamp-format {
                                     type enumeration {
-                                        enum ntp                            { value 0; }
-                                        enum ptp                            { value 1; }
+                                        enum ntp {
+                                            value 0;
+                                            description "Network Time Protocol";
+                                        }
+                                        enum ptp {
+                                            value 1;
+                                            description "Precision Time Protocol";
+                                        }
                                     }
                                     sros-ext:auto-restart-to-modify;
                                     default "ntp";
@@ -1713,7 +1774,7 @@ submodule nokia-conf-oam-pm {
                                         type boolean;
                                         sros-ext:auto-restart-to-modify;
                                         default "false";
-                                        description "Increment HLI/CHLI counters regardless of availability";
+                                        description "Increment HLI and CHLI counters despite availability";
                                     }
 
                                     container timing {
@@ -1724,6 +1785,7 @@ submodule nokia-conf-oam-pm {
                                             type uint32 {
                                                 range "1..50";
                                             }
+                                            units "frames";
                                             sros-ext:auto-restart-to-modify;
                                             description "Number of frames sent in one delta-t";
                                         }
@@ -1773,7 +1835,7 @@ submodule nokia-conf-oam-pm {
                                             }
                                             units "percent";
                                             mandatory true;
-                                            description "Raise threshold for the average FLR";
+                                            description "Rising threshold for the average FLR";
                                         }
 
                                         leaf clear-threshold {

@@ -12,7 +12,7 @@ submodule nokia-state-router-nat {
     include nokia-state-service;
     include nokia-state-svc-nat;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -35,11 +35,11 @@ submodule nokia-state-router-nat {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-05-30";
+    revision "2026-02-11";
 
     grouping state-router-nat {
         container nat {
-            description "Enable the nat context";
+            description "Enter the nat context";
 
             leaf outside-dnat-only-routes-counter {
                 type yang:gauge32;
@@ -61,6 +61,37 @@ submodule nokia-state-router-nat {
                         container deterministic {
                             description "Enter the deterministic context";
 
+                            list address-map {
+                                key "from to nat-policy";
+                                description "Enter the address-map list instance";
+
+                                leaf from {
+                                    type types-sros:ipv4-address;
+                                    description
+                                        "Beginning of the range for IPv4 addresses on the inside
+                                         that will be mapped to specific outside IPv4 addresses.";
+                                }
+
+                                leaf to {
+                                    type types-sros:ipv4-address;
+                                    description
+                                        "Ending of the range for IPv4 addresses on the inside
+                                         that will be mapped to specific outside IPv4 addresses.";
+                                }
+
+                                leaf nat-policy {
+                                    type leafref {
+                                        path "../../../../../../../../service/nat/nat-policy/name";
+                                    }
+                                    description "The NAT policy used for LSN.";
+                                }
+
+                                leaf oper-state {
+                                    type types-sros:up-down-status;
+                                }
+
+                            } // list address-map
+
                             list policy-map {
                                 status obsolete;
                                 key "source-prefix";
@@ -69,7 +100,7 @@ submodule nokia-state-router-nat {
                                 leaf source-prefix {
                                     status obsolete;
                                     type types-sros:ipv4-unicast-prefix;
-                                    description "Source prefix that adds traffic to NAT pool";
+                                    description "Traffic sent from sources within this prefix will be NATed";
                                 }
 
                                 leaf oper-state {
@@ -85,13 +116,17 @@ submodule nokia-state-router-nat {
                                     leaf from {
                                         status obsolete;
                                         type types-sros:ipv4-address;
-                                        description "Beginning of the range for IPv4 addresses";
+                                        description
+                                            "Beginning of the range for IPv4 addresses on the inside
+                                             that will be mapped to specific outside IPv4 addresses.";
                                     }
 
                                     leaf to {
                                         status obsolete;
                                         type types-sros:ipv4-address;
-                                        description "End of the range for IPv4 addresses";
+                                        description
+                                            "Ending of the range for IPv4 addresses on the inside
+                                             that will be mapped to specific outside IPv4 addresses.";
                                     }
 
                                     leaf oper-state {
@@ -116,7 +151,7 @@ submodule nokia-state-router-nat {
                                     type leafref {
                                         path "../../../../../../../../service/nat/nat-policy/name";
                                     }
-                                    description "NAT policy";
+                                    description "The NAT policy.";
                                 }
 
                                 leaf oper-state {
@@ -129,12 +164,16 @@ submodule nokia-state-router-nat {
 
                                     leaf from {
                                         type types-sros:ipv4-address;
-                                        description "First IP address of inside IP NAT range";
+                                        description
+                                            "Beginning of the range for IPv4 addresses on the inside
+                                             that will be mapped to specific outside IPv4 addresses.";
                                     }
 
                                     leaf to {
                                         type types-sros:ipv4-address;
-                                        description "Ending IP address of inside IP NAT range";
+                                        description
+                                            "Ending of the range for IPv4 addresses on the inside
+                                             that will be mapped to specific outside IPv4 addresses.";
                                     }
 
                                     leaf oper-state {
@@ -350,6 +389,37 @@ submodule nokia-state-router-nat {
                         container deterministic {
                             description "Enter the deterministic context";
 
+                            list address-map {
+                                key "from to nat-policy";
+                                description "Enter the address-map list instance";
+
+                                leaf from {
+                                    type types-sros:ipv6-prefix;
+                                    description
+                                        "Beginning of the range for IPv6 addresses on the inside
+                                         that will be mapped to specific outside IPv4 addresses.";
+                                }
+
+                                leaf to {
+                                    type types-sros:ipv6-prefix;
+                                    description
+                                        "Ending of the range for IPv6 addresses on the inside
+                                         that will be mapped to specific outside IPv4 addresses.";
+                                }
+
+                                leaf nat-policy {
+                                    type leafref {
+                                        path "../../../../../../../../service/nat/nat-policy/name";
+                                    }
+                                    description "The NAT policy used for LSN.";
+                                }
+
+                                leaf oper-state {
+                                    type types-sros:up-down-status;
+                                }
+
+                            } // list address-map
+
                             list policy-map {
                                 status obsolete;
                                 key "source-prefix";
@@ -358,7 +428,7 @@ submodule nokia-state-router-nat {
                                 leaf source-prefix {
                                     status obsolete;
                                     type types-sros:ipv6-unicast-prefix;
-                                    description "Source prefix that adds traffic to NAT pool";
+                                    description "Traffic sent from sources within this prefix will be NATed";
                                 }
 
                                 leaf oper-state {
@@ -374,13 +444,17 @@ submodule nokia-state-router-nat {
                                     leaf from {
                                         status obsolete;
                                         type types-sros:ipv6-prefix;
-                                        description "Lower bound of IPv6 address of inside IPv6 NAT range";
+                                        description
+                                            "Beginning of the range for IPv6 addresses on the inside
+                                             that will be mapped to specific outside IPv4 addresses.";
                                     }
 
                                     leaf to {
                                         status obsolete;
                                         type types-sros:ipv6-prefix;
-                                        description "Upper bound of IPv6 address of inside IPv6 NAT range";
+                                        description
+                                            "Ending of the range for IPv6 addresses on the inside
+                                             that will be mapped to specific outside IPv4 addresses.";
                                     }
 
                                     leaf oper-state {
@@ -398,14 +472,14 @@ submodule nokia-state-router-nat {
 
                                 leaf source-prefix {
                                     type types-sros:ipv6-unicast-prefix;
-                                    description "List containing source IP addresses on the private side";
+                                    description "Traffic sent from sources within this prefix will be NATed";
                                 }
 
                                 leaf nat-policy {
                                     type leafref {
                                         path "../../../../../../../../service/nat/nat-policy/name";
                                     }
-                                    description "NAT policy";
+                                    description "The NAT policy.";
                                 }
 
                                 leaf oper-state {
@@ -418,12 +492,16 @@ submodule nokia-state-router-nat {
 
                                     leaf from {
                                         type types-sros:ipv6-prefix;
-                                        description "Beginning of the range for IPv6 addresses";
+                                        description
+                                            "Beginning of the range for IPv6 addresses on the inside
+                                             that will be mapped to specific outside IPv4 addresses.";
                                     }
 
                                     leaf to {
                                         type types-sros:ipv6-prefix;
-                                        description "End of the range for IPv6 addresses";
+                                        description
+                                            "Ending of the range for IPv6 addresses on the inside
+                                             that will be mapped to specific outside IPv4 addresses.";
                                     }
 
                                     leaf oper-state {
@@ -610,7 +688,7 @@ submodule nokia-state-router-nat {
                     } // container dual-stack-lite
 
                     container nat64 {
-                        description "Enable the nat64 context";
+                        description "Enter the nat64 context";
 
                         list subscriber {
                             key "id nat-policy";
@@ -830,6 +908,21 @@ submodule nokia-state-router-nat {
 
                         } // container redundancy
 
+                        container use-interface-ip {
+                            description "Enter the use-interface-ip context";
+
+                            leaf interface-name {
+                                type types-sros:interface-name;
+                                description "Interface name";
+                            }
+
+                            leaf ip-address {
+                                type types-sros:ipv4-unicast-address;
+                                description "Interface ip address";
+                            }
+
+                        } // container use-interface-ip
+
                         list group-member {
                             key "group-member";
                             description "Enter the group-member list instance";
@@ -917,7 +1010,7 @@ submodule nokia-state-router-nat {
                         }
 
                         container port-block-extension {
-                            description "Enable the port-block-extension context";
+                            description "Enter the port-block-extension context";
 
                             leaf shared-port-blocks-per-ip {
                                 type uint32;
@@ -990,12 +1083,12 @@ submodule nokia-state-router-nat {
 
                         leaf start {
                             type types-sros:ipv4-unicast-address;
-                            description "Lower bound of the NAT address range";
+                            description "First IPv4 address";
                         }
 
                         leaf end {
                             type types-sros:ipv4-unicast-address;
-                            description "Upper bound of the NAT address range";
+                            description "Last IPv4 address";
                         }
 
                         leaf allocated-blocks {
@@ -1080,37 +1173,43 @@ submodule nokia-state-router-nat {
 
                 list map-domain {
                     key "domain-name";
-                    description "Add a list entry for map-domain";
+                    description "Enter the map-domain list instance";
 
                     leaf domain-name {
                         type leafref {
                             path "../../../../../service/nat/map-t/domain/name";
                         }
-                        description "MAP domain template name";
+                        description "The name of the MAP domain.";
                     }
 
                     container statistics {
+                        status obsolete;
                         description "Enter the statistics context";
 
                         container upstream {
+                            status obsolete;
                             description "Enter the upstream context";
 
                             leaf forwarded-packets {
+                                status obsolete;
                                 type yang:counter64;
                                 description "Number of packets forwarded in the upstream direction";
                             }
 
                             leaf forwarded-octets {
+                                status obsolete;
                                 type yang:counter64;
                                 description "Number of octets forwarded in the upstream direction";
                             }
 
                             leaf dropped-packets {
+                                status obsolete;
                                 type yang:counter64;
                                 description "Number of packets dropped in the upstream direction";
                             }
 
                             leaf dropped-octets {
+                                status obsolete;
                                 type yang:counter64;
                                 description "Number of octets dropped in the upstream direction";
                             }
@@ -1118,24 +1217,29 @@ submodule nokia-state-router-nat {
                         } // container upstream
 
                         container downstream {
+                            status obsolete;
                             description "Enter the downstream context";
 
                             leaf forwarded-packets {
+                                status obsolete;
                                 type yang:counter64;
                                 description "Number of packets forwarded in the downstream direction";
                             }
 
                             leaf forwarded-octets {
+                                status obsolete;
                                 type yang:counter64;
                                 description "Number of octets forwarded in the downstream direction";
                             }
 
                             leaf dropped-packets {
+                                status obsolete;
                                 type yang:counter64;
                                 description "Number of packets dropped in the downstream direction";
                             }
 
                             leaf dropped-octets {
+                                status obsolete;
                                 type yang:counter64;
                                 description "Number of octets dropped in the downstream direction";
                             }

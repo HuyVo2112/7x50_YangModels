@@ -9,7 +9,7 @@ module nokia-types-ptp {
     import nokia-sros-yang-extensions     { prefix "sros-ext"; }
     import nokia-types-sros               { prefix "types-sros"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -32,7 +32,7 @@ module nokia-types-ptp {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2022-11-18";
+    revision "2026-02-11";
 
     typedef clock-type {
         type enumeration {
@@ -63,11 +63,12 @@ module nokia-types-ptp {
         description
             "The Precision Time Protocol (PTP) domain.
 
-             The value 0 specifies the default domain for IEEE1588-2008.
-             The value 4 specifies the default domain for ITU-T G.8265.1
-             specification.
-             The value 24 specifies the default domain for ITU-T G.8275.1
-             specification.";
+             The value 0 specifies the default domain for IEEE1588-2008 specification.
+             The value 4 specifies the default domain for ITU-T G.8265.1 specification.
+             The value 24 specifies the default domain for ITU-T G.8275.1 specification.
+             The value 44 specifies the default domain for ITU-T G.8275.2 specification.
+             The value 0 specifies the default domain for IEC/IEEE 61850-9-3 specification.
+             The value 254 specifies the default domain for IEEE C37.238-2017 specification.";
     }
 
     typedef priority {
@@ -87,10 +88,30 @@ module nokia-types-ptp {
 
     typedef profile {
         type enumeration {
-            enum g8265dot1-2010                 { value 1; }
-            enum ieee1588-2008                  { value 2; }
-            enum g8275dot1-2014                 { value 3; }
-            enum g8275dot2-2016                 { value 4; }
+            enum g8265dot1-2010 {
+                value 1;
+                description "ITU-T G.8265.1 specification";
+            }
+            enum ieee1588-2008 {
+                value 2;
+                description "2008 version of IEEE 1588 standard";
+            }
+            enum g8275dot1-2014 {
+                value 3;
+                description "2014 version of ITU-T G.8275.1 specification";
+            }
+            enum g8275dot2-2016 {
+                value 4;
+                description "2016 version of ITU-T G.8275.2 specification";
+            }
+            enum iec-61850-9-3-2016 {
+                value 5;
+                description "2016 version of IEC/IEEE 61850-9-3 standard";
+            }
+            enum c37dot238-2017 {
+                value 6;
+                description "2017 version of C37.238 specification";
+            }
         }
         description
             "The Precision Time Protocol (PTP) profile specifies the standard to
@@ -100,7 +121,13 @@ module nokia-types-ptp {
                   ieee1588-2008  - conforms to the default PTP profile specified in
                                    the IEEE 1588-2008 standard
                   g8275dot1-2014 - conforms to the PTP profile specified in the
-                                   ITU-T G.8275.1 specification.";
+                                   ITU-T G.8275.1 specification.
+                  g8275dot2-2016 - conforms to the PTP profile specified in the
+                                   ITU-T G.8275.2 specification
+                  iec-61850-9-3  - conforms to the PTP profile specified in the 2016
+                                   version of the IEC/IEEE 61850-9-3 specification
+                  c37dot238      - conforms to PTP profile specified in the 2017
+                                   version of the IEEE C37.238 specification";
     }
 
     typedef log-interval {
@@ -225,6 +252,32 @@ module nokia-types-ptp {
                               port, between the MAC and the PHY.
                 cpm     (2) - The PTP packet's timestamp was taken in software in
                               the operating system kernel on the CPM card.";
+    }
+
+    typedef announce-packet-tlv-type {
+        type enumeration {
+            enum ieee-c37-238                   { value 1; }
+            enum alternate-time-offset-indicator { value 2; }
+            enum other                          { value 3; }
+        }
+        description "Specifies the announce tlv type.";
+    }
+
+    typedef bmca-change-reason {
+        type enumeration {
+            enum gm-clock-class                 { value 1; }
+            enum gm-clock-accuracy              { value 2; }
+            enum gm-offset-scaled-log-variance  { value 3; }
+            enum gm-priority2                   { value 4; }
+            enum local-priority                 { value 5; }
+            enum gm-clock-id                    { value 6; }
+            enum steps-removed                  { value 7; }
+            enum remote-clock-id                { value 8; }
+            enum remote-port-number             { value 9; }
+            enum local-port-number              { value 10; }
+            enum no-external-sources            { value 11; }
+        }
+        description "The reason why a specific change in Best Master Clock Algorithm (BMCA) occured";
     }
 
 }

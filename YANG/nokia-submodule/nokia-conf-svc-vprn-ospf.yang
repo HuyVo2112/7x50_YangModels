@@ -17,7 +17,7 @@ submodule nokia-conf-svc-vprn-ospf {
     include nokia-conf-system-ned;
     include nokia-conf-system-security;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -40,7 +40,7 @@ submodule nokia-conf-svc-vprn-ospf {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2022-02-22";
+    revision "2026-07-22";
 
     grouping conf-svc-vprn-ospf {
         list ospf {
@@ -52,7 +52,7 @@ submodule nokia-conf-svc-vprn-ospf {
                 type uint32 {
                     range "0";
                 }
-                description "Specifies the value of the integrated OSPF instance.";
+                description "Integrated OSPF instance";
             }
 
             leaf admin-state {
@@ -171,7 +171,7 @@ submodule nokia-conf-svc-vprn-ospf {
             leaf super-backbone {
                 type boolean;
                 default "false";
-                description "Enable/disable super-backbone functionality.";
+                description "Enable super backbone functionality";
             }
 
             leaf vpn-tag {
@@ -685,6 +685,13 @@ submodule nokia-conf-svc-vprn-ospf {
                         description "Advertise point-to-point interfaces as subnet routes";
                     }
 
+                    leaf conditional-advertise-prefix {
+                        type leafref {
+                            path "../../../../../../policy-options/policy-statement/name";
+                        }
+                        description "Policy to conditionally advertise interface prefixes";
+                    }
+
                     leaf interface-type {
                         type types-ospf:interface-type;
                         sros-ext:immutable;
@@ -738,7 +745,7 @@ submodule nokia-conf-svc-vprn-ospf {
                         type uint32 {
                             range "1..max";
                         }
-                        description "Configure load-balancing-weight.";
+                        description "Load-balancing weight";
                     }
 
                     leaf admin-state {

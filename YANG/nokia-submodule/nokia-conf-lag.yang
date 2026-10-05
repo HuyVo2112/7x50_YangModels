@@ -7,7 +7,9 @@ submodule nokia-conf-lag {
     import ietf-yang-types                { prefix "yang"; }
     import nokia-sros-yang-extensions     { prefix "sros-ext"; }
     import nokia-types-eth-cfm            { prefix "types-eth-cfm"; }
+    import nokia-types-lldp               { prefix "types-lldp"; }
     import nokia-types-port               { prefix "types-port"; }
+    import nokia-types-qos                { prefix "types-qos"; }
     import nokia-types-services           { prefix "types-services"; }
     import nokia-types-sros               { prefix "types-sros"; }
 
@@ -17,7 +19,7 @@ submodule nokia-conf-lag {
     include nokia-conf-qos;
     include nokia-conf-service;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -40,7 +42,7 @@ submodule nokia-conf-lag {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-05-16";
+    revision "2026-07-22";
 
     grouping conf-lag {
         list lag {
@@ -155,6 +157,13 @@ submodule nokia-conf-lag {
                 description "MUX machine control for LACP LAG in active/passive mode";
             }
 
+            leaf oper-group {
+                type leafref {
+                    path "../../service/oper-group/name";
+                }
+                description "Operational group associated with a LAG";
+            }
+
             leaf monitor-oper-group {
                 type leafref {
                     path "../../service/oper-group/name";
@@ -260,6 +269,29 @@ submodule nokia-conf-lag {
                     description "Key to identify the channel group on each LACP port";
                 }
 
+                container fallback {
+                    presence "Enable the fallback context";
+                    description "Enable the fallback context";
+
+                    leaf mode {
+                        type enumeration {
+                            enum static                         { value 1; }
+                        }
+                        mandatory true;
+                        description "LACP fallback mode";
+                    }
+
+                    leaf timeout {
+                        type uint32 {
+                            range "4..3600";
+                        }
+                        units "seconds";
+                        default "4";
+                        description "LACP fallback timeout interval";
+                    }
+
+                } // container fallback
+
             } // container lacp
 
             container adaptive-load-balancing {
@@ -280,7 +312,7 @@ submodule nokia-conf-lag {
                     }
                     units "seconds";
                     default "30";
-                    description "The statistics pooling interval for the LAG ports";
+                    description "Statistics polling interval for LAG ports";
                 }
 
                 leaf bandwidth-threshold {
@@ -288,7 +320,7 @@ submodule nokia-conf-lag {
                         range "0..100";
                     }
                     units "percent";
-                    description "Minimum bandwidth for adaptive load balancing";
+                    description "Minimum bandwidth for ALB";
                 }
 
             } // container adaptive-load-balancing
@@ -568,12 +600,12 @@ submodule nokia-conf-lag {
 
                     leaf local-ip-address {
                         type types-sros:ipv4-unicast-address;
-                        description "BFD source address";
+                        description "BFD IPv4 source address";
                     }
 
                     leaf remote-ip-address {
                         type types-sros:ipv4-unicast-address;
-                        description "BFD destination address";
+                        description "BFD IPv4 destination address";
                     }
 
                     leaf-list apply-groups {
@@ -667,12 +699,12 @@ submodule nokia-conf-lag {
 
                     leaf local-ip-address {
                         type types-sros:ipv6-unicast-or-linklocal-address;
-                        description "BFD source address";
+                        description "BFD IPv6 source address";
                     }
 
                     leaf remote-ip-address {
                         type types-sros:ipv6-unicast-or-linklocal-address;
-                        description "BFD destination address";
+                        description "BFD IPv6 destination address";
                     }
 
                     leaf-list apply-groups {
@@ -866,8 +898,14 @@ submodule nokia-conf-lag {
 
                         leaf low-priority-defect {
                             type enumeration {
-                                enum all-def                        { value 1; }
-                                enum mac-rem-err-xcon               { value 2; }
+                                enum all-def {
+                                    value 1;
+                                    description "Generate AIS frame for any defect in CCM state machine";
+                                }
+                                enum mac-rem-err-xcon {
+                                    value 2;
+                                    description "Generate AIS frame for def-mac-status defect or higher";
+                                }
                             }
                             default "all-def";
                             description "Lowest priority defect allowed to generate fault alarm";
@@ -1151,6 +1189,21 @@ submodule nokia-conf-lag {
                     description "Mode of the scheduler";
                 }
 
+                leaf adapt-qos {
+                    type enumeration {
+                        enum link {
+                            value 1;
+                            description "Apply the configured bandwidth as is to all cores";
+                        }
+                        enum dynamic-per-core {
+                            value 2;
+                            description "Distribute bandwidth based on active ports on each core";
+                        }
+                    }
+                    default "link";
+                    description "Scheduler bandwidth allocation model";
+                }
+
                 leaf low-latency {
                     type boolean;
                     default "false";
@@ -1187,6 +1240,17 @@ submodule nokia-conf-lag {
                             path "../../../../qos/vlan-qos-policy/vlan-qos-policy-name";
                         }
                         description "VLAN QoS policy name";
+                    }
+
+                    leaf burst-limit {
+                        type types-qos:vlan-qos-burst-limit;
+                        description "Maximum traffic burst size for the LAG VLAN QoS policy";
+                    }
+
+                    leaf sink-excess-bw {
+                        type boolean;
+                        default "false";
+                        description "Use virtual flows to sink excess bandwidth";
                     }
 
                     leaf-list apply-groups {
@@ -1265,6 +1329,225 @@ submodule nokia-conf-lag {
                 } // list vlan-qos-policy
 
             } // container scheduler
+
+            container lldp-member-template {
+                description "Enter the lldp-member-template context";
+
+                list dest-mac {
+                    key "mac-type";
+                    description "Enter the dest-mac list instance";
+
+                    leaf mac-type {
+                        type types-lldp:mac-addr-type;
+                        description "Destination MAC address type";
+                    }
+
+                    leaf notification {
+                        type boolean;
+                        default "false";
+                        description "Enable LLDP notifications";
+                    }
+
+                    leaf port-id-subtype {
+                        type enumeration {
+                            enum tx-if-alias {
+                                value 1;
+                                description "Transmit the ifAlias String (subtype 1)";
+                            }
+                            enum tx-if-name {
+                                value 5;
+                                description "Transmit the ifName string (subtype 5)";
+                            }
+                            enum tx-local {
+                                value 7;
+                                description "Transmit the interface ifIndex value (subtype 7)";
+                            }
+                        }
+                        default "tx-local";
+                        description "Encoding of the Port ID TLV transmitted to the peer";
+                    }
+
+                    leaf receive {
+                        type boolean;
+                        default "false";
+                        description "Enable LLDP received frame handling";
+                    }
+
+                    leaf transmit {
+                        type boolean;
+                        default "false";
+                        description "Enable LLDP transmitted frame handling";
+                    }
+
+                    leaf tunnel-nearest-bridge {
+                        when "../mac-type = 'nearest-bridge'" {
+                            description "Only valid for nearest-bridge mac-type";
+                        }
+                        type boolean;
+                        default "false";
+                        description "Enable nearest bridge tunneling";
+                    }
+
+                    leaf tunnel-nearest-customer {
+                        when "../mac-type = 'nearest-customer'" {
+                            description "Only valid for nearest-customer mac-type";
+                        }
+                        type boolean;
+                        default "true";
+                        description "Enable nearest customer tunneling";
+                    }
+
+                    leaf tunnel-nearest-non-tpmr {
+                        when "../mac-type = 'nearest-non-tpmr'" {
+                            description "Only valid for nearest-non-tpmr mac-type";
+                        }
+                        type boolean;
+                        default "true";
+                        description "Enable the nearest non-TPMR tunneling";
+                    }
+
+                    leaf-list apply-groups {
+                        type leafref {
+                            path "../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Apply a configuration group at this level";
+                    }
+
+                    leaf-list apply-groups-exclude {
+                        type leafref {
+                            path "../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Exclude a configuration group at this level";
+                    }
+
+                    container tx-tlvs {
+                        description "Enter the tx-tlvs context";
+
+                        leaf port-desc {
+                            type boolean;
+                            default "false";
+                            description "Transmit port description TLVs";
+                        }
+
+                        leaf sys-name {
+                            type boolean;
+                            default "false";
+                            description "Transmit system name TLVs";
+                        }
+
+                        leaf sys-desc {
+                            type boolean;
+                            default "false";
+                            description "Transmit system description TLVs";
+                        }
+
+                        leaf sys-cap {
+                            type boolean;
+                            default "false";
+                            description "Transmit system capabilities TLVs";
+                        }
+
+                    } // container tx-tlvs
+
+                    list tx-mgmt-address {
+                        key "mgmt-address-system-type";
+                        description "Enter the tx-mgmt-address list instance";
+
+                        leaf mgmt-address-system-type {
+                            type enumeration {
+                                enum oob {
+                                    value 0;
+                                    description "Transmit out-of-band IPv4 address for active CPM";
+                                }
+                                enum system {
+                                    value 1;
+                                    description "Transmit the system IP address";
+                                }
+                                enum system-ipv6 {
+                                    value 2;
+                                    description "Transmit the system IPv6 address";
+                                }
+                                enum oob-ipv6 {
+                                    value 3;
+                                    description "Transmit the out-of-band IPv6 address for active CPM";
+                                }
+                            }
+                            description "Management address to transmit";
+                        }
+
+                        leaf admin-state {
+                            type types-sros:admin-state;
+                            default "disable";
+                            description "Administrative state of management address transmission";
+                        }
+
+                        leaf-list apply-groups {
+                            type leafref {
+                                path "../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Apply a configuration group at this level";
+                        }
+
+                        leaf-list apply-groups-exclude {
+                            type leafref {
+                                path "../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Exclude a configuration group at this level";
+                        }
+
+                    } // list tx-mgmt-address
+
+                } // list dest-mac
+
+            } // container lldp-member-template
+
+            container ptp-timestamping {
+                presence "Enable the ptp-timestamping context";
+                description "Enable the ptp-timestamping context";
+
+                leaf admin-state {
+                    type types-sros:admin-state;
+                    default "disable";
+                    description "Administrative state of PTP timestamping";
+                }
+
+                leaf ipv4-address {
+                    type types-sros:ipv4-address;
+                    description "IPv4 destination address for PTP messages into port";
+                }
+
+                leaf ipv6-address {
+                    type types-sros:ipv6-address;
+                    description "IPv6 destination address for PTP messages into port";
+                }
+
+                leaf-list apply-groups {
+                    type leafref {
+                        path "../../../groups/group/name";
+                    }
+                    max-elements 8;
+                    ordered-by user;
+                    description "Apply a configuration group at this level";
+                }
+
+                leaf-list apply-groups-exclude {
+                    type leafref {
+                        path "../../../groups/group/name";
+                    }
+                    max-elements 8;
+                    ordered-by user;
+                    description "Exclude a configuration group at this level";
+                }
+
+            } // container ptp-timestamping
 
         } // list lag
 

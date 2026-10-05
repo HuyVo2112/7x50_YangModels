@@ -10,8 +10,10 @@ submodule nokia-conf-router-static-route {
 
     include nokia-conf-groups;
     include nokia-conf-policy-options;
+    include nokia-conf-service;
+    include nokia-conf-svc-vprn;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -34,7 +36,7 @@ submodule nokia-conf-router-static-route {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-08-11";
+    revision "2026-07-22";
 
     grouping conf-router-static-route-static-routes {
         container static-routes {
@@ -141,6 +143,24 @@ submodule nokia-conf-router-static-route {
                     description "Exclude a configuration group at this level";
                 }
 
+                container leak-destination {
+                    description "Enter the leak-destination context";
+
+                    list router-instance {
+                        key "service-name";
+                        description "Add a list entry for router-instance";
+
+                        leaf service-name {
+                            type leafref {
+                                path "../../../../../../service/vprn/service-name";
+                            }
+                            description "VPRN service name";
+                        }
+
+                    } // list router-instance
+
+                } // container leak-destination
+
                 container blackhole {
                     presence "Enable the blackhole context";
                     description "Enable the blackhole context";
@@ -163,7 +183,7 @@ submodule nokia-conf-router-static-route {
                             range "1..255";
                         }
                         default "5";
-                        description "Priority of this static route over the routes from different sources";
+                        description "Priority of static route over different route sources";
                     }
 
                     leaf tag {
@@ -237,6 +257,7 @@ submodule nokia-conf-router-static-route {
 
                 } // container blackhole
 
+
                 list indirect {
                     key "ip-address";
                     description "Enter the indirect list instance";
@@ -264,7 +285,7 @@ submodule nokia-conf-router-static-route {
                             range "1..255";
                         }
                         default "5";
-                        description "Priority of this static route over the routes from different sources";
+                        description "Priority of static route over different route sources";
                     }
 
                     leaf tag {
@@ -541,7 +562,7 @@ submodule nokia-conf-router-static-route {
                             range "1..255";
                         }
                         default "5";
-                        description "Priority of this static route over the routes from different sources";
+                        description "Priority of static route over different route sources";
                     }
 
                     leaf tag {
@@ -703,7 +724,7 @@ submodule nokia-conf-router-static-route {
 
                     leaf ipsec-tunnel-name {
                         type types-sros:named-item;
-                        description "IPsec tunnel name.";
+                        description "IPsec tunnel name";
                     }
 
                     leaf description {
@@ -724,7 +745,7 @@ submodule nokia-conf-router-static-route {
                             range "1..255";
                         }
                         default "5";
-                        description "Priority of this static route over the routes from different sources";
+                        description "Priority of static route over different route sources";
                     }
 
                     leaf tag {
@@ -816,7 +837,7 @@ submodule nokia-conf-router-static-route {
                             range "1..255";
                         }
                         default "5";
-                        description "Priority of this static route over the routes from different sources";
+                        description "Priority of static route over different route sources";
                     }
 
                     leaf tag {

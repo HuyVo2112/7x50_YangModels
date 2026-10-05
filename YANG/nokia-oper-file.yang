@@ -6,13 +6,11 @@ module nokia-oper-file {
 
     prefix "oper-file";
 
-    import nokia-conf                     { prefix "conf"; }
     import nokia-sros-yang-extensions     { prefix "sros-ext"; }
-    import nokia-state                    { prefix "state"; }
     import nokia-types-operation          { prefix "types-operation"; }
     import nokia-types-sros               { prefix "types-sros"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -35,7 +33,7 @@ module nokia-oper-file {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2016-01-01";
+    revision "2026-02-11";
 
     container file {
         config false;
@@ -50,9 +48,15 @@ module nokia-oper-file {
                     type union {
                         type types-sros:local-file-url;
                         type types-sros:ftp-url;
+                        type types-sros:sftp-url;
                     }
                     mandatory true;
                     description "Directory location";
+                }
+
+                leaf router-instance {
+                    type string;
+                    description "Router name or VPRN service name";
                 }
 
             }
@@ -102,13 +106,13 @@ module nokia-oper-file {
         } // action make-directory
 
         action format {
-            description "Format a compact flash device";
+            description "Format a storage device";
 
             input {
 
                 leaf cflash-id {
                     type types-sros:cflash-id;
-                    description "Compact flash ID";
+                    description "Format a storage device";
                 }
 
             }
@@ -158,13 +162,13 @@ module nokia-oper-file {
         } // action format
 
         action repair {
-            description "Repair a compact flash file system";
+            description "Repair a storage device file system";
 
             input {
 
                 leaf cflash-id {
                     type types-sros:cflash-id;
-                    description "Compact flash ID";
+                    description "Storage device to repair";
                 }
 
             }
@@ -237,6 +241,7 @@ module nokia-oper-file {
                     type union {
                         type types-sros:local-file-url;
                         type types-sros:ftp-url;
+                        type types-sros:sftp-url;
                     }
                     mandatory true;
                     description "Directory URL";
@@ -250,6 +255,11 @@ module nokia-oper-file {
                 leaf recursive {
                     type empty;
                     description "Remove directory and contents recursively";
+                }
+
+                leaf router-instance {
+                    type string;
+                    description "Router name or VPRN service name";
                 }
 
             }
@@ -363,7 +373,7 @@ module nokia-oper-file {
         } // action permission
 
         action enable {
-            description "Enable compact flash devices";
+            description "Enable storage devices";
 
             input {
 
@@ -441,7 +451,7 @@ module nokia-oper-file {
         } // action enable
 
         action disable {
-            description "Disable compact flash devices";
+            description "Disable storage devices";
 
             input {
 
@@ -451,7 +461,7 @@ module nokia-oper-file {
 
                         leaf cflash-id {
                             type types-sros:cflash-id;
-                            description "Disable the compact flash device";
+                            description "Disable the storage device";
                         }
 
                     }
@@ -527,6 +537,7 @@ module nokia-oper-file {
                     type union {
                         type types-sros:local-file-url;
                         type types-sros:remote-file-url;
+                        type types-sros:sftp-url;
                     }
                     mandatory true;
                     description "Source URL";
@@ -537,6 +548,7 @@ module nokia-oper-file {
                         type types-sros:local-file-url;
                         type types-sros:remote-file-url;
                         type types-sros:scp-url;
+                        type types-sros:sftp-url;
                     }
                     mandatory true;
                     description "Destination URL or '.' for the working directory";
@@ -630,6 +642,7 @@ module nokia-oper-file {
                         type types-sros:local-file-url;
                         type types-sros:ftp-url;
                         type types-sros:http-url-loose;
+                        type types-sros:sftp-url;
                     }
                     mandatory true;
                     description "Source URL";
@@ -640,6 +653,7 @@ module nokia-oper-file {
                         type types-sros:local-file-url;
                         type types-sros:ftp-url;
                         type types-sros:http-url-loose;
+                        type types-sros:sftp-url;
                     }
                     mandatory true;
                     description "Destination URL or '.' for the working directory";
@@ -665,6 +679,11 @@ module nokia-oper-file {
                 leaf proxy {
                     type types-sros:http-url;
                     description "Connect over HTTP with a proxy";
+                }
+
+                leaf router-instance {
+                    type string;
+                    description "Router name or VPRN service name";
                 }
 
             }
@@ -723,6 +742,7 @@ module nokia-oper-file {
                         type types-sros:local-file-url;
                         type types-sros:ftp-url;
                         type types-sros:http-url-loose;
+                        type types-sros:sftp-url;
                     }
                     mandatory true;
                     description "File URL";
@@ -748,6 +768,11 @@ module nokia-oper-file {
                 leaf proxy {
                     type types-sros:http-url;
                     description "Connect over HTTP with a proxy";
+                }
+
+                leaf router-instance {
+                    type string;
+                    description "Router name or VPRN service name";
                 }
 
             }
@@ -895,9 +920,15 @@ module nokia-oper-file {
                     type union {
                         type types-sros:local-file-url;
                         type types-sros:ftp-tftp-url;
+                        type types-sros:sftp-url;
                     }
                     mandatory true;
                     description "File URL";
+                }
+
+                leaf router-instance {
+                    type string;
+                    description "Router name or VPRN service name";
                 }
 
             }
@@ -995,6 +1026,7 @@ module nokia-oper-file {
                     type union {
                         type types-sros:local-file-url;
                         type types-sros:remote-file-url;
+                        type types-sros:sftp-url;
                     }
                     mandatory true;
                     description "Source URL";
@@ -1023,6 +1055,11 @@ module nokia-oper-file {
 
                     }
                 }
+                leaf router-instance {
+                    type string;
+                    description "Router name or VPRN service name";
+                }
+
             }
             output {
 
@@ -1068,6 +1105,54 @@ module nokia-oper-file {
 
             }
         } // action unzip
+
+        action secure-erase {
+            description "Secure erase and format a storage device";
+
+            output {
+
+                leaf operation-id {
+                    type types-operation:operation-id;
+                    description "ID assigned to the operation.";
+                }
+
+                leaf start-time {
+                    type types-operation:operation-timestamp;
+                    description "Time when the operation started its execution.";
+                }
+
+                leaf results-path {
+                    type types-operation:operation-path;
+                    description "Path to the results of the operation formatted as xpath.";
+                }
+
+                leaf status {
+                    type types-operation:operation-status;
+                    description "Status of the operation";
+                }
+
+                leaf-list error-message {
+                    type types-operation:operation-message;
+                    description "Error messages reported during execution of the operation.";
+                }
+
+                leaf-list warning-message {
+                    type types-operation:operation-message;
+                    description "Warning messages reported during execution of the operation.";
+                }
+
+                leaf-list info-message {
+                    type types-operation:operation-message;
+                    description "Info messages reported during execution of the operation.";
+                }
+
+                leaf end-time {
+                    type types-operation:operation-timestamp;
+                    description "Time when the operation ended its execution.";
+                }
+
+            }
+        } // action secure-erase
 
     } // container file
 

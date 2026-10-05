@@ -13,7 +13,7 @@ submodule nokia-state-submgt-vrgw {
     import nokia-types-sros               { prefix "types-sros"; }
     import nokia-types-subscriber-mgmt    { prefix "types-submgt"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -36,7 +36,7 @@ submodule nokia-state-submgt-vrgw {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2021-11-05";
+    revision "2025-03-12";
 
     grouping state-submgt-vrgw {
         container vrgw {
@@ -732,6 +732,16 @@ submodule nokia-state-submgt-vrgw {
                                         description "The committed buffer size";
                                     }
 
+                                    leaf parent-weight {
+                                        type types-qos:weight-override;
+                                        description "The weight that needs to be used by the scheduler to which this policer would be feeding to.";
+                                    }
+
+                                    leaf parent-cir-weight {
+                                        type types-qos:weight-override;
+                                        description "The weight that needs to be used until the committed rate by the scheduler to which this policer would be feeding to.";
+                                    }
+
                                 } // list policer
 
                                 list queue {
@@ -765,6 +775,21 @@ submodule nokia-state-submgt-vrgw {
                                         type types-qos:queue-burst-size-override;
                                         units "bytes";
                                         description "The committed buffer size";
+                                    }
+
+                                    leaf burst-limit {
+                                        type types-qos:burst-limit-override-numeric;
+                                        description "The explicit shaping burst size of a queue.";
+                                    }
+
+                                    leaf parent-weight {
+                                        type types-qos:weight-override;
+                                        description "The weight that needs to be used by the scheduler to which this queue would be feeding to.";
+                                    }
+
+                                    leaf parent-cir-weight {
+                                        type types-qos:weight-override;
+                                        description "The weight that needs to be used until the committed rate by the scheduler to which this queue would be feeding to.";
                                     }
 
                                 } // list queue
@@ -1147,6 +1172,16 @@ submodule nokia-state-submgt-vrgw {
                                         description "The committed buffer size";
                                     }
 
+                                    leaf parent-weight {
+                                        type types-qos:weight-override;
+                                        description "The weight that needs to be used by the scheduler to which this policer would be feeding to.";
+                                    }
+
+                                    leaf parent-cir-weight {
+                                        type types-qos:weight-override;
+                                        description "The weight that needs to be used until the committed rate by the scheduler to which this policer would be feeding to.";
+                                    }
+
                                 } // list policer
 
                                 list queue {
@@ -1194,6 +1229,21 @@ submodule nokia-state-submgt-vrgw {
                                         description "The scheduling class weight.";
                                     }
 
+                                    leaf burst-limit {
+                                        type types-qos:burst-limit-override-numeric;
+                                        description "The explicit shaping burst size of a queue.";
+                                    }
+
+                                    leaf parent-weight {
+                                        type types-qos:weight-override;
+                                        description "The weight that needs to be used by the scheduler to which this queue would be feeding to.";
+                                    }
+
+                                    leaf parent-cir-weight {
+                                        type types-qos:weight-override;
+                                        description "The weight that needs to be used until the committed rate by the scheduler to which this queue would be feeding to.";
+                                    }
+
                                 } // list queue
 
                                 list scheduler {
@@ -1225,7 +1275,7 @@ submodule nokia-state-submgt-vrgw {
 
                                     leaf group-id {
                                         type types-qos:hs-wrr-group-id;
-                                        description "HS WRR group identifier";
+                                        description "HS WRR group identifier.";
                                     }
 
                                     leaf pir {
@@ -1246,7 +1296,6 @@ submodule nokia-state-submgt-vrgw {
                         } // container qos
 
                     } // container egress
-
 
                 } // container subscriber-parameters
 

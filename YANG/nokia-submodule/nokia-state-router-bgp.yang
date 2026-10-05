@@ -14,7 +14,7 @@ submodule nokia-state-router-bgp {
 
     include nokia-state-router;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -37,11 +37,11 @@ submodule nokia-state-router-bgp {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2024-04-17";
+    revision "2026-02-11";
 
     grouping state-router-bgp {
         container bgp {
-            description "Enable the bgp context";
+            description "Enter the bgp context";
 
             container convergence {
                 description "Enter the convergence context";
@@ -59,7 +59,9 @@ submodule nokia-state-router-bgp {
                             enum label-ipv4                     { value 17; }
                             enum label-ipv6                     { value 18; }
                         }
-                        description "Address family for which convergence selection applies";
+                        description
+                            "Specifies the address family for which the
+                             bgp convergence selection applies.";
                     }
 
                     leaf up-peers-when-min-expired {
@@ -626,13 +628,22 @@ submodule nokia-state-router-bgp {
 
             } // container statistics
 
+            list group {
+                key "group-name";
+                description "Enter the group list instance";
+
+                leaf group-name {
+                    type types-sros:named-item-64;
+                }
+
+            } // list group
+
             list neighbor {
                 key "ip-address";
                 description "Enter the neighbor list instance";
 
                 leaf ip-address {
                     type types-sros:ip-address-with-zone;
-                    description "IP address of the BGP peer router";
                 }
 
                 container statistics {
@@ -1749,7 +1760,7 @@ submodule nokia-state-router-bgp {
                 } // container statistics
 
                 container graceful-restart {
-                    description "Enable the graceful-restart context";
+                    description "Enter the graceful-restart context";
 
                     leaf support {
                         type boolean;
@@ -1850,7 +1861,7 @@ submodule nokia-state-router-bgp {
                     } // container notification-family
 
                     container long-lived {
-                        description "Enable the long-lived context";
+                        description "Enter the long-lived context";
 
                         list family {
                             key "family-type";
@@ -1858,7 +1869,7 @@ submodule nokia-state-router-bgp {
 
                             leaf family-type {
                                 type types-bgp:llgr-family-identifiers;
-                                description "Family type for family-specific LLGR configuration";
+                                description "Specifies the address family for long-lived graceful-restart";
                             }
 
                             leaf advertised-stale-time-received {
@@ -1893,7 +1904,9 @@ submodule nokia-state-router-bgp {
 
                     leaf family {
                         type types-bgp:ip-family-identifier;
-                        description "Address family to which the limit applies";
+                        description
+                            "Specifies the address families for which
+                             prefix-limit is configured.";
                     }
 
                     leaf inherit {
@@ -1911,6 +1924,64 @@ submodule nokia-state-router-bgp {
                     }
 
                 } // list prefix-limit
+
+                container epe-sid {
+                    description "Enter the epe-sid context";
+
+                    leaf label {
+                        type uint32;
+                        description "specifies the sid label";
+                    }
+
+                    container statistics {
+                        description "Enter the statistics context";
+
+                        leaf packets {
+                            type uint64;
+                            description "Number of packets for this route.";
+                        }
+
+                        leaf octets {
+                            type uint64;
+                            description "Number of octets for this route.";
+                        }
+
+                    } // container statistics
+
+                    list adj-sid {
+                        key "index";
+                        description "Enter the adj-sid list instance";
+
+                        leaf index {
+                            type uint32 {
+                                range "1..32";
+                            }
+                            description "Specifies the adjacency sid index.";
+                        }
+
+                        leaf label {
+                            type uint32;
+                            description "specifies the sid label";
+                        }
+
+                        container statistics {
+                            description "Enter the statistics context";
+
+                            leaf packets {
+                                type uint64;
+                                description "Number of packets for this route.";
+                            }
+
+                            leaf octets {
+                                type uint64;
+                                description "Number of octets for this route.";
+                            }
+
+                        } // container statistics
+
+                    } // list adj-sid
+
+                } // container epe-sid
 
             } // list neighbor
 
@@ -2009,6 +2080,11 @@ submodule nokia-state-router-bgp {
                                 description
                                     "This value indicates if route is stale due to BGP graceful
                                      restart.";
+                            }
+
+                            leaf unused-weight-only {
+                                type boolean;
+                                description "Indicates true if the route is unused, but being used for weight calculation";
                             }
 
                             leaf long-live-gr-stale {
@@ -2343,6 +2419,11 @@ submodule nokia-state-router-bgp {
                                     description
                                         "This value indicates if route is stale due to BGP graceful
                                          restart.";
+                                }
+
+                                leaf unused-weight-only {
+                                    type boolean;
+                                    description "Indicates true if the route is unused, but being used for weight calculation";
                                 }
 
                                 leaf long-live-gr-stale {
@@ -2678,6 +2759,11 @@ submodule nokia-state-router-bgp {
                                      restart.";
                             }
 
+                            leaf unused-weight-only {
+                                type boolean;
+                                description "Indicates true if the route is unused, but being used for weight calculation";
+                            }
+
                             leaf long-live-gr-stale {
                                 type boolean;
                                 description
@@ -3012,6 +3098,11 @@ submodule nokia-state-router-bgp {
                                          restart.";
                                 }
 
+                                leaf unused-weight-only {
+                                    type boolean;
+                                    description "Indicates true if the route is unused, but being used for weight calculation";
+                                }
+
                                 leaf long-live-gr-stale {
                                     type boolean;
                                     description
@@ -3343,6 +3434,11 @@ submodule nokia-state-router-bgp {
                                 description
                                     "This value indicates if route is stale due to BGP graceful
                                      restart.";
+                            }
+
+                            leaf unused-weight-only {
+                                type boolean;
+                                description "Indicates true if the route is unused, but being used for weight calculation";
                             }
 
                             leaf long-live-gr-stale {
@@ -3692,6 +3788,11 @@ submodule nokia-state-router-bgp {
                                     description
                                         "This value indicates if route is stale due to BGP graceful
                                          restart.";
+                                }
+
+                                leaf unused-weight-only {
+                                    type boolean;
+                                    description "Indicates true if the route is unused, but being used for weight calculation";
                                 }
 
                                 leaf long-live-gr-stale {
@@ -4112,6 +4213,11 @@ submodule nokia-state-router-bgp {
                                      restart.";
                             }
 
+                            leaf unused-weight-only {
+                                type boolean;
+                                description "Indicates true if the route is unused, but being used for weight calculation";
+                            }
+
                             leaf long-live-gr-stale {
                                 type boolean;
                                 description
@@ -4446,6 +4552,11 @@ submodule nokia-state-router-bgp {
                                          restart.";
                                 }
 
+                                leaf unused-weight-only {
+                                    type boolean;
+                                    description "Indicates true if the route is unused, but being used for weight calculation";
+                                }
+
                                 leaf long-live-gr-stale {
                                     type boolean;
                                     description
@@ -4754,6 +4865,12 @@ submodule nokia-state-router-bgp {
                     } // list label-ipv6-statistics
 
                 } // container label-ipv6
+
+
+
+
+
+
 
 
 
@@ -5131,6 +5248,7 @@ submodule nokia-state-router-bgp {
 
                         } // container d-path
 
+
                     } // list attr-set
 
                 } // container attr-sets
@@ -5329,6 +5447,11 @@ submodule nokia-state-router-bgp {
                         description "specifies the bfd-strict-mode nh-reachability setting";
                     }
 
+                    leaf enforce-untagged-route {
+                        type types-sros:untagged-route-type;
+                        description "Indicates enforcement of untagged routes";
+                    }
+
                     leaf explicit-null {
                         type boolean;
                         description "specifies if the next-hop is linked to label-ipv6 routes with explicit-null label";
@@ -5352,6 +5475,16 @@ submodule nokia-state-router-bgp {
                         type types-router:protocol-type;
                         description "specifies the final protocol for bgp-over-bgp.";
                     }
+
+                    container upa-trigger {
+                        description "Enter the upa-trigger context";
+
+                        leaf next-hop {
+                            type types-bgp:upa-trigger-next-hop;
+                            description "Action to be taken when an UPA is received for a next-hop.";
+                        }
+
+                    } // container upa-trigger
 
                     list resolved-next-hop {
                         key "index";
@@ -5486,6 +5619,11 @@ submodule nokia-state-router-bgp {
                         description "specifies the bfd-strict-mode nh-reachability setting";
                     }
 
+                    leaf enforce-untagged-route {
+                        type types-sros:untagged-route-type;
+                        description "Indicates enforcement of untagged routes";
+                    }
+
                     leaf evpn {
                         type boolean;
                         description "next-hop is linked to an EVPN service";
@@ -5509,6 +5647,11 @@ submodule nokia-state-router-bgp {
                     leaf auto-bind-strict-tunnel-tagging {
                         type boolean;
                         description "specifies whether strict-tunnel-tagging is enabled for this vpn next-hop.";
+                    }
+
+                    leaf auto-bind-strict-tunnel-untagged {
+                        type boolean;
+                        description "specifies whether strict-tunnel-untagged is enabled for this vpn next-hop.";
                     }
 
                     leaf auto-bind-allow-flex-algo-fallback {
@@ -5615,6 +5758,16 @@ submodule nokia-state-router-bgp {
                         type uint8;
                         description "specifies the number of labels required by the user service";
                     }
+
+                    container upa-trigger {
+                        description "Enter the upa-trigger context";
+
+                        leaf next-hop {
+                            type types-bgp:upa-trigger-next-hop;
+                            description "Action to be taken when an UPA is received for a next-hop.";
+                        }
+
+                    } // container upa-trigger
 
                     list resolved-next-hop {
                         key "index";

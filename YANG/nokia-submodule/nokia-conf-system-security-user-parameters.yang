@@ -14,7 +14,7 @@ submodule nokia-conf-system-security-user-parameters {
     include nokia-conf-system-security;
     include nokia-conf-system-security-aaa;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -37,7 +37,7 @@ submodule nokia-conf-system-security-user-parameters {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-03-17";
+    revision "2026-07-22";
 
     grouping conf-system-security-user-parameters-user-params {
         container user-params {
@@ -207,6 +207,13 @@ submodule nokia-conf-system-security-user-parameters {
                             description "Number of times same character can repeat consecutively";
                         }
 
+                        leaf disallow-sequence-keys {
+                            type uint32 {
+                                range "2..8";
+                            }
+                            description "Minimum length of disallowed sequential characters";
+                        }
+
                         choice complexity-rules-type {
                             case credits {
 
@@ -295,7 +302,7 @@ submodule nokia-conf-system-security-user-parameters {
                     }
 
                     leaf home-directory {
-                        type types-sros:local-url;
+                        type types-sros:cflash-without-slot-url;
                         description "Home directory for the user";
                     }
 
@@ -309,13 +316,13 @@ submodule nokia-conf-system-security-user-parameters {
 
                     leaf restricted-to-home {
                         type boolean;
-                        default "false";
+                        default "true";
                         description "Restrict file access to the home directory of the user";
                     }
 
                     leaf save-when-restricted {
                         type boolean;
-                        default "false";
+                        default "true";
                         description "Save configurations when the user is restricted to home";
                     }
 
@@ -350,7 +357,7 @@ submodule nokia-conf-system-security-user-parameters {
                         leaf console {
                             type boolean;
                             default "false";
-                            description "Allow Bluetooth, console port CLI, SCP/SFTP, SSH CLI, and Telnet CLI access";
+                            description "Allow console port, SCP/SFTP, SSH, and Telnet access";
                         }
 
                         leaf ftp {
@@ -383,6 +390,36 @@ submodule nokia-conf-system-security-user-parameters {
                             description "Allow access to Lawful Intercept (LI) commands";
                         }
 
+                        leaf scp-sftp {
+                            type boolean;
+                            default "false";
+                            description "Allow SCP/SFTP access";
+                        }
+
+                        leaf console-port-cli {
+                            type boolean;
+                            default "false";
+                            description "Allow console port CLI access";
+                        }
+
+                        leaf ssh-cli {
+                            type boolean;
+                            default "false";
+                            description "Allow SSH CLI access";
+                        }
+
+                        leaf telnet-cli {
+                            type boolean;
+                            default "false";
+                            description "Allow Telnet CLI access";
+                        }
+
+                        leaf bluetooth {
+                            type boolean;
+                            default "false";
+                            description "Allow Bluetooth access";
+                        }
+
                     } // container access
 
                     container console {
@@ -403,13 +440,13 @@ submodule nokia-conf-system-security-user-parameters {
                                 }
                                 type types-sros:filename;
                             }
-                            description "File to execute when a user successfully logs in";
+                            description "File to execute when the user logs in";
                         }
 
                         leaf new-password-at-login {
                             type boolean;
                             default "false";
-                            description "Prompt a user to change password at next console login";
+                            description "Prompt the user to change their password at next login";
                         }
 
                         leaf-list member {

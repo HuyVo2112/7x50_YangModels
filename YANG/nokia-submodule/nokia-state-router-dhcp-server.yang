@@ -10,7 +10,7 @@ submodule nokia-state-router-dhcp-server {
     import nokia-types-sros               { prefix "types-sros"; }
     import nokia-types-subscriber-mgmt    { prefix "types-submgt"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -33,7 +33,7 @@ submodule nokia-state-router-dhcp-server {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-06-23";
+    revision "2025-03-12";
 
     grouping state-router-dhcp-server {
         container dhcp-server {
@@ -45,7 +45,7 @@ submodule nokia-state-router-dhcp-server {
 
                 leaf name {
                     type types-sros:named-item;
-                    description "DHCP server name";
+                    description "The name of this DHCP server.";
                 }
 
                 leaf oper-state {
@@ -209,7 +209,7 @@ submodule nokia-state-router-dhcp-server {
 
                     leaf pool-name {
                         type types-sros:named-item;
-                        description "DHCP server pool name";
+                        description "The name identifies this DHCP server pool.";
                     }
 
                     container failover {
@@ -357,7 +357,7 @@ submodule nokia-state-router-dhcp-server {
 
                         leaf ipv4-prefix {
                             type types-sros:ipv4-unicast-prefix;
-                            description "IPv4 prefix for the subnet";
+                            description "IPv4 prefix.";
                         }
 
                         leaf active {
@@ -380,9 +380,7 @@ submodule nokia-state-router-dhcp-server {
                             }
 
                             leaf declined-time {
-                                type yang:date-and-time {
-                                    length "11";
-                                }
+                                type yang:date-and-time;
                                 description "When the client is declined";
                             }
 
@@ -1574,7 +1572,7 @@ submodule nokia-state-router-dhcp-server {
 
                 leaf name {
                     type types-sros:named-item;
-                    description "DHCP server name";
+                    description "The name of this DHCP server.";
                 }
 
                 leaf oper-state {
@@ -1748,7 +1746,7 @@ submodule nokia-state-router-dhcp-server {
 
                     leaf pool-name {
                         type types-sros:named-item;
-                        description "DHCP server pool name";
+                        description "The name identifies this DHCP server pool.";
                     }
 
                     container failover {
@@ -1898,7 +1896,7 @@ submodule nokia-state-router-dhcp-server {
                             type uint32 {
                                 range "1..128";
                             }
-                            description "Delegated prefix length for pool thresholds";
+                            description "Delegated prefix length.";
                         }
 
                         container statistics {
@@ -2086,7 +2084,7 @@ submodule nokia-state-router-dhcp-server {
 
                         leaf ipv6-prefix {
                             type types-sros:ipv6-prefix;
-                            description "IPv6 prefix to be excluded from available pool prefixes";
+                            description "IPv6 prefix.";
                         }
 
                         list prefix-length-threshold {
@@ -2097,7 +2095,7 @@ submodule nokia-state-router-dhcp-server {
                                 type uint32 {
                                     range "1..128";
                                 }
-                                description "Delegated prefix length for pool thresholds";
+                                description "Delegated prefix length.";
                             }
 
                             container statistics {

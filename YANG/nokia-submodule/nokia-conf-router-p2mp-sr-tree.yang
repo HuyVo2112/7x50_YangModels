@@ -9,8 +9,9 @@ submodule nokia-conf-router-p2mp-sr-tree {
 
     include nokia-conf-groups;
     include nokia-conf-router;
+    include nokia-conf-router-segment-routing;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -33,7 +34,7 @@ submodule nokia-conf-router-p2mp-sr-tree {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2022-03-22";
+    revision "2026-07-22";
 
     grouping conf-router-p2mp-sr-tree {
         container p2mp-sr-tree {
@@ -228,8 +229,8 @@ submodule nokia-conf-router-p2mp-sr-tree {
                 }
 
                 leaf replication-sid {
+                    status obsolete;
                     type uint32;
-                    sros-ext:auto-restart-to-modify;
                     default "0";
                     description "Segment ID of the replication segment";
                 }
@@ -260,6 +261,7 @@ submodule nokia-conf-router-p2mp-sr-tree {
                 }
 
                 leaf sid-action {
+                    status obsolete;
                     type enumeration {
                         enum none                           { value 0; }
                         enum push                           { value 1; }
@@ -289,10 +291,12 @@ submodule nokia-conf-router-p2mp-sr-tree {
                 }
 
                 list downstream-nodes {
+                    status obsolete;
                     key "downstream-index";
                     description "Enter the downstream-nodes list instance";
 
                     leaf downstream-index {
+                        status obsolete;
                         type int32 {
                             range "1..4096";
                         }
@@ -300,17 +304,20 @@ submodule nokia-conf-router-p2mp-sr-tree {
                     }
 
                     leaf next-hop-address {
+                        status obsolete;
                         type types-sros:ip-address-with-zone;
                         default "0.0.0.0";
                         description "Next-hop address for replication segment next hops";
                     }
 
                     leaf next-hop-interface-name {
+                        status obsolete;
                         type types-sros:interface-name;
                         description "Interface name for replication segment next-hops";
                     }
 
                     leaf protect-nexthop-id {
+                        status obsolete;
                         type leafref {
                             path "../../downstream-nodes/downstream-index";
                         }
@@ -318,9 +325,244 @@ submodule nokia-conf-router-p2mp-sr-tree {
                     }
 
                     leaf admin-state {
+                        status obsolete;
                         type types-sros:admin-state;
                         default "disable";
                         description "Administrative state of next-hop entries";
+                    }
+
+                    leaf-list apply-groups {
+                        status obsolete;
+                        type leafref {
+                            path "../../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Apply a configuration group at this level";
+                    }
+
+                    leaf-list apply-groups-exclude {
+                        status obsolete;
+                        type leafref {
+                            path "../../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Exclude a configuration group at this level";
+                    }
+
+                    container label {
+                        status obsolete;
+                        description "Enter the label context";
+
+                        choice label {
+                            status obsolete;
+                            default "replication-sid-list";
+                            case replication-sid-list {
+                                status obsolete;
+
+                                list sid-list {
+                                    status obsolete;
+                                    key "index";
+                                    description "Enter the sid-list list instance";
+
+                                    leaf index {
+                                        status obsolete;
+                                        type uint32 {
+                                            range "1..11";
+                                        }
+                                        description "SID list index";
+                                    }
+
+                                    leaf replication-sid {
+                                        status obsolete;
+                                        type uint32 {
+                                            range "3|16..1048575|4294967295";
+                                        }
+                                        mandatory true;
+                                        description "Segment ID for the SID list entry";
+                                    }
+
+                                    leaf-list apply-groups {
+                                        status obsolete;
+                                        type leafref {
+                                            path "../../../../../../../groups/group/name";
+                                        }
+                                        max-elements 8;
+                                        ordered-by user;
+                                        description "Apply a configuration group at this level";
+                                    }
+
+                                    leaf-list apply-groups-exclude {
+                                        status obsolete;
+                                        type leafref {
+                                            path "../../../../../../../groups/group/name";
+                                        }
+                                        max-elements 8;
+                                        ordered-by user;
+                                        description "Exclude a configuration group at this level";
+                                    }
+
+                                } // list sid-list
+
+                            }
+                        }
+                    } // container label
+
+                } // list downstream-nodes
+
+                container segment-routing-mpls {
+                    description "Enter the segment-routing-mpls context";
+
+                    leaf incoming-sid {
+                        type uint32;
+                        sros-ext:auto-restart-to-modify;
+                        default "0";
+                        description "Incoming MPLS label as the replication SID";
+                    }
+
+                    leaf sid-action {
+                        type enumeration {
+                            enum none                           { value 0; }
+                            enum push                           { value 1; }
+                            enum pop                            { value 2; }
+                            enum swap                           { value 3; }
+                        }
+                        default "none";
+                        description "SID action for the replication segment";
+                    }
+
+                    list downstream-nodes {
+                        key "downstream-index";
+                        description "Enter the downstream-nodes list instance";
+
+                        leaf downstream-index {
+                            type int32 {
+                                range "1..4096";
+                            }
+                            description "Downstream node index entry";
+                        }
+
+                        leaf next-hop-address {
+                            type types-sros:ip-address-with-zone;
+                            default "0.0.0.0";
+                            description "Next-hop address for replication segment next hop";
+                        }
+
+                        leaf next-hop-interface-name {
+                            type types-sros:interface-name;
+                            description "Interface name for replication segment next hop";
+                        }
+
+                        leaf protect-nexthop-id {
+                            type leafref {
+                                path "../../downstream-nodes/downstream-index";
+                            }
+                            description "ID of the protection next hop used for FRR";
+                        }
+
+                        leaf admin-state {
+                            type types-sros:admin-state;
+                            default "disable";
+                            description "Administrative state of the downstream node";
+                        }
+
+                        leaf-list apply-groups {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Apply a configuration group at this level";
+                        }
+
+                        leaf-list apply-groups-exclude {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Exclude a configuration group at this level";
+                        }
+
+                        container label {
+                            description "Enter the label context";
+
+                            choice label {
+                                default "replication-sid-list";
+                                case replication-sid-list {
+
+                                    list sid-list {
+                                        key "index";
+                                        description "Enter the sid-list list instance";
+
+                                        leaf index {
+                                            type uint32 {
+                                                range "1..11";
+                                            }
+                                            description "SID list index";
+                                        }
+
+                                        leaf replication-sid {
+                                            type uint32 {
+                                                range "3|16..1048575|4294967295";
+                                            }
+                                            mandatory true;
+                                            description "Segment ID for the SID list entry";
+                                        }
+
+                                        leaf-list apply-groups {
+                                            type leafref {
+                                                path "../../../../../../../../groups/group/name";
+                                            }
+                                            max-elements 8;
+                                            ordered-by user;
+                                            description "Apply a configuration group at this level";
+                                        }
+
+                                        leaf-list apply-groups-exclude {
+                                            type leafref {
+                                                path "../../../../../../../../groups/group/name";
+                                            }
+                                            max-elements 8;
+                                            ordered-by user;
+                                            description "Exclude a configuration group at this level";
+                                        }
+
+                                    } // list sid-list
+
+                                }
+                            }
+                        } // container label
+
+                    } // list downstream-nodes
+
+                } // container segment-routing-mpls
+
+                container segment-routing-v6 {
+                    description "Enter the segment-routing-v6 context";
+
+                    leaf role {
+                        type enumeration {
+                            enum none {
+                                value 0;
+                                description "Do not use a role for this segment";
+                            }
+                            enum root {
+                                value 1;
+                                description "Use the neighbor root role for this segment";
+                            }
+                            enum leaf {
+                                value 2;
+                                description "Use the leaf area role for this segment";
+                            }
+                            enum transit {
+                                value 3;
+                                description "Use the transit role for this segment";
+                            }
+                        }
+                        default "none";
+                        description "Role of the SRv6 replication segment entry";
                     }
 
                     leaf-list apply-groups {
@@ -341,57 +583,83 @@ submodule nokia-conf-router-p2mp-sr-tree {
                         description "Exclude a configuration group at this level";
                     }
 
-                    container label {
-                        description "Enter the label context";
+                    container incoming-sid {
+                        description "Enter the incoming-sid context";
 
-                        choice label {
-                            default "replication-sid-list";
-                            case replication-sid-list {
+                        container locator {
+                            description "Enter the locator context";
 
-                                list sid-list {
-                                    key "index";
-                                    description "Enter the sid-list list instance";
-
-                                    leaf index {
-                                        type uint32 {
-                                            range "1..11";
-                                        }
-                                        description "SID list index";
-                                    }
-
-                                    leaf replication-sid {
-                                        type uint32 {
-                                            range "3|16..1048575|4294967295";
-                                        }
-                                        mandatory true;
-                                        description "Segment ID for the SID list entry";
-                                    }
-
-                                    leaf-list apply-groups {
-                                        type leafref {
-                                            path "../../../../../../../groups/group/name";
-                                        }
-                                        max-elements 8;
-                                        ordered-by user;
-                                        description "Apply a configuration group at this level";
-                                    }
-
-                                    leaf-list apply-groups-exclude {
-                                        type leafref {
-                                            path "../../../../../../../groups/group/name";
-                                        }
-                                        max-elements 8;
-                                        ordered-by user;
-                                        description "Exclude a configuration group at this level";
-                                    }
-
-                                } // list sid-list
-
+                            leaf locator-name {
+                                type leafref {
+                                    path "../../../../../../../router/segment-routing/segment-routing-v6/locator/locator-name";
+                                }
+                                description "Incoming SID locator name";
                             }
-                        }
-                    } // container label
 
-                } // list downstream-nodes
+                            leaf function {
+                                type enumeration {
+                                    enum end-replicate {
+                                        value 1;
+                                        description "Use the incoming SID to find the replication state";
+                                    }
+                                }
+                                description "Function of the incoming replication SID";
+                            }
+
+                            leaf function-value {
+                                type uint32 {
+                                    range "1..1048575";
+                                }
+                                description "Incoming SID function value";
+                            }
+
+                        } // container locator
+
+                    } // container incoming-sid
+
+                    list downstream-nodes {
+                        key "downstream-node-index";
+                        description "Enter the downstream-nodes list instance";
+
+                        leaf downstream-node-index {
+                            type int32 {
+                                range "1..4096";
+                            }
+                            description "Downstream node index";
+                        }
+
+                        leaf replication-sid {
+                            type types-sros:ipv6-unicast-address;
+                            description "Replication SID for next-hop entries";
+                        }
+
+                        leaf admin-state {
+                            type types-sros:admin-state;
+                            default "disable";
+                            description "Administrative state of the downstream next-hop entries";
+                        }
+
+                        leaf-list apply-groups {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Apply a configuration group at this level";
+                        }
+
+                        leaf-list apply-groups-exclude {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Exclude a configuration group at this level";
+                        }
+
+                    } // list downstream-nodes
+
+                } // container segment-routing-v6
 
             } // list replication-segment
 

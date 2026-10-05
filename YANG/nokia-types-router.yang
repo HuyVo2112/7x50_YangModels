@@ -9,7 +9,7 @@ module nokia-types-router {
     import nokia-sros-yang-extensions     { prefix "sros-ext"; }
     import nokia-types-sros               { prefix "types-sros"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -32,13 +32,20 @@ module nokia-types-router {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2024-01-31";
+    revision "2025-10-30";
 
     typedef ip-ecmp {
         type uint32 {
             range "1..64";
         }
         description "The supported range of ECMP values for IP routes.";
+    }
+
+    typedef ip-ecmp-128 {
+        type uint32 {
+            range "1..128";
+        }
+        description "The supported range of 128 ECMP values for IP routes.";
     }
 
     typedef mpls-ecmp {
@@ -50,9 +57,18 @@ module nokia-types-router {
 
     typedef urpf-check-mode {
         type enumeration {
-            enum strict                         { value 1; }
-            enum loose                          { value 2; }
-            enum strict-no-ecmp                 { value 3; }
+            enum strict {
+                value 1;
+                description "Check source address match in RT and interface";
+            }
+            enum loose {
+                value 2;
+                description "Check source address match in RT only";
+            }
+            enum strict-no-ecmp {
+                value 3;
+                description "Check source address match in ECMP route";
+            }
         }
         description "uRPF check mode type.";
     }
@@ -194,6 +210,7 @@ module nokia-types-router {
             enum http                           { value 41; }
             enum pfcp                           { value 43; }
             enum ibcp                           { value 44; }
+            enum bfd                            { value 45; }
         }
         description
             "DSCP Application identifiers for protocols that generate control
@@ -264,8 +281,14 @@ module nokia-types-router {
 
     typedef ttl-propagate-type {
         type enumeration {
-            enum none                           { value 0; }
-            enum all                            { value 1; }
+            enum none {
+                value 0;
+                description "Do not propagate TTL or hop-limit field value";
+            }
+            enum all {
+                value 1;
+                description "Propagate TTL or hop-limit field value";
+            }
         }
         description
             "Specifies whether or not to enable the propagation
@@ -440,6 +463,8 @@ module nokia-types-router {
             enum bgp-epe                        { value 17; }
             enum srv6-isis                      { value 18; }
             enum srv6-policy                    { value 19; }
+            enum vxlan                          { value 20; }
+            enum srv6                           { value 21; }
         }
         description "Indicates the type of a tunnel entity.";
     }
@@ -618,6 +643,7 @@ module nokia-types-router {
             enum video                          { value 53; }
             enum vxlan                          { value 54; }
             enum esmbcast                       { value 55; }
+            enum evpn-ifl-host                  { value 56; }
         }
         description "Route and tunnel owners.";
     }
@@ -668,6 +694,8 @@ module nokia-types-router {
             enum gmpls-loopback                 { value 31; }
             enum control-tunnel                 { value 32; }
             enum pdn                            { value 33; }
+            enum service-ies-dms                { value 34; }
+            enum service-vprn-dms               { value 35; }
         }
         description "Type of interface.";
     }
@@ -711,6 +739,7 @@ module nokia-types-router {
             enum igp-metric                     { value 0; }
             enum te-metric                      { value 1; }
             enum hop-count                      { value 2; }
+            enum delay-metric                   { value 3; }
         }
         description "The value specifies the METRIC object used in PCReq message ";
     }

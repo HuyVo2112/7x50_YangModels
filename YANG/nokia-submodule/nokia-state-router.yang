@@ -48,7 +48,7 @@ submodule nokia-state-router {
     include nokia-state-router-twamp-light;
     include nokia-state-router-wpp;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -71,7 +71,7 @@ submodule nokia-state-router {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-10-02";
+    revision "2026-02-11";
 
     grouping state-router-mvpn-extranet {
         list mvpn-extranet {
@@ -121,7 +121,10 @@ submodule nokia-state-router {
 
             leaf router-name {
                 type types-sros:named-item-64;
-                description "Administrative router name";
+                description
+                    "The administrative name for this virtual router.
+
+                     The router name must be unique among all virtual routers in the system.";
             }
 
             leaf vrtr-id {
@@ -805,7 +808,7 @@ submodule nokia-state-router {
 
                     leaf ip-prefix {
                         type types-sros:ip-unicast-prefix;
-                        description "Destination IP address prefix of the aggregate route";
+                        description "The value indicates the IP address prefix to match for the aggregation.";
                     }
 
                     leaf oper-state {
@@ -1149,7 +1152,7 @@ submodule nokia-state-router {
             } // list wlan-gw-tunnel
 
             container sfm-overload {
-                description "Enable the sfm-overload context";
+                description "Enter the sfm-overload context";
 
                 leaf state {
                     type enumeration {
@@ -1180,7 +1183,7 @@ submodule nokia-state-router {
 
                 leaf interface-name {
                     type types-sros:interface-name;
-                    description "Router interface name";
+                    description "The administrative name assigned to this router interface.";
                 }
 
                 leaf if-index {
@@ -1969,7 +1972,7 @@ submodule nokia-state-router {
                 } // container distributed-cpu-protection
 
                 container ipsec {
-                    description "Enable the ipsec context";
+                    description "Enter the ipsec context";
 
                     list ipsec-tunnel {
                         key "name";
@@ -1977,7 +1980,7 @@ submodule nokia-state-router {
 
                         leaf name {
                             type types-sros:named-item;
-                            description "IPsec tunnel name";
+                            description "IPsec ipsec name.";
                         }
 
                         leaf host-mda {
@@ -2029,7 +2032,7 @@ submodule nokia-state-router {
                             description "Enter the bfd context";
 
                             container bfd-liveness {
-                                description "Enable the bfd-liveness context";
+                                description "Enter the bfd-liveness context";
 
                                 leaf src-ip {
                                     type types-sros:ip-address;
@@ -2054,7 +2057,7 @@ submodule nokia-state-router {
                                 case dynamic {
 
                                     container dynamic {
-                                        description "Enable the dynamic context";
+                                        description "Enter the dynamic context";
 
                                         container ike-sa {
                                             description "Enter the ike-sa context";
@@ -2116,6 +2119,13 @@ submodule nokia-state-router {
                                             leaf cert-profile-name {
                                                 type types-sros:named-item;
                                                 description "The IPsec tunnel certificate profile name used for this tunnel";
+                                            }
+
+                                            leaf ppk-negotiated {
+                                                type boolean;
+                                                description
+                                                    "Whether the Post-quantum Preshared Key is negotiated for
+                                                     this IPsec tunnel";
                                             }
 
                                             container statistics {
@@ -2576,19 +2586,23 @@ submodule nokia-state-router {
                             type leafref {
                                 path "../../../../../eth-cfm/domain/md-admin-name";
                             }
-                            description "Maintenance Domain (MD) name";
+                            description "A unique administratively assigned name used to identify a domain.";
                         }
 
                         leaf ma-admin-name {
                             type leafref {
                                 path "../../../../../eth-cfm/domain[md-admin-name=current()/../md-admin-name]/association/ma-admin-name";
                             }
-                            description "Maintenance Association (MA) name";
+                            description "A unique administratively assigned name used to identify an association.";
                         }
 
                         leaf mep-id {
                             type types-eth-cfm:mep-id-type;
-                            description "Maintenance Endpoint (MEP) ID";
+                            description
+                                "A CFM Virtual Maintenance Endpoint
+
+                                 Specifies a local Maintenance association End Point identifier unique
+                                 over a given maintanance association.";
                         }
 
                         leaf if-index {
@@ -2868,6 +2882,8 @@ submodule nokia-state-router {
                             bit pdn-address-mismatch           { position 18; }
                             bit ping-check-failure             { position 19; }
                             bit port-internal-loopback         { position 20; }
+                            bit no-resources-for-srv6-loopback { position 21; }
+                            bit ip-tunnel-not-ready            { position 22; }
                         }
                         description
                             "Indicates the reason for why the interface is operationally down.
@@ -2893,7 +2909,9 @@ submodule nokia-state-router {
                                  ip-control-tunnel-down          - The IP tunnel associated to a control-tunnel interface is operationally down.
                                  pdn-address-mismatch            - The IP address learned from the packet data network does not match the configured primary IP address.
                                  ping-check-failure              - The IP interface is or went down because of a ping-template failure.
-                                 port-internal-loopback          - The IP interface is bound to a port that has an internal loopback configured.";
+                                 port-internal-loopback          - The IP interface is bound to a port that has an internal loopback configured.
+                                 no-resources-for-srv6-loopback  - There are not enough resources for the SRv6 locator prefix loopback address.
+                                 ip-tunnel-not-ready             - The IP tunnel associated to an ip-tunnel-interface is not ready.";
                     }
 
                     container icmp {
@@ -3206,7 +3224,7 @@ submodule nokia-state-router {
                     } // container statistics
 
                     container primary {
-                        description "Enable the primary context";
+                        description "Enter the primary context";
 
                         leaf oper-address {
                             type types-sros:ip-address;
@@ -3226,7 +3244,7 @@ submodule nokia-state-router {
 
                         leaf address {
                             type types-sros:ipv4-unicast-address;
-                            description "Secondary IPv4 address assigned to the interface";
+                            description "The value of this object specifies the IPv4 address assigned to a router's interface.";
                         }
 
                         leaf oper-address {
@@ -3287,7 +3305,7 @@ submodule nokia-state-router {
 
                             leaf ipv4-address {
                                 type types-sros:ipv4-address;
-                                description "IPv4 address that corresponds to the physical address";
+                                description "The IPv4 address corresponding to the media-dependent physical address.";
                             }
 
                             leaf oper-state {
@@ -3334,7 +3352,7 @@ submodule nokia-state-router {
                             type int32 {
                                 range "1..255";
                             }
-                            description "Virtual Router Identifier (VRID) for the IP interface";
+                            description "Virtual Router Identifier (VRID).";
                         }
 
                         leaf authentication-type {
@@ -3501,7 +3519,7 @@ submodule nokia-state-router {
                         }
 
                         container bfd-liveness {
-                            description "Enable the bfd-liveness context";
+                            description "Enter the bfd-liveness context";
 
                             leaf src-ip {
                                 type types-sros:ip-address;
@@ -3733,7 +3751,7 @@ submodule nokia-state-router {
                 } // container ipv4
 
                 container ipv6 {
-                    description "Enable the ipv6 context";
+                    description "Enter the ipv6 context";
 
                     leaf oper-state {
                         type types-sros:oper-state;
@@ -3763,6 +3781,8 @@ submodule nokia-state-router {
                             bit pdn-address-mismatch           { position 18; }
                             bit ping-check-failure             { position 19; }
                             bit port-internal-loopback         { position 20; }
+                            bit no-resources-for-srv6-loopback { position 21; }
+                            bit ip-tunnel-not-ready            { position 22; }
                         }
                         description
                             "Indicates the reason for why the interface is operationally down.
@@ -3788,7 +3808,9 @@ submodule nokia-state-router {
                                  ip-control-tunnel-down          - The IP tunnel associated to a control-tunnel interface is operationally down.
                                  pdn-address-mismatch            - The IP address learned from the packet data network does not match the configured primary IP address.
                                  ping-check-failure              - The IP interface is or went down because of a ping-template failure.
-                                 port-internal-loopback          - The IP interface is bound to a port that has an internal loopback configured.";
+                                 port-internal-loopback          - The IP interface is bound to a port that has an internal loopback configured.
+                                 no-resources-for-srv6-loopback  - There are not enough resources for the SRv6 locator prefix loopback address.
+                                 ip-tunnel-not-ready             - The IP tunnel associated to an ip-tunnel-interface is not ready.";
                     }
 
                     container icmp6 {
@@ -4065,7 +4087,7 @@ submodule nokia-state-router {
 
                         leaf ipv6-address {
                             type types-sros:ipv6-address;
-                            description "IPv6 address assigned to the interface";
+                            description "The value of this object specifies the IPv6 address assigned to a router's interface.";
                         }
 
                         leaf address-state {
@@ -4099,7 +4121,7 @@ submodule nokia-state-router {
 
                             leaf ipv6-address {
                                 type types-sros:ipv6-address;
-                                description "IPv6 address corresponding to the physical address";
+                                description "The IPv6 address corresponding to the media-dependent physical address.";
                             }
 
                             leaf state {
@@ -4175,7 +4197,7 @@ submodule nokia-state-router {
                             type int32 {
                                 range "1..255";
                             }
-                            description "Virtual Router Identifier (VRID) for the IP interface";
+                            description "Virtual Router Identifier (VRID).";
                         }
 
                         leaf oper-state {
@@ -4327,7 +4349,7 @@ submodule nokia-state-router {
                         }
 
                         container bfd-liveness {
-                            description "Enable the bfd-liveness context";
+                            description "Enter the bfd-liveness context";
 
                             leaf src-ip {
                                 type types-sros:ip-address;
@@ -4968,7 +4990,7 @@ submodule nokia-state-router {
 
                         leaf ip-int-name {
                             type types-sros:interface-name;
-                            description "Router interface name";
+                            description "Router interface name.";
                         }
 
                         leaf creation-origin {
@@ -4991,7 +5013,7 @@ submodule nokia-state-router {
 
                     leaf lsp-name {
                         type types-sros:named-item;
-                        description "LSP name of the P2MP RSVP tunnel interface";
+                        description "The LSP name of the P2MP RSVP tunnel interface";
                     }
 
                     leaf interface-index {
@@ -5007,12 +5029,12 @@ submodule nokia-state-router {
 
                     leaf lsp-name {
                         type types-sros:named-item;
-                        description "LSP name of the P2MP RSVP tunnel interface";
+                        description "The LSP name of the P2MP RSVP tunnel interface";
                     }
 
                     leaf sender-address {
                         type types-sros:ipv4-unicast-address;
-                        description "Address of a sender for the P2MP RSVP tunnel interface instance";
+                        description "The address of a sender for the P2MP RSVP tunnel interface instance.";
                     }
 
                     leaf interface-index {
@@ -5030,12 +5052,12 @@ submodule nokia-state-router {
                         type uint32 {
                             range "1..8192";
                         }
-                        description "Identifier used for signaling MLDP P2MP LSP";
+                        description "The LDP P2MP identifier [1..8192]";
                     }
 
                     leaf sender-address {
                         type types-sros:ipv4-unicast-address;
-                        description "Address of an LDP sender for the P2MP RSVP tunnel interface instance";
+                        description "The address of an LDP sender for the P2MP RSVP tunnel interface instance.";
                     }
 
                     leaf interface-index {
@@ -5051,12 +5073,12 @@ submodule nokia-state-router {
 
                     leaf p2mp-id {
                         type uint32;
-                        description "Identifier used for signaling MLDP P2MP LSP";
+                        description "The LDP P2MP identifier [1..4294967295]";
                     }
 
                     leaf sender-address {
                         type types-sros:ipv4-unicast-address;
-                        description "Address of an LDP sender for the P2MP RSVP tunnel interface instance";
+                        description "The address of an LDP sender for the P2MP RSVP tunnel interface instance.";
                     }
 
                     leaf interface-index {
@@ -5097,13 +5119,12 @@ submodule nokia-state-router {
 
                     list interface {
                         key "name";
-                        description "Add a list entry for interface";
+                        description "Enter the interface list instance";
 
                         leaf name {
                             type leafref {
                                 path "../../../../interface/interface-name";
                             }
-                            description "Interface name";
                         }
 
                         container statistics {
@@ -5784,6 +5805,7 @@ submodule nokia-state-router {
                             }
 
                         } // container srv6-isis
+
 
                         container srv6-policy {
                             description "Enter the srv6-policy context";
@@ -6484,6 +6506,7 @@ submodule nokia-state-router {
                                         bit nh-is-lfa                      { position 2; }
                                         bit nh-is-backup                   { position 3; }
                                         bit nh-is-unnumbered               { position 4; }
+                                        bit nh-has-anysec                  { position 5; }
                                     }
                                     description
                                         "Bit flags that indicate different properties of this next-hop.
@@ -6505,7 +6528,10 @@ submodule nokia-state-router {
                                          a BGP backup next-hop.
 
                                          If the 'nh-is-unnumbered' bit is set, it indicates the next-hop is
-                                         unnumbered.";
+                                         unnumbered.
+
+                                         If the 'nh-has-anysec' bit is set, it indicates the traffic to the
+                                         destination is encrypted based on ANYsec configuration.";
                                 }
 
                                 leaf if-index {
@@ -6619,6 +6645,7 @@ submodule nokia-state-router {
                                             bit nh-is-lfa                      { position 2; }
                                             bit nh-is-backup                   { position 3; }
                                             bit nh-is-unnumbered               { position 4; }
+                                            bit nh-has-anysec                  { position 5; }
                                         }
                                         description
                                             "Bit flags that indicate different properties of this next-hop.
@@ -6640,7 +6667,10 @@ submodule nokia-state-router {
                                              a BGP backup next-hop.
 
                                              If the 'nh-is-unnumbered' bit is set, it indicates the next-hop is
-                                             unnumbered.";
+                                             unnumbered.
+
+                                             If the 'nh-has-anysec' bit is set, it indicates the traffic to the
+                                             destination is encrypted based on ANYsec configuration.";
                                     }
 
                                     leaf if-index {
@@ -7307,6 +7337,7 @@ submodule nokia-state-router {
                                         bit nh-is-lfa                      { position 2; }
                                         bit nh-is-backup                   { position 3; }
                                         bit nh-is-unnumbered               { position 4; }
+                                        bit nh-has-anysec                  { position 5; }
                                     }
                                     description
                                         "Bit flags that indicate different properties of this next-hop.
@@ -7328,7 +7359,10 @@ submodule nokia-state-router {
                                          a BGP backup next-hop.
 
                                          If the 'nh-is-unnumbered' bit is set, it indicates the next-hop is
-                                         unnumbered.";
+                                         unnumbered.
+
+                                         If the 'nh-has-anysec' bit is set, it indicates the traffic to the
+                                         destination is encrypted based on ANYsec configuration.";
                                 }
 
                                 leaf if-index {
@@ -7442,6 +7476,7 @@ submodule nokia-state-router {
                                             bit nh-is-lfa                      { position 2; }
                                             bit nh-is-backup                   { position 3; }
                                             bit nh-is-unnumbered               { position 4; }
+                                            bit nh-has-anysec                  { position 5; }
                                         }
                                         description
                                             "Bit flags that indicate different properties of this next-hop.
@@ -7463,7 +7498,10 @@ submodule nokia-state-router {
                                              a BGP backup next-hop.
 
                                              If the 'nh-is-unnumbered' bit is set, it indicates the next-hop is
-                                             unnumbered.";
+                                             unnumbered.
+
+                                             If the 'nh-has-anysec' bit is set, it indicates the traffic to the
+                                             destination is encrypted based on ANYsec configuration.";
                                     }
 
                                     leaf if-index {
@@ -7778,6 +7816,7 @@ submodule nokia-state-router {
                                         bit nh-is-lfa                      { position 2; }
                                         bit nh-is-backup                   { position 3; }
                                         bit nh-is-unnumbered               { position 4; }
+                                        bit nh-has-anysec                  { position 5; }
                                     }
                                     description
                                         "Bit flags that indicate different properties of this next-hop.
@@ -7799,7 +7838,10 @@ submodule nokia-state-router {
                                          a BGP backup next-hop.
 
                                          If the 'nh-is-unnumbered' bit is set, it indicates the next-hop is
-                                         unnumbered.";
+                                         unnumbered.
+
+                                         If the 'nh-has-anysec' bit is set, it indicates the traffic to the
+                                         destination is encrypted based on ANYsec configuration.";
                                 }
 
                                 leaf if-index {
@@ -7908,6 +7950,7 @@ submodule nokia-state-router {
                                             bit nh-is-lfa                      { position 2; }
                                             bit nh-is-backup                   { position 3; }
                                             bit nh-is-unnumbered               { position 4; }
+                                            bit nh-has-anysec                  { position 5; }
                                         }
                                         description
                                             "Bit flags that indicate different properties of this next-hop.
@@ -7929,7 +7972,10 @@ submodule nokia-state-router {
                                              a BGP backup next-hop.
 
                                              If the 'nh-is-unnumbered' bit is set, it indicates the next-hop is
-                                             unnumbered.";
+                                             unnumbered.
+
+                                             If the 'nh-has-anysec' bit is set, it indicates the traffic to the
+                                             destination is encrypted based on ANYsec configuration.";
                                     }
 
                                     leaf if-index {
@@ -8217,6 +8263,7 @@ submodule nokia-state-router {
                                         bit nh-is-lfa                      { position 2; }
                                         bit nh-is-backup                   { position 3; }
                                         bit nh-is-unnumbered               { position 4; }
+                                        bit nh-has-anysec                  { position 5; }
                                     }
                                     description
                                         "Bit flags that indicate different properties of this next-hop.
@@ -8238,7 +8285,10 @@ submodule nokia-state-router {
                                          a BGP backup next-hop.
 
                                          If the 'nh-is-unnumbered' bit is set, it indicates the next-hop is
-                                         unnumbered.";
+                                         unnumbered.
+
+                                         If the 'nh-has-anysec' bit is set, it indicates the traffic to the
+                                         destination is encrypted based on ANYsec configuration.";
                                 }
 
                                 leaf if-index {
@@ -8347,6 +8397,7 @@ submodule nokia-state-router {
                                             bit nh-is-lfa                      { position 2; }
                                             bit nh-is-backup                   { position 3; }
                                             bit nh-is-unnumbered               { position 4; }
+                                            bit nh-has-anysec                  { position 5; }
                                         }
                                         description
                                             "Bit flags that indicate different properties of this next-hop.
@@ -8368,7 +8419,10 @@ submodule nokia-state-router {
                                              a BGP backup next-hop.
 
                                              If the 'nh-is-unnumbered' bit is set, it indicates the next-hop is
-                                             unnumbered.";
+                                             unnumbered.
+
+                                             If the 'nh-has-anysec' bit is set, it indicates the traffic to the
+                                             destination is encrypted based on ANYsec configuration.";
                                     }
 
                                     leaf if-index {
@@ -8482,7 +8536,7 @@ submodule nokia-state-router {
 
                     leaf domain-name {
                         type types-sros:named-item;
-                        description "Network domain name";
+                        description "Specifies the network-domain name.";
                     }
 
                     leaf associated-interfaces {
@@ -9189,7 +9243,6 @@ submodule nokia-state-router {
 
                     leaf name {
                         type types-sros:interface-name;
-                        description "Multi-chassis shunt interface name";
                     }
 
                     container next-hop {
@@ -9245,6 +9298,128 @@ submodule nokia-state-router {
                 } // container ipv4
 
             } // container subscriber-mgmt
+
+            container unreachable-route-table {
+                description "Enter the unreachable-route-table context";
+
+                container unicast {
+                    description "Enter the unicast context";
+
+                    container ipv4 {
+                        description "Enter the ipv4 context";
+
+                        list route {
+                            key "ipv4-prefix prefix-index";
+                            description "Enter the route list instance";
+
+                            leaf ipv4-prefix {
+                                type types-sros:ipv4-prefix;
+                                description "Indicates the IPv4 prefix for this unreachable route table entry.";
+                            }
+
+                            leaf prefix-index {
+                                type uint32;
+                                description
+                                    "Indicates the index of the entry for a given prefix when there
+                                     are multiple entries per prefix from different routing protocols.
+                                     There will be at least one entry for a given prefix with index 0.
+                                     The entry with index 0 is the best-route for the given prefix.";
+                            }
+
+                            leaf age {
+                                type uint32 {
+                                    range "0..4294967295";
+                                }
+                                description "The number of seconds since this route was last updated.";
+                            }
+
+                            leaf instance {
+                                type uint8;
+                                description "The protocol instance the route belongs to.";
+                            }
+
+                            leaf metric {
+                                type uint32;
+                                description
+                                    "Indicates the routing metric for this route. The semantics
+                                     of this metric are determined by the routing protocol.";
+                            }
+
+                            leaf preference {
+                                type uint8;
+                                description
+                                    "Indicates the priority of this route versus the routes
+                                     from different protocol sources. Smaller values have higher priority.";
+                            }
+
+                            leaf protocol {
+                                type types-router:protocol-type;
+                                description "Identifies the routing protocol.";
+                            }
+
+                        } // list route
+
+                    } // container ipv4
+
+                    container ipv6 {
+                        description "Enter the ipv6 context";
+
+                        list route {
+                            key "ipv6-prefix prefix-index";
+                            description "Enter the route list instance";
+
+                            leaf ipv6-prefix {
+                                type types-sros:ipv6-prefix;
+                                description "Indicates the IPv6 prefix for this unreachable route table entry.";
+                            }
+
+                            leaf prefix-index {
+                                type uint32;
+                                description
+                                    "Indicates the index of the entry for a given prefix when there
+                                     are multiple entries per prefix from different routing protocols.
+                                     There will be at least one entry for a given prefix with index 0.
+                                     The entry with index 0 is the best-route for the given prefix.";
+                            }
+
+                            leaf age {
+                                type uint32 {
+                                    range "0..4294967295";
+                                }
+                                description "The number of seconds since this route was last updated.";
+                            }
+
+                            leaf instance {
+                                type uint8;
+                                description "The protocol instance the route belongs to.";
+                            }
+
+                            leaf metric {
+                                type uint32;
+                                description
+                                    "Indicates the routing metric for this route. The semantics
+                                     of this metric are determined by the routing protocol.";
+                            }
+
+                            leaf preference {
+                                type uint8;
+                                description
+                                    "Indicates the priority of this route versus the routes
+                                     from different protocol sources. Smaller values have higher priority.";
+                            }
+
+                            leaf protocol {
+                                type types-router:protocol-type;
+                                description "Identifies the routing protocol.";
+                            }
+
+                        } // list route
+
+                    } // container ipv6
+
+                } // container unicast
+
+            } // container unreachable-route-table
 
             uses state-router-bgp;
             uses state-router-bier;

@@ -14,7 +14,7 @@ submodule nokia-conf-isa-application-assurance-group {
     include nokia-conf-log;
     include nokia-conf-qos;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -37,7 +37,7 @@ submodule nokia-conf-isa-application-assurance-group {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-06-14";
+    revision "2026-07-22";
 
     grouping conf-isa-application-assurance-group {
         list application-assurance-group {
@@ -125,6 +125,12 @@ submodule nokia-conf-isa-application-assurance-group {
                 sros-ext:auto-restart-to-modify;
                 default "false";
                 description "Enable load balancing of the traffic using TEID";
+            }
+
+            leaf aa-sub-distribute-traffic-by-ip {
+                type boolean;
+                default "false";
+                description "Allow application assurance to divert traffic";
             }
 
             leaf-list apply-groups {
@@ -233,7 +239,7 @@ submodule nokia-conf-isa-application-assurance-group {
 
                 list esa {
                     key "esa-id vm";
-                    max-elements 1;
+                    max-elements 4;
                     description "Add a list entry for esa";
 
                     leaf esa-id {
@@ -280,6 +286,7 @@ submodule nokia-conf-isa-application-assurance-group {
                 }
 
                 leaf ipv4-remote-entries {
+                    status obsolete;
                     type uint32 {
                         range "1..2047";
                     }
@@ -287,6 +294,7 @@ submodule nokia-conf-isa-application-assurance-group {
                 }
 
                 leaf ipv6-remote-entries {
+                    status obsolete;
                     type uint32 {
                         range "1..1023";
                     }

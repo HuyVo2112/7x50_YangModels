@@ -12,6 +12,7 @@ submodule nokia-conf-svc-epipe {
     import nokia-types-sros               { prefix "types-sros"; }
 
     include nokia-conf-aa-group;
+    include nokia-conf-anysec;
     include nokia-conf-application-assurance;
     include nokia-conf-bfd;
     include nokia-conf-eth-cfm;
@@ -30,7 +31,7 @@ submodule nokia-conf-svc-epipe {
     include nokia-conf-system;
     include nokia-conf-system-security;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -53,7 +54,7 @@ submodule nokia-conf-svc-epipe {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-10-13";
+    revision "2026-07-22";
 
     grouping conf-svc-epipe {
         list epipe {
@@ -116,6 +117,13 @@ submodule nokia-conf-svc-epipe {
                     range "1..9782";
                 }
                 description "MTU size";
+            }
+
+            leaf flexible-cross-connect {
+                type boolean;
+                sros-ext:immutable;
+                default "false";
+                description "Enable FXC mode";
             }
 
             leaf oper-group {
@@ -762,7 +770,7 @@ submodule nokia-conf-svc-epipe {
                         enum qinq-c-tag-c-tag               { value 2; }
                         enum qinq-s-tag-c-tag               { value 3; }
                     }
-                    description "VC forwarding action";
+                    description "VLAN tag processing action";
                 }
 
                 leaf bandwidth {
@@ -792,6 +800,13 @@ submodule nokia-conf-svc-epipe {
                     sros-ext:auto-restart-to-modify;
                     default "ether";
                     description "Virtual circuit type associated with the SDP binding";
+                }
+
+                leaf anysec-encryption-group {
+                    type leafref {
+                        path "../../../../anysec/service-encryption/encryption-group/group-name";
+                    }
+                    description "ANYsec encryption group name";
                 }
 
                 leaf-list apply-groups {
@@ -1265,8 +1280,14 @@ submodule nokia-conf-svc-epipe {
 
                             leaf low-priority-defect {
                                 type enumeration {
-                                    enum all-def                        { value 1; }
-                                    enum mac-rem-err-xcon               { value 2; }
+                                    enum all-def {
+                                        value 1;
+                                        description "Generate AIS frame for any defect in CCM state machine";
+                                    }
+                                    enum mac-rem-err-xcon {
+                                        value 2;
+                                        description "Generate AIS frame for def-mac-status defect or higher";
+                                    }
                                 }
                                 default "all-def";
                                 description "Lowest priority defect allowed to generate fault alarm";
@@ -1715,7 +1736,7 @@ submodule nokia-conf-svc-epipe {
 
             list sap {
                 key "sap-id";
-                max-elements 2;
+                max-elements 255;
                 description "Enter the sap list instance";
 
                 leaf sap-id {
@@ -1834,6 +1855,54 @@ submodule nokia-conf-svc-epipe {
 
                     }
                 }
+                container qtag-normalization {
+                    presence "Enable the qtag-normalization context";
+                    description "Enable the qtag-normalization context";
+
+                    choice q-tag {
+                        case single-tag {
+
+                            container single-tag {
+                                description "Enter the single-tag context";
+
+                                leaf tag {
+                                    type int32 {
+                                        range "1..4094";
+                                    }
+                                    sros-ext:immutable;
+                                    description "Tag normalization value";
+                                }
+
+                            } // container single-tag
+
+                        }
+                        case double-tag {
+
+                            container double-tag {
+                                description "Enter the double-tag context";
+
+                                leaf c-tag {
+                                    type int32 {
+                                        range "1..4094";
+                                    }
+                                    sros-ext:immutable;
+                                    description "C-tag value used for the tag normalization";
+                                }
+
+                                leaf s-tag {
+                                    type int32 {
+                                        range "1..4094";
+                                    }
+                                    sros-ext:immutable;
+                                    description "S-tag value used for the tag normalization";
+                                }
+
+                            } // container double-tag
+
+                        }
+                    }
+                } // container qtag-normalization
+
                 container ingress {
                     description "Enter the ingress context";
 
@@ -2441,12 +2510,12 @@ submodule nokia-conf-svc-epipe {
                                     type int32 {
                                         range "0..4094";
                                     }
-                                    description "Outer ingress VLN translation for two service delimiting VLAN values";
+                                    description "Outer S-tag value for ingress QinQ VLAN translation";
                                 }
 
                                 leaf c-tag {
                                     type types-services:qinq-vlan-translation-ctag;
-                                    description "Inner ingress VLAN translation for two service delimiting VLAN values";
+                                    description "Inner C-tag value for ingress QinQ VLAN translation";
                                 }
 
                             }
@@ -2486,6 +2555,7 @@ submodule nokia-conf-svc-epipe {
                         }
 
                         leaf burst {
+                            status obsolete;
                             type types-qos:aggr-policer-burst;
                             default "default";
                             description "Aggregate policer burst";
@@ -2499,8 +2569,30 @@ submodule nokia-conf-svc-epipe {
 
                         leaf cbs {
                             type types-qos:aggr-policer-cbs;
-                            units "kilobytes";
+                            units "kilobits";
                             description "Aggregate policer CBS";
+                        }
+
+                        leaf mbs {
+                            type types-qos:aggr-policer-mbs;
+                            units "kilobits";
+                            default "default";
+                            description "Aggregate policer mbs";
+                        }
+
+                        leaf algorithm-type {
+                            type enumeration {
+                                enum trtcm-ds {
+                                    value 1;
+                                    description "Use the TRTCM non-coupled mode";
+                                }
+                                enum trtcm-ds-coupled {
+                                    value 2;
+                                    description "Use the TRTCM coupled mode";
+                                }
+                            }
+                            default "trtcm-ds-coupled";
+                            description "Policer algorithm type";
                         }
 
                     } // container aggregate-policer
@@ -2603,6 +2695,25 @@ submodule nokia-conf-svc-epipe {
                             type boolean;
                             default "false";
                             description "Mark top Q-tags";
+                        }
+
+                        leaf burst-limit {
+                            type types-qos:vlan-qos-burst-limit;
+                            description "Maximum traffic burst size for SAP egress";
+                        }
+
+                        leaf latency-budget {
+                            type uint32 {
+                                range "1..1000000";
+                            }
+                            units "microseconds";
+                            description "SAP egress latency budget";
+                        }
+
+                        leaf sink-excess-bw {
+                            type boolean;
+                            default "false";
+                            description "Use virtual flows to sink excess bandwidth";
                         }
 
                         container sap-egress {
@@ -3705,6 +3816,13 @@ submodule nokia-conf-svc-epipe {
                             description "Threshold time limit for the one-way delay test";
                         }
 
+                        leaf monitor-oper-group {
+                            type leafref {
+                                path "../../../../../oper-group/name";
+                            }
+                            description "Operational group to monitor";
+                        }
+
                         leaf-list apply-groups {
                             type leafref {
                                 path "../../../../../../groups/group/name";
@@ -3773,8 +3891,14 @@ submodule nokia-conf-svc-epipe {
 
                             leaf low-priority-defect {
                                 type enumeration {
-                                    enum all-def                        { value 1; }
-                                    enum mac-rem-err-xcon               { value 2; }
+                                    enum all-def {
+                                        value 1;
+                                        description "Generate AIS frame for any defect in CCM state machine";
+                                    }
+                                    enum mac-rem-err-xcon {
+                                        value 2;
+                                        description "Generate AIS frame for def-mac-status defect or higher";
+                                    }
                                 }
                                 default "all-def";
                                 description "Lowest priority defect allowed to generate fault alarm";
@@ -4149,6 +4273,12 @@ submodule nokia-conf-svc-epipe {
                         description "BGP instance ID";
                     }
 
+                    leaf vlan-signaled-flexible-cross-connect {
+                        type boolean;
+                        default "false";
+                        description "Enable FXC VLAN-signaled mode";
+                    }
+
                     leaf-list apply-groups {
                         type leafref {
                             path "../../../../../groups/group/name";
@@ -4381,7 +4511,7 @@ submodule nokia-conf-svc-epipe {
                     leaf hash-label {
                         type boolean;
                         default "false";
-                        description "Push hash label";
+                        description "Default profile when the CP-provided profile is unknown";
                     }
 
                     leaf-list apply-groups {
@@ -4440,6 +4570,12 @@ submodule nokia-conf-svc-epipe {
                             type types-router:mpls-ecmp;
                             default "1";
                             description "Maximum ECMP routes information";
+                        }
+
+                        leaf enforce-untagged-route {
+                            type types-sros:untagged-route-type;
+                            default "none";
+                            description "Untagged route type enforcement";
                         }
 
                         leaf allow-flex-algo-fallback {
@@ -4676,9 +4812,11 @@ submodule nokia-conf-svc-epipe {
                     }
 
                     container srv6 {
+                        status deprecated;
                         description "Enter the srv6 context";
 
                         leaf instance {
+                            status deprecated;
                             type leafref {
                                 path "../../../../segment-routing-v6/instance";
                             }
@@ -4687,6 +4825,7 @@ submodule nokia-conf-svc-epipe {
                         }
 
                         leaf default-locator {
+                            status deprecated;
                             type string;
                             sros-ext:immutable;
                             description "Default route locator";

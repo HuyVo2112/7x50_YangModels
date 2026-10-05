@@ -6,7 +6,6 @@ module nokia-oper-global {
 
     prefix "oper-global";
 
-    import nokia-conf                     { prefix "conf"; }
     import nokia-sros-yang-extensions     { prefix "sros-ext"; }
     import nokia-state                    { prefix "state"; }
     import nokia-types-eth-cfm            { prefix "types-eth-cfm"; }
@@ -16,7 +15,7 @@ module nokia-oper-global {
     import nokia-types-sros               { prefix "types-sros"; }
     import nokia-types-subscriber-mgmt    { prefix "types-subscriber-mgmt"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -39,7 +38,7 @@ module nokia-oper-global {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2020-10-15";
+    revision "2026-07-22";
 
     container global-operations {
         config false;
@@ -51,7 +50,9 @@ module nokia-oper-global {
             input {
 
                 leaf md-cli-input-line {
-                    type string;
+                    type string {
+                        length "0..2600";
+                    }
                     mandatory true;
                     description "MD-CLI command to be executed..";
                 }
@@ -305,6 +306,7 @@ module nokia-oper-global {
                     type enumeration {
                         enum xml                            { value 0; }
                         enum md-cli                         { value 1; }
+                        enum md-cli-full                    { value 2; }
                     }
                     default "xml";
                     description "RPC output format tag.";
@@ -365,6 +367,94 @@ module nokia-oper-global {
 
             }
         } // action md-compare
+
+        action md-rollback {
+            description "Trigger md-rollback command.";
+
+            input {
+
+                leaf configuration-region {
+                    type types-sros:configuration-region;
+                    default "configure";
+                    description "This parameter contains the configuration region to operate on.";
+                }
+
+                choice rollback-type {
+                    mandatory true;
+                    case rollback-id {
+
+                        leaf rollback-id {
+                            type union {
+                                type enumeration {
+                                    enum startup {
+                                        value -1;
+                                        description "The configuration that will be loaded by the system when it boots";
+                                    }
+                                }
+                                type uint32 {
+                                    range "0..200";
+                                }
+                            }
+                            description "Previous configuration to roll back to";
+                        }
+
+                    }
+                    case commit-id {
+
+                        leaf commit-id {
+                            type leafref {
+                                path "/state:state/state:system/state:management-interface/state:configuration-region[state:region-name=current()/../configuration-region]/state:commit-history/state:commit-id/state:id";
+                            }
+                            description "Commit ID to roll back to";
+                        }
+
+                    }
+                }
+            }
+            output {
+
+                leaf operation-id {
+                    type types-operation:operation-id;
+                    description "ID assigned to the operation.";
+                }
+
+                leaf start-time {
+                    type types-operation:operation-timestamp;
+                    description "Time when the operation started its execution.";
+                }
+
+                leaf results-path {
+                    type types-operation:operation-path;
+                    description "Path to the results of the operation formatted as xpath.";
+                }
+
+                leaf status {
+                    type types-operation:operation-status;
+                    description "Status of the operation";
+                }
+
+                leaf-list error-message {
+                    type types-operation:operation-message;
+                    description "Error messages reported during execution of the operation.";
+                }
+
+                leaf-list warning-message {
+                    type types-operation:operation-message;
+                    description "Warning messages reported during execution of the operation.";
+                }
+
+                leaf-list info-message {
+                    type types-operation:operation-message;
+                    description "Info messages reported during execution of the operation.";
+                }
+
+                leaf end-time {
+                    type types-operation:operation-timestamp;
+                    description "Time when the operation ended its execution.";
+                }
+
+            }
+        } // action md-rollback
 
         container oam {
             description "Enter the oam context for operations, administration and maintenance";
@@ -498,7 +588,7 @@ module nokia-oper-global {
                                 type enumeration {
                                     enum multicast {
                                         value 0;
-                                        description "Class one destination multicast address based on the level of the local MEP";
+                                        description "Class one destination multicast address from level of local ME";
                                     }
                                 }
                                 type types-eth-cfm:mep-id-type;
@@ -996,7 +1086,7 @@ module nokia-oper-global {
                 } // action bgp-label
 
                 action ldp {
-                    description "Perform Label Distribution Protocal (LDP) LSP ping test";
+                    description "Perform an LDP LSP ping test";
 
                     input {
 
@@ -3721,11 +3811,11 @@ module nokia-oper-global {
                             type enumeration {
                                 enum dsmap {
                                     value 1;
-                                    description "Downstream mapping TLV";
+                                    description "Downstream Mapping TLV";
                                 }
                                 enum ddmap {
                                     value 2;
-                                    description "Detailed downstream mapping TLV";
+                                    description "Downstream Detailed Mapping TLV";
                                 }
                                 enum none {
                                     value 3;
@@ -4376,11 +4466,11 @@ module nokia-oper-global {
                             type enumeration {
                                 enum dsmap {
                                     value 1;
-                                    description "Downstream mapping TLV";
+                                    description "Downstream Mapping TLV";
                                 }
                                 enum ddmap {
                                     value 2;
-                                    description "Detailed downstream mapping TLV";
+                                    description "Downstream Detailed Mapping TLV";
                                 }
                                 enum none {
                                     value 3;
@@ -5016,11 +5106,11 @@ module nokia-oper-global {
                             type enumeration {
                                 enum dsmap {
                                     value 1;
-                                    description "Downstream mapping TLV";
+                                    description "Downstream Mapping TLV";
                                 }
                                 enum ddmap {
                                     value 2;
-                                    description "Detailed downstream mapping TLV";
+                                    description "Downstream Detailed Mapping TLV";
                                 }
                                 enum none {
                                     value 3;
@@ -5668,11 +5758,11 @@ module nokia-oper-global {
                             type enumeration {
                                 enum dsmap {
                                     value 1;
-                                    description "Downstream mapping TLV";
+                                    description "Downstream Mapping TLV";
                                 }
                                 enum ddmap {
                                     value 2;
-                                    description "Detailed downstream mapping TLV";
+                                    description "Downstream Detailed Mapping TLV";
                                 }
                                 enum none {
                                     value 3;
@@ -6352,11 +6442,11 @@ module nokia-oper-global {
                             type enumeration {
                                 enum dsmap {
                                     value 1;
-                                    description "Downstream mapping TLV";
+                                    description "Downstream Mapping TLV";
                                 }
                                 enum ddmap {
                                     value 2;
-                                    description "Detailed downstream mapping TLV";
+                                    description "Downstream Detailed Mapping TLV";
                                 }
                                 enum none {
                                     value 3;
@@ -7029,11 +7119,11 @@ module nokia-oper-global {
                             type enumeration {
                                 enum dsmap {
                                     value 1;
-                                    description "Downstream mapping TLV";
+                                    description "Downstream Mapping TLV";
                                 }
                                 enum ddmap {
                                     value 2;
-                                    description "Detailed downstream mapping TLV";
+                                    description "Downstream Detailed Mapping TLV";
                                 }
                                 enum none {
                                     value 3;
@@ -7704,11 +7794,11 @@ module nokia-oper-global {
                             type enumeration {
                                 enum dsmap {
                                     value 1;
-                                    description "Downstream mapping TLV";
+                                    description "Downstream Mapping TLV";
                                 }
                                 enum ddmap {
                                     value 2;
-                                    description "Detailed downstream mapping TLV";
+                                    description "Downstream Detailed Mapping TLV";
                                 }
                                 enum none {
                                     value 3;
@@ -8382,11 +8472,11 @@ module nokia-oper-global {
                             type enumeration {
                                 enum dsmap {
                                     value 1;
-                                    description "Downstream mapping TLV";
+                                    description "Downstream Mapping TLV";
                                 }
                                 enum ddmap {
                                     value 2;
-                                    description "Detailed downstream mapping TLV";
+                                    description "Downstream Detailed Mapping TLV";
                                 }
                                 enum none {
                                     value 3;
@@ -8970,14 +9060,14 @@ module nokia-oper-global {
                         type leafref {
                             path "/state:state/state:saa/state:owner[state:test=current()/../test]/state:owner-name";
                         }
-                        description "Name of the owner of SAA test to be stopped or started";
+                        description "Name of the owner of SAA test";
                     }
 
                     leaf test {
                         type leafref {
                             path "/state:state/state:saa/state:owner[state:owner-name=current()/../owner-name]/state:test";
                         }
-                        description "Name of the SAA test to be stopped or started";
+                        description "Name of the SAA test";
                     }
 
                     action start {
@@ -9362,7 +9452,7 @@ module nokia-oper-global {
 
                 leaf do-not-fragment {
                     type empty;
-                    description "Do not fragment the request frame";
+                    description "Do not fragment echo request packets (valid for IPv4)";
                 }
 
                 leaf fc {
@@ -9892,6 +9982,56 @@ module nokia-oper-global {
                 leaf argument-10 {
                     type string;
                     description "Tenth argument.";
+                }
+
+                leaf argument-11 {
+                    type string;
+                    description "Eleventh argument.";
+                }
+
+                leaf argument-12 {
+                    type string;
+                    description "Twelfth argument.";
+                }
+
+                leaf argument-13 {
+                    type string;
+                    description "Thirteenth argument.";
+                }
+
+                leaf argument-14 {
+                    type string;
+                    description "Fourteenth argument.";
+                }
+
+                leaf argument-15 {
+                    type string;
+                    description "Fifteenth argument.";
+                }
+
+                leaf argument-16 {
+                    type string;
+                    description "Sixteenth argument.";
+                }
+
+                leaf argument-17 {
+                    type string;
+                    description "Seventeenth argument.";
+                }
+
+                leaf argument-18 {
+                    type string;
+                    description "Eighteenth argument.";
+                }
+
+                leaf argument-19 {
+                    type string;
+                    description "Nineteenth argument.";
+                }
+
+                leaf argument-20 {
+                    type string;
+                    description "Twentieth argument.";
                 }
 
             }

@@ -16,7 +16,7 @@ submodule nokia-conf-router-ldp {
     include nokia-conf-system;
     include nokia-conf-system-security;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -39,12 +39,12 @@ submodule nokia-conf-router-ldp {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-08-09";
+    revision "2026-07-22";
 
     grouping conf-router-ldp {
         container ldp {
-            presence "Enter the ldp context";
-            description "Enter the ldp context";
+            presence "Enable the ldp context";
+            description "Enable the ldp context";
 
             leaf class-forwarding {
                 type enumeration {
@@ -437,7 +437,7 @@ submodule nokia-conf-router-ldp {
 
                     leaf ip-prefix {
                         type types-sros:ip-prefix;
-                        description "IP prefix";
+                        description "FEC IP prefix";
                     }
 
                     leaf accounting-policy {
@@ -450,7 +450,7 @@ submodule nokia-conf-router-ldp {
                     leaf collect-stats {
                         type boolean;
                         default "false";
-                        description "Collect statistics";
+                        description "Collect FEC prefix statistics";
                     }
 
                     leaf admin-state {
@@ -497,7 +497,7 @@ submodule nokia-conf-router-ldp {
                     type leafref {
                         path "../../../../bfd/bfd-template/name";
                     }
-                    description "BFD template to apply to BFD sessions associated with the prefix list";
+                    description "BFD sessions template associated with the prefix list";
                 }
 
                 leaf failure-action {
@@ -531,13 +531,13 @@ submodule nokia-conf-router-ldp {
 
                 leaf source-address {
                     type types-sros:ip-unicast-address;
-                    description "Source address in LSP ping packets and BFD control packets associated with prefix list";
+                    description "Source address in LSP ping and BFD control packets";
                 }
 
                 leaf bfd-liveness {
                     type boolean;
                     default "false";
-                    description "Enable BFD on LDP LSPs with FECs that match the prefix list";
+                    description "Enable BFD on LDP LSPs for FECs matching prefix list";
                 }
 
                 leaf-list apply-groups {
@@ -1552,7 +1552,7 @@ submodule nokia-conf-router-ldp {
                     leaf bfd-liveness {
                         type boolean;
                         default "false";
-                        description "Enable BFD tracking of LDP session for sessions created by peer template";
+                        description "Enable BFD tracking of T-LDP peer session";
                     }
 
                     leaf community {

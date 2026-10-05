@@ -10,7 +10,7 @@ submodule nokia-state-cflowd {
     import nokia-types-qos                { prefix "types-qos"; }
     import nokia-types-sros               { prefix "types-sros"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -33,11 +33,11 @@ submodule nokia-state-cflowd {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-03-31";
+    revision "2025-07-16";
 
     grouping state-cflowd {
         container cflowd {
-            description "Enable the cflowd context";
+            description "Enter the cflowd context";
 
             leaf max-collectors {
                 type int32 {
@@ -128,6 +128,11 @@ submodule nokia-state-cflowd {
                      Data from dropped flows are not reported to any collector.";
             }
 
+            leaf total-ie315-packets-received {
+                type yang:counter64;
+                description "Indicates the total number of packets using the IE315 format were received for Cflowd.";
+            }
+
             list version {
                 key "version-index";
                 description "Enter the version list instance";
@@ -168,14 +173,21 @@ submodule nokia-state-cflowd {
 
                 leaf ip-address {
                     type types-sros:ip-unicast-address;
-                    description "IP address of the remote cflowd collector host";
+                    description
+                        "Specifies the IP address of a remote Cflowd collector
+                         host to receive the exported Cflowd data.";
                 }
 
                 leaf port {
                     type types-qos:tcp-udp-match-port {
                         range "1..65535";
                     }
-                    description "UDP port number of the remote cflowd collector host";
+                    description
+                        "Specifies the UDP port number on the remote Cflowd collector
+                         host to receive the exported Cflowd data.
+
+                         Default port number for v5/v8/v9 collector is 2055.
+                         Default port number for v10 collector is 4739.";
                 }
 
                 leaf oper-state {
@@ -214,6 +226,7 @@ submodule nokia-state-cflowd {
                             enum mpls                           { value 2; }
                             enum ipv6                           { value 3; }
                             enum l2                             { value 4; }
+                            enum ie315                          { value 5; }
                         }
                         description "The template flow type.";
                     }

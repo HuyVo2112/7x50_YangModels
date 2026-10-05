@@ -5,25 +5,18 @@ module nokia-sr-openconfig-mpls-deviations {
     prefix "nokia-oc-mpls-devs";
 
     import nokia-sros-yang-extensions     { prefix "sros-ext"; }
-    import openconfig-extensions          { prefix "oc-ext"; }
     import openconfig-inet-types          { prefix "oc-inet"; }
-    import openconfig-interfaces          { prefix "oc-if"; }
-    import openconfig-mpls                { prefix "oc-mpls"; }
-    import openconfig-mpls-ldp            { prefix "oc-ldp"; }
-    import openconfig-mpls-rsvp           { prefix "oc-rsvp"; }
     import openconfig-mpls-types          { prefix "oc-mplst"; }
     import openconfig-network-instance    { prefix "oc-netinst"; }
-    import openconfig-segment-routing     { prefix "oc-sr"; }
-    import openconfig-types               { prefix "oc-types"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
          Web: <http://www.nokia.com>";
     description
         "This module contains the list of deviations against the openconfig-mpls
-          module for the Nokia SR OS based routers.
+         module for the Nokia SR OS based routers.
 
          Copyright 2016 Nokia. All rights reserved. Reproduction of this document
          is authorized on the condition that the foregoing copyright notice is included.
@@ -40,7 +33,7 @@ module nokia-sr-openconfig-mpls-deviations {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2017-03-22";
+    revision "2025-03-12";
 
     deviation /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:global/oc-netinst:config/oc-netinst:null-label {
         deviate delete {
@@ -64,7 +57,7 @@ module nokia-sr-openconfig-mpls-deviations {
 
     deviation /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:global/oc-netinst:interface-attributes/oc-netinst:interface {
         deviate add {
-            unique "interface-ref/config/interface interface-ref/config/subinterface";
+            unique "oc-netinst:interface-ref/oc-netinst:config/oc-netinst:interface oc-netinst:interface-ref/oc-netinst:config/oc-netinst:subinterface";
         }
     }
 
@@ -334,7 +327,7 @@ module nokia-sr-openconfig-mpls-deviations {
 
     deviation /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:te-interface-attributes/oc-netinst:interface {
         deviate add {
-            unique "interface-ref/config/interface interface-ref/config/subinterface";
+            unique "oc-netinst:interface-ref/oc-netinst:config/oc-netinst:interface oc-netinst:interface-ref/oc-netinst:config/oc-netinst:subinterface";
         }
     }
 

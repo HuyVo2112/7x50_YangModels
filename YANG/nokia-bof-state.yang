@@ -12,7 +12,7 @@ module nokia-bof-state {
     import nokia-types-router             { prefix "types-router"; }
     import nokia-types-sros               { prefix "types-sros"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -35,7 +35,7 @@ module nokia-bof-state {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2024-03-01";
+    revision "2025-03-12";
 
     augment /state:state {
 
@@ -204,7 +204,7 @@ module nokia-bof-state {
                                         length "3..514";
                                     }
                                     type string {
-                                        length "256";
+                                        length "1..256";
                                     }
                                 }
                                 description "DHCP client ID";
@@ -246,7 +246,7 @@ module nokia-bof-state {
                                         length "3..514";
                                     }
                                     type string {
-                                        length "256";
+                                        length "1..256";
                                     }
                                 }
                                 description "DHCP client ID";
@@ -543,9 +543,9 @@ module nokia-bof-state {
                         description "Base system MAC address";
                     }
 
-                    leaf fips-140-2 {
+                    leaf fips-140 {
                         type boolean;
-                        description "Operate in FIPS-140.2 mode";
+                        description "Operate in FIP-140 mode";
                     }
 
                     leaf persistent-indices {

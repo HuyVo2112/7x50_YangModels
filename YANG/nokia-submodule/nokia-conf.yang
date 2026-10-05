@@ -21,6 +21,7 @@ module nokia-conf {
     include nokia-conf-cflowd;
     include nokia-conf-chassis;
     include nokia-conf-conn-prof;
+    include nokia-conf-dms;
     include nokia-conf-esa;
     include nokia-conf-eth-cfm;
     include nokia-conf-eth-ring;
@@ -161,7 +162,7 @@ module nokia-conf {
     include nokia-conf-testoam-service-activation-testhead;
     include nokia-conf-vrrp;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -184,7 +185,7 @@ module nokia-conf {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2024-03-06";
+    revision "2026-07-22";
 
     container configure {
         description "Configure system configuration";
@@ -209,6 +210,7 @@ module nokia-conf {
         uses conf-cflowd;
         uses conf-chassis;
         uses conf-conn-prof-connection-profile;
+        uses conf-dms-defender-mitigation-system;
         uses conf-esa;
         uses conf-eth-cfm;
         uses conf-eth-ring;

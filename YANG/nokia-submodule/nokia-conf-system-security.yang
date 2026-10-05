@@ -24,7 +24,7 @@ submodule nokia-conf-system-security {
     include nokia-conf-system-security-tls;
     include nokia-conf-system-security-user-parameters;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -47,7 +47,7 @@ submodule nokia-conf-system-security {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2022-12-12";
+    revision "2026-07-22";
 
     grouping conf-system-security {
         container security {
@@ -76,6 +76,12 @@ submodule nokia-conf-system-security {
                 description "Allow CPM hardware queuing per peer";
             }
 
+            leaf console-login {
+                type boolean;
+                default "true";
+                description "Enable logins on the serial console port of the CPM";
+            }
+
             leaf-list apply-groups {
                 type leafref {
                     path "../../../groups/group/name";
@@ -93,6 +99,37 @@ submodule nokia-conf-system-security {
                 ordered-by user;
                 description "Exclude a configuration group at this level";
             }
+
+            container telnet {
+                description "Enter the telnet context";
+
+                leaf listening-port {
+                    type types-sros:tcp-udp-port-non-zero {
+                        range "23|1024..49151";
+                    }
+                    default "23";
+                    description "TCP port for Telnet connections for VPRN or base routing";
+                }
+
+                leaf-list apply-groups {
+                    type leafref {
+                        path "../../../../groups/group/name";
+                    }
+                    max-elements 8;
+                    ordered-by user;
+                    description "Apply a configuration group at this level";
+                }
+
+                leaf-list apply-groups-exclude {
+                    type leafref {
+                        path "../../../../groups/group/name";
+                    }
+                    max-elements 8;
+                    ordered-by user;
+                    description "Exclude a configuration group at this level";
+                }
+
+            } // container telnet
 
             container vprn-network-exceptions {
                 presence "Enable the vprn-network-exceptions context";
@@ -801,7 +838,7 @@ submodule nokia-conf-system-security {
 
                     list static-policer {
                         key "policer-name";
-                        max-elements 18;
+                        max-elements 27;
                         description "Enter the static-policer list instance";
 
                         leaf policer-name {
@@ -926,7 +963,6 @@ submodule nokia-conf-system-security {
                                                 }
                                             }
                                             units "packets per interval";
-                                            default "max";
                                             description "Packets per interval limit";
                                         }
 
@@ -1193,7 +1229,7 @@ submodule nokia-conf-system-security {
                                 type uint32 {
                                     range "0..63|255";
                                 }
-                                description "Keychain identifier";
+                                description "Keychain ID";
                             }
 
                             leaf authentication-key {
@@ -1207,15 +1243,6 @@ submodule nokia-conf-system-security {
                                 description "Authentication key used by the encryption algorithm";
                             }
 
-                            leaf algorithm {
-                                when "not(../keychain-entry-index = 255)" {
-                                    description "must not be used with entry 255 (null-entry)";
-                                }
-                                type types-security:keychain-algo;
-                                sros-ext:immutable;
-                                description "Encryption algorithm used by the keychain key";
-                            }
-
                             leaf admin-state {
                                 type types-sros:admin-state;
                                 default "enable";
@@ -1225,6 +1252,15 @@ submodule nokia-conf-system-security {
                             leaf begin-time {
                                 type yang:date-and-time;
                                 description "Calendar date and time to start using the key";
+                            }
+
+                            leaf algorithm {
+                                when "not(../keychain-entry-index = 255)" {
+                                    description "must not be used with entry 255 (null-entry)";
+                                }
+                                type types-security:keychain-algo;
+                                sros-ext:immutable;
+                                description "Encryption algorithm used by the keychain key";
                             }
 
                             leaf option {
@@ -1283,7 +1319,7 @@ submodule nokia-conf-system-security {
                                 type uint32 {
                                     range "0..63|255";
                                 }
-                                description "Keychain identifier";
+                                description "Keychain ID";
                             }
 
                             leaf authentication-key {
@@ -1297,15 +1333,6 @@ submodule nokia-conf-system-security {
                                 description "Authentication key used by the encryption algorithm";
                             }
 
-                            leaf algorithm {
-                                when "not(../keychain-entry-index = 255)" {
-                                    description "must not be used with entry 255 (null-entry)";
-                                }
-                                type types-security:keychain-algo;
-                                sros-ext:immutable;
-                                description "Encryption algorithm used by the keychain key";
-                            }
-
                             leaf admin-state {
                                 type types-sros:admin-state;
                                 default "enable";
@@ -1315,6 +1342,15 @@ submodule nokia-conf-system-security {
                             leaf begin-time {
                                 type yang:date-and-time;
                                 description "Calendar date and time to start using the key";
+                            }
+
+                            leaf algorithm {
+                                when "not(../keychain-entry-index = 255)" {
+                                    description "must not be used with entry 255 (null-entry)";
+                                }
+                                type types-security:keychain-algo;
+                                sros-ext:immutable;
+                                description "Encryption algorithm used by the keychain key";
                             }
 
                             leaf end-time {
@@ -1368,7 +1404,7 @@ submodule nokia-conf-system-security {
                                 type uint32 {
                                     range "0..63|255";
                                 }
-                                description "Keychain identifier";
+                                description "Keychain ID";
                             }
 
                             leaf authentication-key {
@@ -1382,6 +1418,17 @@ submodule nokia-conf-system-security {
                                 description "Authentication key used by the encryption algorithm";
                             }
 
+                            leaf admin-state {
+                                type types-sros:admin-state;
+                                default "enable";
+                                description "Administrative state of the keychain entry";
+                            }
+
+                            leaf begin-time {
+                                type yang:date-and-time;
+                                description "Calendar date and time to start using the key";
+                            }
+
                             leaf algorithm {
                                 when "not(../keychain-entry-index = 255)" {
                                     description "must not be used with entry 255 (null-entry)";
@@ -1389,6 +1436,87 @@ submodule nokia-conf-system-security {
                                 type types-security:keychain-algo;
                                 sros-ext:immutable;
                                 description "Encryption algorithm used by the keychain key";
+                            }
+
+                            leaf-list apply-groups {
+                                type leafref {
+                                    path "../../../../../../../groups/group/name";
+                                }
+                                max-elements 8;
+                                ordered-by user;
+                                description "Apply a configuration group at this level";
+                            }
+
+                            leaf-list apply-groups-exclude {
+                                type leafref {
+                                    path "../../../../../../../groups/group/name";
+                                }
+                                max-elements 8;
+                                ordered-by user;
+                                description "Exclude a configuration group at this level";
+                            }
+
+                        } // list entry
+
+                    } // container send
+
+                    container macsec {
+                        description "Enter the macsec context";
+
+                        list entry {
+                            key "keychain-entry-index";
+                            description "Enter the entry list instance";
+
+                            leaf keychain-entry-index {
+                                type uint32 {
+                                    range "0..63";
+                                }
+                                description "Keychain ID";
+                            }
+
+                            leaf cak {
+                                type types-sros:encrypted-leaf-hex-without-prefix {
+                                    length "1..71";
+                                }
+                                sros-ext:immutable;
+                                mandatory true;
+                                description "CAK used by the encryption algorithm";
+                            }
+
+                            leaf cak-name {
+                                type types-security:cak-name;
+                                sros-ext:immutable;
+                                mandatory true;
+                                description "CAK name";
+                            }
+
+                            leaf algorithm {
+                                type enumeration {
+                                    enum aes-128-cmac-128 {
+                                        value 1;
+                                        description "Algorithm based on AES-CMAC and key size of 128 bits";
+                                    }
+                                    enum aes-256-cmac-256 {
+                                        value 2;
+                                        description "Algorithm based on AES-CMAC and key size of 256 bits";
+                                    }
+                                }
+                                sros-ext:immutable;
+                                mandatory true;
+                                description "Encryption algorithm used by the keychain key";
+                            }
+
+                            leaf tolerance {
+                                type union {
+                                    type types-sros:time-duration {
+                                        range "20..4294967294";
+                                    }
+                                    type enumeration {
+                                        enum infinite                       { value -1; }
+                                    }
+                                }
+                                default "300";
+                                description "Time a receive key should overlap with active send key";
                             }
 
                             leaf admin-state {
@@ -1422,7 +1550,7 @@ submodule nokia-conf-system-security {
 
                         } // list entry
 
-                    } // container send
+                    } // container macsec
 
                 } // list keychain
 
@@ -1437,26 +1565,80 @@ submodule nokia-conf-system-security {
 
                     leaf application {
                         type enumeration {
-                            enum telnet                         { value 1; }
-                            enum ftp                            { value 2; }
-                            enum ssh                            { value 3; }
-                            enum radius                         { value 4; }
-                            enum tacplus                        { value 5; }
-                            enum snmptrap                       { value 6; }
-                            enum syslog                         { value 7; }
-                            enum ping                           { value 8; }
-                            enum traceroute                     { value 9; }
-                            enum dns                            { value 10; }
-                            enum sntp                           { value 11; }
-                            enum ntp                            { value 12; }
-                            enum cflowd                         { value 13; }
-                            enum ptp                            { value 23; }
-                            enum mcreporter                     { value 24; }
-                            enum sflow                          { value 27; }
-                            enum icmp-error                     { value 29; }
-                            enum ldap                           { value 31; }
+                            enum telnet {
+                                value 1;
+                                description "Telnet packets";
+                            }
+                            enum ftp {
+                                value 2;
+                                description "FTP packets";
+                            }
+                            enum ssh {
+                                value 3;
+                                description "SSH packets";
+                            }
+                            enum radius {
+                                value 4;
+                                description "RADIUS packets";
+                            }
+                            enum tacplus {
+                                value 5;
+                                description "TACACS+ packets";
+                            }
+                            enum snmptrap {
+                                value 6;
+                                description "SNMP trap packets";
+                            }
+                            enum syslog {
+                                value 7;
+                                description "Syslog packets";
+                            }
+                            enum ping {
+                                value 8;
+                                description "ICMP Echo Reply messages";
+                            }
+                            enum traceroute {
+                                value 9;
+                                description "Traceroute reply messages";
+                            }
+                            enum dns {
+                                value 10;
+                                description "DNS packets";
+                            }
+                            enum sntp {
+                                value 11;
+                                description "SNTP packets";
+                            }
+                            enum ntp {
+                                value 12;
+                                description "NTP packets";
+                            }
+                            enum cflowd {
+                                value 13;
+                                description "Cflowd packets";
+                            }
+                            enum ptp {
+                                value 23;
+                                description "PTP packets";
+                            }
+                            enum mcreporter {
+                                value 24;
+                                description "IGMP Host Report messages";
+                            }
+                            enum sflow {
+                                value 27;
+                                description "Sflow packets";
+                            }
+                            enum icmp-error {
+                                value 29;
+                                description "ICMP error messages";
+                            }
+                            enum ldap {
+                                value 31;
+                                description "LDAP packets";
+                            }
                         }
-                        description "Application that uses the source IP address";
+                        description "Application that sets the source IPv4 address";
                     }
 
                     leaf-list apply-groups {
@@ -1493,7 +1675,7 @@ submodule nokia-conf-system-security {
                             leaf address {
                                 type types-sros:ipv4-address;
                                 sros-ext:immutable;
-                                description "Source IPv4 address";
+                                description "IPv4 source address for the application";
                             }
 
                         }
@@ -1506,31 +1688,79 @@ submodule nokia-conf-system-security {
 
                     leaf application {
                         type enumeration {
-                            enum telnet                         { value 14; }
-                            enum ftp                            { value 15; }
-                            enum radius                         { value 16; }
-                            enum tacplus                        { value 17; }
-                            enum snmptrap                       { value 18; }
-                            enum syslog                         { value 19; }
-                            enum ping                           { value 20; }
-                            enum traceroute                     { value 21; }
-                            enum dns                            { value 22; }
-                            enum cflowd                         { value 25; }
-                            enum ntp                            { value 26; }
-                            enum sflow                          { value 28; }
-                            enum icmp6-error                    { value 30; }
-                            enum ldap                           { value 32; }
-                            enum ssh                            { value 33; }
-                            enum ptp                            { value 34; }
+                            enum telnet {
+                                value 14;
+                                description "Telnet packets";
+                            }
+                            enum ftp {
+                                value 15;
+                                description "FTP packets";
+                            }
+                            enum radius {
+                                value 16;
+                                description "RADIUS packets";
+                            }
+                            enum tacplus {
+                                value 17;
+                                description "TACACS+ packets";
+                            }
+                            enum snmptrap {
+                                value 18;
+                                description "SNMP trap packets";
+                            }
+                            enum syslog {
+                                value 19;
+                                description "Syslog packets";
+                            }
+                            enum ping {
+                                value 20;
+                                description "ICMPv6 Echo Reply messages";
+                            }
+                            enum traceroute {
+                                value 21;
+                                description "Traceroute reply messages";
+                            }
+                            enum dns {
+                                value 22;
+                                description "DNS packets";
+                            }
+                            enum cflowd {
+                                value 25;
+                                description "Cflowd packets";
+                            }
+                            enum ntp {
+                                value 26;
+                                description "NTP packets";
+                            }
+                            enum sflow {
+                                value 28;
+                                description "Sflow packets";
+                            }
+                            enum icmp6-error {
+                                value 30;
+                                description "ICMPv6 error messages";
+                            }
+                            enum ldap {
+                                value 32;
+                                description "LDAP packets";
+                            }
+                            enum ssh {
+                                value 33;
+                                description "SSH packets";
+                            }
+                            enum ptp {
+                                value 34;
+                                description "PTP packets";
+                            }
                         }
-                        description "Application which uses the source IPv6 address";
+                        description "Application that sets the source IPv6 address";
                     }
 
                     leaf address {
                         type types-sros:ipv6-address;
                         sros-ext:immutable;
                         mandatory true;
-                        description "Source IPv6 address";
+                        description "IPv6 source address for the application";
                     }
 
                     leaf-list apply-groups {

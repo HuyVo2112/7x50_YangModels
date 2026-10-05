@@ -5,24 +5,18 @@ module nokia-sr-openconfig-isis-deviations {
     prefix "nokia-oc-isis-devs";
 
     import nokia-sros-yang-extensions     { prefix "sros-ext"; }
-    import openconfig-bfd                 { prefix "oc-bfd"; }
     import openconfig-extensions          { prefix "oc-ext"; }
-    import openconfig-interfaces          { prefix "oc-if"; }
-    import openconfig-isis                { prefix "oc-isis"; }
-    import openconfig-isis-types          { prefix "oc-isis-types"; }
-    import openconfig-keychain-types      { prefix "oc-keychain-types"; }
     import openconfig-network-instance    { prefix "oc-netinst"; }
-    import openconfig-routing-policy      { prefix "oc-rpol"; }
     import openconfig-types               { prefix "oc-types"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
          Web: <http://www.nokia.com>";
     description
         "This module contains the list of deviations against the openconfig-isis
-          module for the Nokia SR OS based routers.
+         module for the Nokia SR OS based routers.
 
          Copyright 2016 Nokia. All rights reserved. Reproduction of this document
          is authorized on the condition that the foregoing copyright notice is included.
@@ -39,7 +33,7 @@ module nokia-sr-openconfig-isis-deviations {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2022-09-20";
+    revision "2025-03-12";
 
     deviation /oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:config/oc-netinst:net {
         deviate add {

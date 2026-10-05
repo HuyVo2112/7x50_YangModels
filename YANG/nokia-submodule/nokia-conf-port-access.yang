@@ -10,7 +10,7 @@ submodule nokia-conf-port-access {
     include nokia-conf-groups;
     include nokia-conf-qos;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -33,7 +33,7 @@ submodule nokia-conf-port-access {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-07-19";
+    revision "2026-07-22";
 
     grouping conf-port-access {
         container access {
@@ -150,6 +150,49 @@ submodule nokia-conf-port-access {
 
                     } // container resv-cbs
 
+                    container monitor-pool-depth {
+                        description "Enter the monitor-pool-depth context";
+
+                        leaf admin-state {
+                            type types-sros:admin-state;
+                            default "disable";
+                            description "Administrative state of pool-depth monitoring";
+                        }
+
+                        container alarm-thresholds {
+                            description "Enter the alarm-thresholds context";
+
+                            leaf total-pool-in-use {
+                                type decimal64 {
+                                    range "0.00..100.00";
+                                    fraction-digits 2;
+                                }
+                                units "centipercent";
+                                description "Alarm threshold for usage of total buffer pool";
+                            }
+
+                            leaf shared-pool-in-use {
+                                type decimal64 {
+                                    range "0.00..100.00";
+                                    fraction-digits 2;
+                                }
+                                units "centipercent";
+                                description "Alarm threshold for shared of buffer pool usage";
+                            }
+
+                            leaf reserved-pool-in-use {
+                                type decimal64 {
+                                    range "0.00..100.00";
+                                    fraction-digits 2;
+                                }
+                                units "centipercent";
+                                description "Alarm threshold for reserved buffer pool usage";
+                            }
+
+                        } // container alarm-thresholds
+
+                    } // container monitor-pool-depth
+
                 } // list pool
 
             } // container egress
@@ -246,6 +289,49 @@ submodule nokia-conf-port-access {
                         } // container amber-alarm-action
 
                     } // container resv-cbs
+
+                    container monitor-pool-depth {
+                        description "Enter the monitor-pool-depth context";
+
+                        leaf admin-state {
+                            type types-sros:admin-state;
+                            default "disable";
+                            description "Administrative state of pool-depth monitoring";
+                        }
+
+                        container alarm-thresholds {
+                            description "Enter the alarm-thresholds context";
+
+                            leaf total-pool-in-use {
+                                type decimal64 {
+                                    range "0.00..100.00";
+                                    fraction-digits 2;
+                                }
+                                units "centipercent";
+                                description "Alarm threshold for usage of total buffer pool";
+                            }
+
+                            leaf shared-pool-in-use {
+                                type decimal64 {
+                                    range "0.00..100.00";
+                                    fraction-digits 2;
+                                }
+                                units "centipercent";
+                                description "Alarm threshold for shared of buffer pool usage";
+                            }
+
+                            leaf reserved-pool-in-use {
+                                type decimal64 {
+                                    range "0.00..100.00";
+                                    fraction-digits 2;
+                                }
+                                units "centipercent";
+                                description "Alarm threshold for reserved buffer pool usage";
+                            }
+
+                        } // container alarm-thresholds
+
+                    } // container monitor-pool-depth
 
                 } // list pool
 

@@ -18,6 +18,7 @@ submodule nokia-state-system {
     include nokia-state-sfm;
     include nokia-state-system-bluetooth;
     include nokia-state-system-bootup;
+    include nokia-state-system-central-frequency-clock;
     include nokia-state-system-cron;
     include nokia-state-system-licensing;
     include nokia-state-system-ptp;
@@ -26,7 +27,7 @@ submodule nokia-state-system {
     include nokia-state-system-telemetry;
     include nokia-state-system-time;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -49,7 +50,7 @@ submodule nokia-state-system {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2024-05-15";
+    revision "2026-02-11";
 
     grouping state-system {
         container system {
@@ -98,9 +99,9 @@ submodule nokia-state-system {
                      XRS-20 chassis and is also known as an XRS-40 system.";
             }
 
-            leaf crypto-module-version {
+            leaf kernel-version {
                 type string;
-                description "Cryptographic module version.";
+                description "Indicates the version of the operating kernel.";
             }
 
             leaf fabric-speed {
@@ -175,6 +176,43 @@ submodule nokia-state-system {
             leaf current-time {
                 type yang:date-and-time;
                 description "Current system time.";
+            }
+
+            leaf reboot-required {
+                type boolean;
+                description
+                    "The value indicates if a condition exists on the node
+                     that requires a manually triggered reboot.";
+            }
+
+            leaf reboot-required-reason {
+                type bits {
+                    bit upgrade-asl-change             { position 0; }
+                    bit fp-resource-policy-change      { position 1; }
+                    bit bof-configuration-change       { position 2; }
+                    bit ptp-configuration-change       { position 3; }
+                    bit fp-options-change              { position 4; }
+                    bit fp-resource-alloc-change       { position 5; }
+                    bit fp-cam-alloc-change            { position 6; }
+                    bit isa-mda-deprovision            { position 7; }
+                }
+                description
+                    "The value specifies a bitmask that identifies the
+                     reason(s) why a reboot is required.";
+            }
+
+            leaf os-security-password {
+                type types-sros:enabled-disabled;
+                description
+                    "Whether the system-wide OS Security password has been set,
+                     thereby enabling the use of the OS Security feature suite.";
+            }
+
+            leaf anti-theft-locked {
+                type boolean;
+                description
+                    "Whether the system is currently locked by the Anti-Theft
+                     component of the OS Security feature suite.";
             }
 
             leaf boot-good-exec-status {
@@ -334,6 +372,26 @@ submodule nokia-state-system {
 
             } // container alarms
 
+            container crypto-module {
+                description "Enter the crypto-module context";
+
+                leaf crypto-module-version {
+                    type string;
+                    description "Indicates the version of the cryptographic module.";
+                }
+
+                leaf fips-provider-version {
+                    type string;
+                    description "Indicates the version of the Federal Information Processing Standards (FIPS) provider.";
+                }
+
+                leaf entropy-source-version {
+                    type string;
+                    description "Indicates the version of the entropy source.";
+                }
+
+            } // container crypto-module
+
             list alarm-contact-input {
                 key "input-pin-number";
                 description "Enter the alarm-contact-input list instance";
@@ -342,7 +400,7 @@ submodule nokia-state-system {
                     type int32 {
                         range "1..4";
                     }
-                    description "Alarm contact input pin";
+                    description "The alarm contact input pin number.";
                 }
 
                 leaf input-status {
@@ -425,14 +483,26 @@ submodule nokia-state-system {
                         } // container bum-policers
 
                         container shared-policer {
+                            status obsolete;
                             description "Enter the shared-policer context";
 
                             leaf oper-state {
+                                status obsolete;
                                 type types-sros:enabled-disabled;
                                 description "Indicates the QOS shared policer operational state.";
                             }
 
                         } // container shared-policer
+
+                        container sap-shared-policer {
+                            description "Enter the sap-shared-policer context";
+
+                            leaf oper-state {
+                                type types-sros:enabled-disabled;
+                                description "Indicates the QOS sap shared policer operational state.";
+                            }
+
+                        } // container sap-shared-policer
 
                     } // container qos
 
@@ -460,6 +530,16 @@ submodule nokia-state-system {
                             }
 
                         } // container fast-switchover
+
+                        container hierarchical-tunnel {
+                            description "Enter the hierarchical-tunnel context";
+
+                            leaf oper-state {
+                                type types-sros:enabled-disabled;
+                                description "Indicates the MPLS hierarchical tunnel operational state";
+                            }
+
+                        } // container hierarchical-tunnel
 
                     } // container mpls
 
@@ -670,6 +750,21 @@ submodule nokia-state-system {
 
                     } // container ipv6-filter
 
+                    container lag {
+                        description "Enter the lag context";
+
+                        container adaptive-load-balancing {
+                            description "Enter the adaptive-load-balancing context";
+
+                            leaf oper-state {
+                                type types-sros:enabled-disabled;
+                                description "The operational state of adaptive load-balancing";
+                            }
+
+                        } // container adaptive-load-balancing
+
+                    } // container lag
+
                     container lpm-allocation {
                         status obsolete;
                         description "Enter the lpm-allocation context";
@@ -741,6 +836,13 @@ submodule nokia-state-system {
                             "Operational Max G8032 SAP entries
                              This leaf was deprecated in release 21.10 on Nokia SROS series
                              It has been replaced by /system/fp/resource-alloction/fec/system-wide/oper-paired.";
+                    }
+
+                    leaf oper-profile {
+                        type uint32 {
+                            range "0..5";
+                        }
+                        description "Indicates the operational value of the profile for the forwarding plane.";
                     }
 
                     container egress-encap {
@@ -830,6 +932,16 @@ submodule nokia-state-system {
 
                                     } // container mirror
 
+                                    container rate-limit {
+                                        description "Enter the rate-limit context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the action rate-limit operational state.";
+                                        }
+
+                                    } // container rate-limit
+
                                     container redirect {
                                         description "Enter the redirect context";
 
@@ -885,6 +997,56 @@ submodule nokia-state-system {
 
                                     } // container dst-port
 
+                                    container icmp-code {
+                                        description "Enter the icmp-code context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the icmp-code operational state.";
+                                        }
+
+                                    } // container icmp-code
+
+                                    container icmp-type {
+                                        description "Enter the icmp-type context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the icmp-type operational state.";
+                                        }
+
+                                    } // container icmp-type
+
+                                    container ip-option-presence {
+                                        description "Enter the ip-option-presence context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the ip-option operational state.";
+                                        }
+
+                                    } // container ip-option-presence
+
+                                    container ip-option-value {
+                                        description "Enter the ip-option-value context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the ip-option value operational state.";
+                                        }
+
+                                    } // container ip-option-value
+
+                                    container packet-length {
+                                        description "Enter the packet-length context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the packet-length operational state.";
+                                        }
+
+                                    } // container packet-length
+
                                     container protocol {
                                         description "Enter the protocol context";
 
@@ -924,6 +1086,16 @@ submodule nokia-state-system {
                                         }
 
                                     } // container tcp-flags
+
+                                    container tcp-flags-ext {
+                                        description "Enter the tcp-flags-ext context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the tcp flags ext operational state.";
+                                        }
+
+                                    } // container tcp-flags-ext
 
                                 } // container match-criteria
 
@@ -974,6 +1146,16 @@ submodule nokia-state-system {
                                         }
 
                                     } // container mirror
+
+                                    container rate-limit {
+                                        description "Enter the rate-limit context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the action rate-limit operational state.";
+                                        }
+
+                                    } // container rate-limit
 
                                     container redirect {
                                         description "Enter the redirect context";
@@ -1050,6 +1232,36 @@ submodule nokia-state-system {
 
                                     } // container flow-label
 
+                                    container icmp-code {
+                                        description "Enter the icmp-code context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the icmp-code operational state.";
+                                        }
+
+                                    } // container icmp-code
+
+                                    container icmp-type {
+                                        description "Enter the icmp-type context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the icmp-type operational state.";
+                                        }
+
+                                    } // container icmp-type
+
+                                    container packet-length {
+                                        description "Enter the packet-length context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the packet-length operational state.";
+                                        }
+
+                                    } // container packet-length
+
                                     container next-header {
                                         description "Enter the next-header context";
 
@@ -1100,11 +1312,386 @@ submodule nokia-state-system {
 
                                     } // container tcp-flags
 
+                                    container tcp-flags-ext {
+                                        description "Enter the tcp-flags-ext context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the tcp flags ext operational state.";
+                                        }
+
+                                    } // container tcp-flags-ext
+
                                 } // container match-criteria
 
                             } // container ipv6-filter
 
                         } // container ingress
+
+                        container egress {
+                            description "Enter the egress context";
+
+                            container ip-filter {
+                                description "Enter the ip-filter context";
+
+                                container actions {
+                                    description "Enter the actions context";
+
+                                    container drop {
+                                        description "Enter the drop context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the action drop operational state.";
+                                        }
+
+                                    } // container drop
+
+                                    container mirror {
+                                        description "Enter the mirror context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the mirror action operational state.";
+                                        }
+
+                                    } // container mirror
+
+                                    container stats-collection {
+                                        description "Enter the stats-collection context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the filter statistics collection operational state.";
+                                        }
+
+                                    } // container stats-collection
+
+                                } // container actions
+
+                                container match-criteria {
+                                    description "Enter the match-criteria context";
+
+                                    container dscp {
+                                        description "Enter the dscp context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the dscp operational state.";
+                                        }
+
+                                    } // container dscp
+
+                                    container dst-ip {
+                                        description "Enter the dst-ip context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the destination ip address operational state.";
+                                        }
+
+                                    } // container dst-ip
+
+                                    container dst-port {
+                                        description "Enter the dst-port context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the destination port operational state.";
+                                        }
+
+                                    } // container dst-port
+
+                                    container icmp-code {
+                                        description "Enter the icmp-code context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the icmp-code operational state.";
+                                        }
+
+                                    } // container icmp-code
+
+                                    container icmp-type {
+                                        description "Enter the icmp-type context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the icmp-type operational state.";
+                                        }
+
+                                    } // container icmp-type
+
+                                    container ip-option-presence {
+                                        description "Enter the ip-option-presence context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the ip-option operational state.";
+                                        }
+
+                                    } // container ip-option-presence
+
+                                    container ip-option-value {
+                                        description "Enter the ip-option-value context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the ip-option value operational state.";
+                                        }
+
+                                    } // container ip-option-value
+
+                                    container packet-length {
+                                        description "Enter the packet-length context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the packet-length operational state.";
+                                        }
+
+                                    } // container packet-length
+
+                                    container protocol {
+                                        description "Enter the protocol context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the protocol operational state.";
+                                        }
+
+                                    } // container protocol
+
+                                    container src-ip {
+                                        description "Enter the src-ip context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the source ip address operational state.";
+                                        }
+
+                                    } // container src-ip
+
+                                    container src-port {
+                                        description "Enter the src-port context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the source port operational state.";
+                                        }
+
+                                    } // container src-port
+
+                                    container tcp-flags {
+                                        description "Enter the tcp-flags context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the tcp flags operational state.";
+                                        }
+
+                                    } // container tcp-flags
+
+                                    container tcp-flags-ext {
+                                        description "Enter the tcp-flags-ext context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the tcp flags ext operational state.";
+                                        }
+
+                                    } // container tcp-flags-ext
+
+                                } // container match-criteria
+
+                            } // container ip-filter
+
+                            container ipv6-filter {
+                                description "Enter the ipv6-filter context";
+
+                                container actions {
+                                    description "Enter the actions context";
+
+                                    container drop {
+                                        description "Enter the drop context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the action drop operational state.";
+                                        }
+
+                                    } // container drop
+
+                                    container mirror {
+                                        description "Enter the mirror context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the mirror action operational state.";
+                                        }
+
+                                    } // container mirror
+
+                                    container stats-collection {
+                                        description "Enter the stats-collection context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the filter statistics collection operational state.";
+                                        }
+
+                                    } // container stats-collection
+
+                                } // container actions
+
+                                container match-criteria {
+                                    description "Enter the match-criteria context";
+
+                                    container dscp {
+                                        description "Enter the dscp context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the dscp operational state.";
+                                        }
+
+                                    } // container dscp
+
+                                    container dst-ip-lsb {
+                                        description "Enter the dst-ip-lsb context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the destination ip least significant bit operational state.";
+                                        }
+
+                                    } // container dst-ip-lsb
+
+                                    container dst-ip-msb {
+                                        description "Enter the dst-ip-msb context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the destination ip most significant bit operational state.";
+                                        }
+
+                                    } // container dst-ip-msb
+
+                                    container dst-port {
+                                        description "Enter the dst-port context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the destination port operational state.";
+                                        }
+
+                                    } // container dst-port
+
+                                    container flow-label {
+                                        description "Enter the flow-label context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the flow-label operational state.";
+                                        }
+
+                                    } // container flow-label
+
+                                    container icmp-code {
+                                        description "Enter the icmp-code context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the icmp-code operational state.";
+                                        }
+
+                                    } // container icmp-code
+
+                                    container icmp-type {
+                                        description "Enter the icmp-type context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the icmp-type operational state.";
+                                        }
+
+                                    } // container icmp-type
+
+                                    container packet-length {
+                                        description "Enter the packet-length context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the packet-length operational state.";
+                                        }
+
+                                    } // container packet-length
+
+                                    container next-header {
+                                        description "Enter the next-header context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the next-header operational state.";
+                                        }
+
+                                    } // container next-header
+
+                                    container src-ip-lsb {
+                                        description "Enter the src-ip-lsb context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the source ip least significant bit operational state.";
+                                        }
+
+                                    } // container src-ip-lsb
+
+                                    container src-ip-msb {
+                                        description "Enter the src-ip-msb context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the source ip most significant bit operational state.";
+                                        }
+
+                                    } // container src-ip-msb
+
+                                    container src-port {
+                                        description "Enter the src-port context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the source port operational state.";
+                                        }
+
+                                    } // container src-port
+
+                                    container tcp-flags {
+                                        description "Enter the tcp-flags context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the tcp flags operational state.";
+                                        }
+
+                                    } // container tcp-flags
+
+                                    container tcp-flags-ext {
+                                        description "Enter the tcp-flags-ext context";
+
+                                        leaf oper-state {
+                                            type types-sros:enabled-disabled;
+                                            description "Indicates the tcp flags ext operational state.";
+                                        }
+
+                                    } // container tcp-flags-ext
+
+                                } // container match-criteria
+
+                            } // container ipv6-filter
+
+                        } // container egress
 
                     } // container filter
 
@@ -1119,6 +1706,15 @@ submodule nokia-state-system {
                                     range "0|1|2|4";
                                 }
                                 description "Operational policer stats resource allocated.";
+                            }
+
+                            leaf oper-dedicated-fc-policers {
+                                type uint32 {
+                                    range "0..10816";
+                                }
+                                description
+                                    "Operational value of number of stats allocated for dedicated
+                                     fc policers";
                             }
 
                         } // container policer
@@ -1152,7 +1748,7 @@ submodule nokia-state-system {
                             type uint32 {
                                 range "1..2";
                             }
-                            description "Pool identifier";
+                            description "Specifies the pool identifier.";
                         }
 
                         container lag-bundle {
@@ -1190,20 +1786,24 @@ submodule nokia-state-system {
                     } // container fec
 
                     container lpm {
+                        status obsolete;
                         description "Enter the lpm context";
 
                         list scale-option {
+                            status obsolete;
                             key "option";
                             description "Enter the scale-option list instance";
 
                             leaf option {
+                                status obsolete;
                                 type uint32 {
                                     range "1..4";
                                 }
-                                description "Unique LPM (FIB) scale option";
+                                description "Specifies the unique LPM scale option.";
                             }
 
                             leaf oper-state {
+                                status obsolete;
                                 type types-sros:enabled-disabled;
                                 description "Indicates the operational state of the LPM scale option.";
                             }
@@ -1229,8 +1829,11 @@ submodule nokia-state-system {
                                     enum dual-mode-16k-bank-1           { value 1; }
                                     enum dual-mode-16k-bank-2           { value 2; }
                                     enum dual-mode-16k-bank-3           { value 3; }
+                                    enum dual-mode-16k-bank-4           { value 4; }
+                                    enum dual-mode-16k-bank-5           { value 5; }
+                                    enum dual-mode-16k-bank-6           { value 6; }
                                 }
-                                description "Bank name";
+                                description "Specifies the bank name.";
                             }
 
                             container application {
@@ -1241,6 +1844,14 @@ submodule nokia-state-system {
                                         range "1..3";
                                     }
                                     description "Specifies the operational group.";
+                                }
+
+                                leaf oper-binding {
+                                    type enumeration {
+                                        enum policer                        { value 1; }
+                                        enum statistics                     { value 2; }
+                                    }
+                                    description "Specifies the operational binding.";
                                 }
 
                             } // container application
@@ -1278,7 +1889,7 @@ submodule nokia-state-system {
                                     type uint32 {
                                         range "1..3";
                                     }
-                                    description "Application group ID";
+                                    description "Specifies the group identifier.";
                                 }
 
                                 container policers {
@@ -1299,13 +1910,14 @@ submodule nokia-state-system {
                                                 enum per-4-fc                       { value 7; }
                                                 enum aggregate-policers             { value 8; }
                                                 enum shared-policers                { value 9; }
+                                                enum filter-shared-policers         { value 11; }
                                             }
-                                            description "FC policer type";
+                                            description "The unique application to the group.";
                                         }
 
                                         leaf oper-scale {
                                             type int32 {
-                                                range "-1..32";
+                                                range "-1..96";
                                             }
                                             description "Indicates the scale of the application.";
                                         }
@@ -1314,11 +1926,292 @@ submodule nokia-state-system {
 
                                 } // container policers
 
+                                container statistics {
+                                    description "Enter the statistics context";
+
+                                    list application {
+                                        key "application-id";
+                                        description "Enter the application list instance";
+
+                                        leaf application-id {
+                                            type enumeration {
+                                                enum aggregate-policers             { value 8; }
+                                                enum shared-policers                { value 9; }
+                                                enum fc-policers                    { value 10; }
+                                                enum filter-shared-policers         { value 11; }
+                                            }
+                                            description "The unique application to the group.";
+                                        }
+
+                                        leaf oper-scale {
+                                            type int32 {
+                                                range "-1..96";
+                                            }
+                                            description "Indicates the scale of the application.";
+                                        }
+
+                                    } // list application
+
+                                } // container statistics
+
                             } // list group
 
                         } // container application-group
 
                     } // container policer-and-statistics-override
+
+                    container bank-allocation {
+                        description "Enter the bank-allocation context";
+
+                        leaf oper-state {
+                            type types-sros:oper-state;
+                            description "Oper state of bank-allocation.";
+                        }
+
+                        list bank {
+                            key "bank-id";
+                            description "Enter the bank list instance";
+
+                            leaf bank-id {
+                                type uint32 {
+                                    range "1..10";
+                                }
+                                description "Specifies the bank id.";
+                            }
+
+                            leaf application-oper {
+                                type types-system:bank-application-id;
+                                description "Specifies the application for the bank";
+                            }
+
+                            leaf bank-type {
+                                type enumeration {
+                                    enum policers                       { value 1; }
+                                    enum statistics                     { value 2; }
+                                }
+                                description "Specifies the bank type";
+                            }
+
+                            leaf bank-size {
+                                type uint32 {
+                                    range "6|24|32";
+                                }
+                                description "Specifies the bank type";
+                            }
+
+                        } // list bank
+
+                        container application-resource-allocation {
+                            description "Enter the application-resource-allocation context";
+
+                            leaf fc-policers {
+                                type uint32;
+                                description "Specifies the total statistics allocated for the fc-policers application.";
+                            }
+
+                            leaf fc-policers-oper {
+                                type uint32;
+                                description
+                                    "Specifies the operational value of the total statistics allocated for the
+                                     fc-policers application.";
+                            }
+
+                            leaf fc-policers-high-scale {
+                                type uint32;
+                                description "Specifies the total statistics allocated for the fc-policers-high-scale application.";
+                            }
+
+                            leaf fc-policers-high-scale-oper {
+                                type uint32;
+                                description
+                                    "Specifies the operational value of the total statistics allocated for the
+                                     fc-policers-high-scale application.";
+                            }
+
+                            leaf fc-policer-statistics {
+                                type uint32;
+                                description "Specifies the total statistics allocated for the fc-policer-statistics application.";
+                            }
+
+                            leaf fc-policer-statistics-oper {
+                                type uint32;
+                                description
+                                    "Specifies the operational value of the total statistics allocated for the
+                                     fc-policer-statistics application";
+                            }
+
+                            leaf l1-policers {
+                                type uint32;
+                                description "Specifies the total statistics allocated for the l1-policers application.";
+                            }
+
+                            leaf l1-policers-oper {
+                                type uint32;
+                                description
+                                    "Specifies the operational value of the total statistics allocated for the
+                                     l1-policers application.";
+                            }
+
+                            leaf l1-policer-statistics {
+                                type uint32;
+                                description "Specifies the total statistics allocated for the l1-policer-statistics application.";
+                            }
+
+                            leaf l1-policer-statistics-oper {
+                                type uint32;
+                                description
+                                    "Specifies the operational value of the total statistics allocated for the
+                                     l1-policer-statistics application.";
+                            }
+
+                            leaf shared-policer-statistics {
+                                type uint32;
+                                description "Specifies the total statistics allocated for the shared-policers-statistics application.";
+                            }
+
+                            leaf shared-policer-statistics-oper {
+                                type uint32;
+                                description
+                                    "Specifies the operational value of the total statistics allocated for the
+                                     shared-policer-statistics application";
+                            }
+
+                            leaf ing-filter-statistics {
+                                type uint32;
+                                description "Specifies the total statistics allocated for the ing-filter-statistics application.";
+                            }
+
+                            leaf ing-filter-statistics-oper {
+                                type uint32;
+                                description
+                                    "Specifies the operational value of the total statistics allocated for the
+                                     ing-filter-statistics application";
+                            }
+
+                            leaf egr-filter-statistics {
+                                type uint32;
+                                description "Specifies the total statistics allocated for the egr-filter-statistics application.";
+                            }
+
+                            leaf egr-filter-statistics-oper {
+                                type uint32;
+                                description
+                                    "Specifies the operational value of the total statistics allocated for the
+                                     egr-filter-statistics application";
+                            }
+
+                        } // container application-resource-allocation
+
+                        container application-scales {
+                            description "Enter the application-scales context";
+
+                            container fc-policers {
+                                description "Enter the fc-policers context";
+
+                                leaf per-fc-unicast-broadcast-unknown-multicast-oper {
+                                    type uint32 {
+                                        range "0..64";
+                                    }
+                                    description "Specifies the scale value for per-fc-unicast-broadcast-unknown-multicast";
+                                }
+
+                                leaf per-fc-unicast-multipoint-oper {
+                                    type uint32 {
+                                        range "0..64";
+                                    }
+                                    description "Specifies the scale value for per-fc-unicast-multipoint";
+                                }
+
+                                leaf per-fc-oper {
+                                    type uint32 {
+                                        range "0..64";
+                                    }
+                                    description "Specifies the scale value for per-fc";
+                                }
+
+                            } // container fc-policers
+
+                            container fc-policers-high-scale {
+                                description "Enter the fc-policers-high-scale context";
+
+                                leaf per-2-fc-unicast-multipoint-oper {
+                                    type uint32 {
+                                        range "0..64";
+                                    }
+                                    description "Specifies the scale value for per-2-fc-unicast-multipoint";
+                                }
+
+                                leaf per-4-fc-unicast-multipoint-oper {
+                                    type uint32 {
+                                        range "0..64";
+                                    }
+                                    description "Specifies the scale value for per-4-fc-unicast-multipoint";
+                                }
+
+                                leaf per-2-fc-oper {
+                                    type uint32 {
+                                        range "0..64";
+                                    }
+                                    description "Specifies the scale value for per-2-fc";
+                                }
+
+                                leaf per-4-fc-oper {
+                                    type uint32 {
+                                        range "0..64";
+                                    }
+                                    description "Specifies the scale value for per-4-fc";
+                                }
+
+                            } // container fc-policers-high-scale
+
+                            container l1-policers {
+                                description "Enter the l1-policers context";
+
+                                leaf aggregate-policers-oper {
+                                    type uint32 {
+                                        range "0..8";
+                                    }
+                                    description "Specifies the scale value for aggregate-policers";
+                                }
+
+                                leaf shared-policers-oper {
+                                    type uint32 {
+                                        range "0..32";
+                                    }
+                                    description "Specifies the scale value for shared-policers";
+                                }
+
+                                leaf filter-shared-policers-oper {
+                                    type uint32 {
+                                        range "0..32";
+                                    }
+                                    description "Specifies the scale value for filter-shared-policers";
+                                }
+
+                            } // container l1-policers
+
+                            container l1-policer-statistics {
+                                description "Enter the l1-policer-statistics context";
+
+                                leaf aggregate-policers-oper {
+                                    type uint32 {
+                                        range "0..24";
+                                    }
+                                    description "Specifies the scale value for aggregate-policers";
+                                }
+
+                                leaf filter-shared-policers-oper {
+                                    type uint32 {
+                                        range "0..84";
+                                    }
+                                    description "Specifies the scale value for filter-shared-policers";
+                                }
+
+                            } // container l1-policer-statistics
+
+                        } // container application-scales
+
+                    } // container bank-allocation
 
                     container segment-routing-v6 {
                         description "Enter the segment-routing-v6 context";
@@ -1338,6 +2231,76 @@ submodule nokia-state-system {
                         } // container tunnel-termination
 
                     } // container segment-routing-v6
+
+                    container vlan-qos {
+                        description "Enter the vlan-qos context";
+
+                        container four-queue {
+                            description "Enter the four-queue context";
+
+                            leaf oper-scale {
+                                type uint32 {
+                                    range "0..4490";
+                                }
+                                description "Operational resource allocation value for vlan qos 4-queue parameter.";
+                            }
+
+                            leaf oper-statistics-capable {
+                                type uint32 {
+                                    range "0..782";
+                                }
+                                description "Operational stats resource allocation value for vlan qos 4-queue parameter.";
+                            }
+
+                        } // container four-queue
+
+                        container virtual-flow {
+                            description "Enter the virtual-flow context";
+
+                            container four-queue {
+                                description "Enter the four-queue context";
+
+                                leaf oper-scale {
+                                    type uint32 {
+                                        range "0..2227";
+                                    }
+                                    description "Operational resource allocation value for vlan qos 4-queue virtual flow parameter.";
+                                }
+
+                            } // container four-queue
+
+                            container eight-queue {
+                                description "Enter the eight-queue context";
+
+                                leaf oper-scale {
+                                    type uint32 {
+                                        range "0..1114";
+                                    }
+                                    description "Operational resource allocation value for vlan qos 4-queue virtual flow parameter.";
+                                }
+
+                            } // container eight-queue
+
+                        } // container virtual-flow
+
+                    } // container vlan-qos
+
+                    container load-balancing {
+                        description "Enter the load-balancing context";
+
+                        container ipv6 {
+                            description "Enter the ipv6 context";
+
+                            leaf oper-non-symmetric-hashing {
+                                type boolean;
+                                description
+                                    "Operational value for enabling/disabling non-symmetric hashing for
+                                     load-balancing ipv6 traffic.";
+                            }
+
+                        } // container ipv6
+
+                    } // container load-balancing
 
                 } // container resource-allocation
 
@@ -1359,6 +2322,7 @@ submodule nokia-state-system {
                     }
                     description "The reason due to which gRPC server is operationally down.";
                 }
+
 
                 container gnoi {
                     description "Enter the gnoi context";
@@ -1615,7 +2579,7 @@ submodule nokia-state-system {
 
                     leaf name {
                         type types-sros:named-item;
-                        description "Tunnel name";
+                        description "Tunnel name.";
                     }
 
                     leaf oper-state {
@@ -1649,12 +2613,12 @@ submodule nokia-state-system {
                                     type types-sros:ip-address;
                                     type types-sros:fully-qualified-domain-name;
                                 }
-                                description "Address of the destination within the destination group";
+                                description "Address for the gRPC-Tunnel destination.";
                             }
 
                             leaf port {
                                 type types-sros:tcp-udp-port-non-zero;
-                                description "TCP port number for the destination";
+                                description "Protocol TCP port number for the gRPC-Tunnel destination.";
                             }
 
                             leaf oper-state {
@@ -1778,27 +2742,76 @@ submodule nokia-state-system {
                 }
 
                 leaf primary-schema-path {
-                    status deprecated;
+                    status obsolete;
                     type types-system:schema-path-state-type;
-                    description "Location of schema files derived from primary-image.";
+                    description
+                        "Location of schema files derived from primary-image.
+                         This leaf was obsoleted in release 24.3.";
                 }
 
                 leaf secondary-schema-path {
-                    status deprecated;
+                    status obsolete;
                     type types-system:schema-path-state-type;
-                    description "Location of schema files derived from secondary-image.";
+                    description
+                        "Location of schema files derived from secondary-image.
+                         This leaf was obsoleted in release 24.3.";
                 }
 
                 leaf tertiary-schema-path {
-                    status deprecated;
+                    status obsolete;
                     type types-system:schema-path-state-type;
-                    description "Location of schema files derived from tertiary-image.";
+                    description
+                        "Location of schema files derived from tertiary-image.
+                         This leaf was obsoleted in release 24.3.";
                 }
 
                 leaf oper-schema-path {
                     type types-system:schema-path-state-type;
                     description "Operational location of schema files used by the system.";
                 }
+
+                container commit-management {
+                    description "Enter the commit-management context";
+
+                    container python-scripts {
+                        description "Enter the python-scripts context";
+
+                        leaf next-commit {
+                            type enumeration {
+                                enum scripts-will-execute           { value 0; }
+                                enum scripts-will-not-execute       { value 1; }
+                            }
+                            description "Indicates whether pre- and post-commit Python scripts will run on next commit.";
+                        }
+
+                        container statistics {
+                            description "Enter the statistics context";
+
+                            leaf pre-commit-python-script-runs {
+                                type yang:zero-based-counter32;
+                                description "Number of executions of the pre-commit Python script";
+                            }
+
+                            leaf pre-commit-python-script-failures {
+                                type yang:zero-based-counter32;
+                                description "Number of failures of the pre-commit Python script";
+                            }
+
+                            leaf post-commit-python-script-runs {
+                                type yang:zero-based-counter32;
+                                description "Number of executions of the post-commit Python script";
+                            }
+
+                            leaf post-commit-python-script-failures {
+                                type yang:zero-based-counter32;
+                                description "Number of failures of the post-commit Python script";
+                            }
+
+                        } // container statistics
+
+                    } // container python-scripts
+
+                } // container commit-management
 
                 container cli {
                     description "Enter the cli context";
@@ -2005,11 +3018,13 @@ submodule nokia-state-system {
                     description "Enter the netconf context";
 
                     leaf oper-state {
+                        status obsolete;
                         type types-sros:oper-state;
                         description "operational state";
                     }
 
                     leaf oper-down-reason {
+                        status obsolete;
                         type enumeration {
                             enum admin-down                     { value 1; }
                             enum no-connected-client            { value 2; }
@@ -2019,9 +3034,11 @@ submodule nokia-state-system {
                     }
 
                     container statistics {
+                        status obsolete;
                         description "Enter the statistics context";
 
                         leaf requests {
+                            status obsolete;
                             type yang:counter32;
                             description
                                 "total number of NETCONF requests which have been accepted and processed by the NETCONF
@@ -2029,6 +3046,7 @@ submodule nokia-state-system {
                         }
 
                         leaf get-requests {
+                            status obsolete;
                             type yang:counter32;
                             description
                                 "total number of get NETCONF requests which have been accepted and processed by the
@@ -2036,6 +3054,7 @@ submodule nokia-state-system {
                         }
 
                         leaf get-config-requests {
+                            status obsolete;
                             type yang:counter32;
                             description
                                 "total number of get-config NETCONF requests which have been accepted and
@@ -2043,6 +3062,7 @@ submodule nokia-state-system {
                         }
 
                         leaf edit-config-requests {
+                            status obsolete;
                             type yang:counter32;
                             description
                                 "total number of edit-config NETCONF requests which have been accepted and
@@ -2050,6 +3070,7 @@ submodule nokia-state-system {
                         }
 
                         leaf close-requests {
+                            status obsolete;
                             type yang:counter32;
                             description
                                 "total number of close-session NETCONF requests which have been accepted and processed
@@ -2057,6 +3078,7 @@ submodule nokia-state-system {
                         }
 
                         leaf kill-requests {
+                            status obsolete;
                             type yang:counter32;
                             description
                                 "total number of kill-session NETCONF requests which have been accepted and processed
@@ -2064,6 +3086,7 @@ submodule nokia-state-system {
                         }
 
                         leaf responses {
+                            status obsolete;
                             type yang:counter32;
                             description
                                 "total number of NETCONF responses which have been generated and sent by the NETCONF
@@ -2071,6 +3094,7 @@ submodule nokia-state-system {
                         }
 
                         leaf error-responses {
+                            status obsolete;
                             type yang:counter32;
                             description
                                 "total number of NETCONF error responses which have been generated and sent by the
@@ -2078,6 +3102,7 @@ submodule nokia-state-system {
                         }
 
                         leaf copy-config-requests {
+                            status obsolete;
                             type yang:counter32;
                             description
                                 "total number of copy-config NETCONF requests which have been accepted and
@@ -2085,6 +3110,7 @@ submodule nokia-state-system {
                         }
 
                         leaf del-config-requests {
+                            status obsolete;
                             type yang:counter32;
                             description
                                 "total number of delete-config NETCONF requests which have been accepted and
@@ -2092,6 +3118,7 @@ submodule nokia-state-system {
                         }
 
                         leaf validate-requests {
+                            status obsolete;
                             type yang:counter32;
                             description
                                 "total number of validate NETCONF requests which have been accepted and
@@ -2099,6 +3126,7 @@ submodule nokia-state-system {
                         }
 
                         leaf failed-edit-cfg-reqs {
+                            status obsolete;
                             type yang:counter32;
                             description
                                 "total number of edit-config NETCONF requests which have failed because of
@@ -2106,6 +3134,7 @@ submodule nokia-state-system {
                         }
 
                         leaf failed-lock-reqs {
+                            status obsolete;
                             type yang:counter32;
                             description
                                 "total number of lock NETCONF requests which have failed because of
@@ -2113,6 +3142,7 @@ submodule nokia-state-system {
                         }
 
                         leaf lock-requests {
+                            status obsolete;
                             type yang:counter32;
                             description
                                 "total number of lock NETCONF requests which have been accepted and
@@ -2120,6 +3150,7 @@ submodule nokia-state-system {
                         }
 
                         leaf unlock-requests {
+                            status obsolete;
                             type yang:counter32;
                             description
                                 "total number of unlock NETCONF requests which have been accepted
@@ -2127,6 +3158,7 @@ submodule nokia-state-system {
                         }
 
                         leaf commit-requests {
+                            status obsolete;
                             type yang:counter32;
                             description
                                 "total number of commit NETCONF requests which have been accepted
@@ -2134,6 +3166,7 @@ submodule nokia-state-system {
                         }
 
                         leaf discard-requests {
+                            status obsolete;
                             type yang:counter32;
                             description
                                 "total number of discard change NETCONF requests which have been accepted
@@ -2141,6 +3174,7 @@ submodule nokia-state-system {
                         }
 
                         leaf create-subscription-requests {
+                            status obsolete;
                             type yang:counter32;
                             description
                                 "total number of create subscription NETCONF requests which have been accepted
@@ -2148,6 +3182,7 @@ submodule nokia-state-system {
                         }
 
                         leaf get-schema-requests {
+                            status obsolete;
                             type yang:counter32;
                             description
                                 "total number of get-schema NETCONF requests which have been accepted
@@ -2155,6 +3190,7 @@ submodule nokia-state-system {
                         }
 
                         leaf get-data-requests {
+                            status obsolete;
                             type yang:counter32;
                             description
                                 "total number of get-data NETCONF requests which have been accepted
@@ -2162,6 +3198,7 @@ submodule nokia-state-system {
                         }
 
                         leaf action-requests {
+                            status obsolete;
                             type yang:counter32;
                             description
                                 "total number of action NETCONF requests which have been accepted
@@ -2169,16 +3206,19 @@ submodule nokia-state-system {
                         }
 
                         leaf in-bad-hellos {
+                            status obsolete;
                             type yang:counter32;
                             description "total number of bad NETCONF hello messages which have been received by the NETCONF server.";
                         }
 
                         leaf dropped-sessions {
+                            status obsolete;
                             type yang:counter32;
                             description "total number of dropped NETCONF sessions.";
                         }
 
                         leaf last-oper-change {
+                            status obsolete;
                             type types-sros:date-time;
                             description "time of last change of operational state of NETCONF server.";
                         }
@@ -2186,28 +3226,34 @@ submodule nokia-state-system {
                     } // container statistics
 
                     container notifications {
+                        status obsolete;
                         description "Enter the notifications context";
 
                         list subscription {
+                            status obsolete;
                             key "session-id";
                             description "Enter the subscription list instance";
 
                             leaf session-id {
+                                status obsolete;
                                 type uint32;
                                 description "The id of the NETCONF session.";
                             }
 
                             leaf stream {
+                                status obsolete;
                                 type string;
                                 description "The name of the event stream the session is subscribed to.";
                             }
 
                             leaf connection-ip {
+                                status obsolete;
                                 type types-sros:ip-address;
                                 description "Connection ip address.";
                             }
 
                             leaf user {
+                                status obsolete;
                                 type types-sros:named-item;
                                 description "Name of the user.";
                             }
@@ -2215,6 +3261,443 @@ submodule nokia-state-system {
                         } // list subscription
 
                     } // container notifications
+
+                    container listen {
+                        description "Enter the listen context";
+
+                        leaf oper-state {
+                            type types-sros:oper-state;
+                            description "operational state";
+                        }
+
+                        leaf oper-down-reason {
+                            type types-system:netconf-oper-down-reason;
+                            description "The reason why the NETCONF server is operationally down";
+                        }
+
+                        container statistics {
+                            description "Enter the statistics context";
+
+                            leaf requests {
+                                type yang:counter32;
+                                description
+                                    "total number of NETCONF requests which have been accepted and processed by the NETCONF
+                                     server.";
+                            }
+
+                            leaf get-requests {
+                                type yang:counter32;
+                                description
+                                    "total number of get NETCONF requests which have been accepted and processed by the
+                                     NETCONF server.";
+                            }
+
+                            leaf get-config-requests {
+                                type yang:counter32;
+                                description
+                                    "total number of get-config NETCONF requests which have been accepted and
+                                     processed by the NETCONF server.";
+                            }
+
+                            leaf edit-config-requests {
+                                type yang:counter32;
+                                description
+                                    "total number of edit-config NETCONF requests which have been accepted and
+                                     processed by the NETCONF server.";
+                            }
+
+                            leaf close-requests {
+                                type yang:counter32;
+                                description
+                                    "total number of close-session NETCONF requests which have been accepted and processed
+                                     by the NETCONF server.";
+                            }
+
+                            leaf kill-requests {
+                                type yang:counter32;
+                                description
+                                    "total number of kill-session NETCONF requests which have been accepted and processed
+                                     by the NETCONF server.";
+                            }
+
+                            leaf responses {
+                                type yang:counter32;
+                                description
+                                    "total number of NETCONF responses which have been generated and sent by the NETCONF
+                                     server.";
+                            }
+
+                            leaf error-responses {
+                                type yang:counter32;
+                                description
+                                    "total number of NETCONF error responses which have been generated and sent by the
+                                     NETCONF server.";
+                            }
+
+                            leaf copy-config-requests {
+                                type yang:counter32;
+                                description
+                                    "total number of copy-config NETCONF requests which have been accepted and
+                                     processed by the NETCONF server.";
+                            }
+
+                            leaf del-config-requests {
+                                type yang:counter32;
+                                description
+                                    "total number of delete-config NETCONF requests which have been accepted and
+                                     processed by the NETCONF server.";
+                            }
+
+                            leaf validate-requests {
+                                type yang:counter32;
+                                description
+                                    "total number of validate NETCONF requests which have been accepted and
+                                     processed by the NETCONF server.";
+                            }
+
+                            leaf failed-edit-cfg-reqs {
+                                type yang:counter32;
+                                description
+                                    "total number of edit-config NETCONF requests which have failed because of
+                                     locks taken by other NETCONF sessions.";
+                            }
+
+                            leaf failed-lock-reqs {
+                                type yang:counter32;
+                                description
+                                    "total number of lock NETCONF requests which have failed because of
+                                     locks taken by other NETCONF sessions.";
+                            }
+
+                            leaf lock-requests {
+                                type yang:counter32;
+                                description
+                                    "total number of lock NETCONF requests which have been accepted and
+                                     processed by the NETCONF server.";
+                            }
+
+                            leaf unlock-requests {
+                                type yang:counter32;
+                                description
+                                    "total number of unlock NETCONF requests which have been accepted
+                                     and processed by the NETCONF server.";
+                            }
+
+                            leaf commit-requests {
+                                type yang:counter32;
+                                description
+                                    "total number of commit NETCONF requests which have been accepted
+                                     and processed by the NETCONF server.";
+                            }
+
+                            leaf discard-requests {
+                                type yang:counter32;
+                                description
+                                    "total number of discard change NETCONF requests which have been accepted
+                                     and processed by the NETCONF server.";
+                            }
+
+                            leaf create-subscription-requests {
+                                type yang:counter32;
+                                description
+                                    "total number of create subscription NETCONF requests which have been accepted
+                                     and processed by the NETCONF server.";
+                            }
+
+                            leaf get-schema-requests {
+                                type yang:counter32;
+                                description
+                                    "total number of get-schema NETCONF requests which have been accepted
+                                     and processed by the NETCONF server.";
+                            }
+
+                            leaf get-data-requests {
+                                type yang:counter32;
+                                description
+                                    "total number of get-data NETCONF requests which have been accepted
+                                     and processed by the NETCONF server.";
+                            }
+
+                            leaf action-requests {
+                                type yang:counter32;
+                                description
+                                    "total number of action NETCONF requests which have been accepted
+                                     and processed by the NETCONF server.";
+                            }
+
+                            leaf in-bad-hellos {
+                                type yang:counter32;
+                                description "total number of bad NETCONF hello messages which have been received by the NETCONF server.";
+                            }
+
+                            leaf dropped-sessions {
+                                type yang:counter32;
+                                description "total number of dropped NETCONF sessions.";
+                            }
+
+                            leaf last-oper-change {
+                                type types-sros:date-time;
+                                description "time of last change of operational state of NETCONF server.";
+                            }
+
+                        } // container statistics
+
+                        container notifications {
+                            description "Enter the notifications context";
+
+                            list subscription {
+                                key "session-id";
+                                description "Enter the subscription list instance";
+
+                                leaf session-id {
+                                    type uint32;
+                                    description "The id of the NETCONF session.";
+                                }
+
+                                leaf stream {
+                                    type string;
+                                    description "The name of the event stream the session is subscribed to.";
+                                }
+
+                                leaf connection-ip {
+                                    type types-sros:ip-address;
+                                    description "Connection ip address.";
+                                }
+
+                                leaf user {
+                                    type types-sros:named-item;
+                                    description "Name of the user.";
+                                }
+
+                            } // list subscription
+
+                        } // container notifications
+
+                    } // container listen
+
+                    container call-home {
+                        description "Enter the call-home context";
+
+                        list netconf-client {
+                            key "name";
+                            description "Enter the netconf-client list instance";
+
+                            leaf name {
+                                type types-sros:named-item;
+                                description "Name for the remote NETCONF client";
+                            }
+
+                            leaf oper-state {
+                                type types-sros:oper-state;
+                                description "Operational state of call-home session.";
+                            }
+
+                            leaf oper-down-reason {
+                                type types-system:netconf-oper-down-reason;
+                                description "The reason due to which call-home session is operationally down.";
+                            }
+
+                            container statistics {
+                                description "Enter the statistics context";
+
+                                leaf requests {
+                                    type yang:counter32;
+                                    description
+                                        "total number of NETCONF requests which have been accepted and processed by the NETCONF
+                                         server.";
+                                }
+
+                                leaf get-requests {
+                                    type yang:counter32;
+                                    description
+                                        "total number of get NETCONF requests which have been accepted and processed by the
+                                         NETCONF server.";
+                                }
+
+                                leaf get-config-requests {
+                                    type yang:counter32;
+                                    description
+                                        "total number of get-config NETCONF requests which have been accepted and
+                                         processed by the NETCONF server.";
+                                }
+
+                                leaf edit-config-requests {
+                                    type yang:counter32;
+                                    description
+                                        "total number of edit-config NETCONF requests which have been accepted and
+                                         processed by the NETCONF server.";
+                                }
+
+                                leaf close-requests {
+                                    type yang:counter32;
+                                    description
+                                        "total number of close-session NETCONF requests which have been accepted and processed
+                                         by the NETCONF server.";
+                                }
+
+                                leaf kill-requests {
+                                    type yang:counter32;
+                                    description
+                                        "total number of kill-session NETCONF requests which have been accepted and processed
+                                         by the NETCONF server.";
+                                }
+
+                                leaf responses {
+                                    type yang:counter32;
+                                    description
+                                        "total number of NETCONF responses which have been generated and sent by the NETCONF
+                                         server.";
+                                }
+
+                                leaf error-responses {
+                                    type yang:counter32;
+                                    description
+                                        "total number of NETCONF error responses which have been generated and sent by the
+                                         NETCONF server.";
+                                }
+
+                                leaf copy-config-requests {
+                                    type yang:counter32;
+                                    description
+                                        "total number of copy-config NETCONF requests which have been accepted and
+                                         processed by the NETCONF server.";
+                                }
+
+                                leaf del-config-requests {
+                                    type yang:counter32;
+                                    description
+                                        "total number of delete-config NETCONF requests which have been accepted and
+                                         processed by the NETCONF server.";
+                                }
+
+                                leaf validate-requests {
+                                    type yang:counter32;
+                                    description
+                                        "total number of validate NETCONF requests which have been accepted and
+                                         processed by the NETCONF server.";
+                                }
+
+                                leaf failed-edit-cfg-reqs {
+                                    type yang:counter32;
+                                    description
+                                        "total number of edit-config NETCONF requests which have failed because of
+                                         locks taken by other NETCONF sessions.";
+                                }
+
+                                leaf failed-lock-reqs {
+                                    type yang:counter32;
+                                    description
+                                        "total number of lock NETCONF requests which have failed because of
+                                         locks taken by other NETCONF sessions.";
+                                }
+
+                                leaf lock-requests {
+                                    type yang:counter32;
+                                    description
+                                        "total number of lock NETCONF requests which have been accepted and
+                                         processed by the NETCONF server.";
+                                }
+
+                                leaf unlock-requests {
+                                    type yang:counter32;
+                                    description
+                                        "total number of unlock NETCONF requests which have been accepted
+                                         and processed by the NETCONF server.";
+                                }
+
+                                leaf commit-requests {
+                                    type yang:counter32;
+                                    description
+                                        "total number of commit NETCONF requests which have been accepted
+                                         and processed by the NETCONF server.";
+                                }
+
+                                leaf discard-requests {
+                                    type yang:counter32;
+                                    description
+                                        "total number of discard change NETCONF requests which have been accepted
+                                         and processed by the NETCONF server.";
+                                }
+
+                                leaf create-subscription-requests {
+                                    type yang:counter32;
+                                    description
+                                        "total number of create subscription NETCONF requests which have been accepted
+                                         and processed by the NETCONF server.";
+                                }
+
+                                leaf get-schema-requests {
+                                    type yang:counter32;
+                                    description
+                                        "total number of get-schema NETCONF requests which have been accepted
+                                         and processed by the NETCONF server.";
+                                }
+
+                                leaf get-data-requests {
+                                    type yang:counter32;
+                                    description
+                                        "total number of get-data NETCONF requests which have been accepted
+                                         and processed by the NETCONF server.";
+                                }
+
+                                leaf action-requests {
+                                    type yang:counter32;
+                                    description
+                                        "total number of action NETCONF requests which have been accepted
+                                         and processed by the NETCONF server.";
+                                }
+
+                                leaf in-bad-hellos {
+                                    type yang:counter32;
+                                    description "total number of bad NETCONF hello messages which have been received by the NETCONF server.";
+                                }
+
+                                leaf dropped-sessions {
+                                    type yang:counter32;
+                                    description "total number of dropped NETCONF sessions.";
+                                }
+
+                                leaf last-oper-change {
+                                    type types-sros:date-time;
+                                    description "time of last change of operational state of NETCONF server.";
+                                }
+
+                            } // container statistics
+
+                            container notifications {
+                                description "Enter the notifications context";
+
+                                list subscription {
+                                    key "session-id";
+                                    description "Enter the subscription list instance";
+
+                                    leaf session-id {
+                                        type uint32;
+                                        description "The id of the NETCONF session.";
+                                    }
+
+                                    leaf stream {
+                                        type string;
+                                        description "The name of the event stream the session is subscribed to.";
+                                    }
+
+                                    leaf connection-ip {
+                                        type types-sros:ip-address;
+                                        description "Connection ip address.";
+                                    }
+
+                                    leaf user {
+                                        type types-sros:named-item;
+                                        description "Name of the user.";
+                                    }
+
+                                } // list subscription
+
+                            } // container notifications
+
+                        } // list netconf-client
+
+                    } // container call-home
 
                 } // container netconf
 
@@ -2438,7 +3921,7 @@ submodule nokia-state-system {
 
                         leaf manager-name {
                             type types-sros:named-item-64;
-                            description "Remote management manager name";
+                            description "Manager name";
                         }
 
                         leaf last-registration-status {
@@ -2915,7 +4398,7 @@ submodule nokia-state-system {
 
                     leaf cflash-id {
                         type types-sros:thresholds-cflash-url;
-                        description "cflash device name monitored for capacity";
+                        description "Specifies the compact flash id.";
                     }
 
                     leaf rmon-alarm-id {
@@ -2982,7 +4465,7 @@ submodule nokia-state-system {
 
                     leaf cflash-id {
                         type types-sros:thresholds-cflash-url;
-                        description "cflash device name monitored for capacity";
+                        description "Specifies the compact flash id.";
                     }
 
                     leaf rmon-alarm-id {
@@ -3044,7 +4527,7 @@ submodule nokia-state-system {
                 } // list cflash-cap-warn-percent
 
                 container kb-memory-use-alarm {
-                    description "Enable the kb-memory-use-alarm context";
+                    description "Enter the kb-memory-use-alarm context";
 
                     leaf rmon-alarm-id {
                         type uint32;
@@ -3105,7 +4588,7 @@ submodule nokia-state-system {
                 } // container kb-memory-use-alarm
 
                 container kb-memory-use-warn {
-                    description "Enable the kb-memory-use-warn context";
+                    description "Enter the kb-memory-use-warn context";
 
                     leaf rmon-alarm-id {
                         type uint32;
@@ -3168,6 +4651,14 @@ submodule nokia-state-system {
                 container rmon {
                     description "Enter the rmon context";
 
+                    leaf hc-alarm-capabilities {
+                        type bits {
+                            bit hc-alarm-creation              { position 0; }
+                            bit hc-alarm-nv-storage            { position 1; }
+                        }
+                        description "RMON High Capacity alarm capabilities of this agent";
+                    }
+
                     list alarm {
                         key "rmon-alarm-id";
                         description "Enter the alarm list instance";
@@ -3176,7 +4667,10 @@ submodule nokia-state-system {
                             type uint32 {
                                 range "0..65400";
                             }
-                            description "Index ID for an entry in the alarm table";
+                            description
+                                "An index that uniquely identifies an entry in the alarm
+                                 table.  Each such entry defines a diagnostic sample at a
+                                 particular interval for an object on the device.";
                         }
 
                         leaf alarm-value {
@@ -3196,7 +4690,10 @@ submodule nokia-state-system {
                             type uint32 {
                                 range "1..65400";
                             }
-                            description "Index ID for an entry in the event table";
+                            description
+                                "An index that uniquely identifies an entry in the event table.
+                                 Each such entry defines one event that is to be generated when
+                                 the appropriate conditions occur.";
                         }
 
                         leaf event-last-time-sent {
@@ -3210,9 +4707,52 @@ submodule nokia-state-system {
 
                     } // list event
 
+                    list hc-alarm {
+                        key "rmon-hc-alarm-id";
+                        description "Enter the hc-alarm list instance";
+
+                        leaf rmon-hc-alarm-id {
+                            type uint32 {
+                                range "1..65400";
+                            }
+                            description "Identifies an RMON hc-alarm test";
+                        }
+
+                        leaf hc-alarm-value {
+                            type int64;
+                            description "Most recent value read using snmpget for the test";
+                        }
+
+                        leaf failed-polls {
+                            type yang:counter32;
+                            description "Count of failed snmpget operations for the test";
+                        }
+
+                    } // list hc-alarm
+
                 } // container rmon
 
             } // container thresholds
+
+            container ip {
+                description "Enter the ip context";
+
+                leaf start-mac-address {
+                    type types-sros:mac-unicast-address;
+                    description "Interface MAC address range start address.";
+                }
+
+                leaf end-mac-address {
+                    type types-sros:mac-unicast-address;
+                    description "Interface MAC address range end address.";
+                }
+
+                leaf common-mac-address {
+                    type types-sros:mac-unicast-address;
+                    description "Interface common MAC address.";
+                }
+
+            } // container ip
 
             container lldp {
                 description "Enter the lldp context";
@@ -3400,7 +4940,7 @@ submodule nokia-state-system {
                     type uint32 {
                         range "1..2";
                     }
-                    description "Power zone";
+                    description "Specifies the managed power-zone for this management entity.";
                 }
 
                 leaf active-conditions {
@@ -3474,6 +5014,33 @@ submodule nokia-state-system {
                     units "watts";
                     description "Indicates the operational safety alert.";
                 }
+
+                leaf total-wattage {
+                    type uint32;
+                    units "milliwatts";
+                    description "The current wattage in use by all the managed hardware components in the power zone.";
+                }
+
+                container power-save {
+                    description "Enter the power-save context";
+
+                    container low-power-fabric {
+                        description "Enter the low-power-fabric context";
+
+                        leaf oper-state {
+                            type types-sros:oper-state;
+                            description "Operational state of low power switch fabric mode.";
+                        }
+
+                        leaf oper-state-last-changed {
+                            type yang:date-and-time;
+                            description "Date and time when the operational status of low power switch fabric mode last changed.";
+                        }
+
+                    } // container low-power-fabric
+
+
+                } // container power-save
 
             } // list power-management
 
@@ -3571,7 +5138,7 @@ submodule nokia-state-system {
                     description "Enter the tcp-connection list instance";
 
                     leaf local-ip-address {
-                        type types-sros:ip-address;
+                        type types-sros:ip-address-with-zone;
                         description "IP address of local address.";
                     }
 
@@ -3581,7 +5148,7 @@ submodule nokia-state-system {
                     }
 
                     leaf remote-ip-address {
-                        type types-sros:ip-address;
+                        type types-sros:ip-address-with-zone;
                         description "IP address of remote address.";
                     }
 
@@ -4896,8 +6463,50 @@ submodule nokia-state-system {
                 } // container ospf
 
                 container openflow {
-                    status deprecated;
+                    status obsolete;
                     description "Enter the openflow context";
+
+                    leaf cpu-time {
+                        status obsolete;
+                        type types-sros:time-duration;
+                        units "microseconds";
+                        description
+                            "Number of microseconds used by this group/core. (This leaf may experience
+                             overflow because it is a 32-bit integer. Please use the neighboring leaf,
+                             time-used, it is 64-bit.)";
+                    }
+
+                    leaf time-used {
+                        status obsolete;
+                        type types-sros:time-duration-64;
+                        units "microseconds";
+                        description "Number of microseconds used by this group/core since start-up.";
+                    }
+
+                    leaf cpu-usage {
+                        status obsolete;
+                        type decimal64 {
+                            range "0..100";
+                            fraction-digits 2;
+                        }
+                        units "percent";
+                        description "Relative amount of time used by this group/core since start-up.";
+                    }
+
+                    leaf capacity-usage {
+                        status obsolete;
+                        type decimal64 {
+                            range "0..100";
+                            fraction-digits 2;
+                        }
+                        units "percent";
+                        description "Relative amount of time used by the busiest task/core.";
+                    }
+
+                } // container openflow
+
+                container sdn-protocols {
+                    description "Enter the sdn-protocols context";
 
                     leaf cpu-time {
                         status deprecated;
@@ -4910,14 +6519,12 @@ submodule nokia-state-system {
                     }
 
                     leaf time-used {
-                        status deprecated;
                         type types-sros:time-duration-64;
                         units "microseconds";
                         description "Number of microseconds used by this group/core since start-up.";
                     }
 
                     leaf cpu-usage {
-                        status deprecated;
                         type decimal64 {
                             range "0..100";
                             fraction-digits 2;
@@ -4927,7 +6534,6 @@ submodule nokia-state-system {
                     }
 
                     leaf capacity-usage {
-                        status deprecated;
                         type decimal64 {
                             range "0..100";
                             fraction-digits 2;
@@ -4936,7 +6542,7 @@ submodule nokia-state-system {
                         description "Relative amount of time used by the busiest task/core.";
                     }
 
-                } // container openflow
+                } // container sdn-protocols
 
                 container pim-l2mcast {
                     description "Enter the pim-l2mcast context";
@@ -5639,6 +7245,201 @@ submodule nokia-state-system {
                     }
 
                 } // container web-redirect
+
+                container agg-shapers-algorithm {
+                    description "Enter the agg-shapers-algorithm context";
+
+                    leaf cpu-time {
+                        status deprecated;
+                        type types-sros:time-duration;
+                        units "microseconds";
+                        description
+                            "Number of microseconds used by this group/core. (This leaf may experience
+                             overflow because it is a 32-bit integer. Please use the neighboring leaf,
+                             time-used, it is 64-bit.)";
+                    }
+
+                    leaf time-used {
+                        type types-sros:time-duration-64;
+                        units "microseconds";
+                        description "Number of microseconds used by this group/core since start-up.";
+                    }
+
+                    leaf cpu-usage {
+                        type decimal64 {
+                            range "0..100";
+                            fraction-digits 2;
+                        }
+                        units "percent";
+                        description "Relative amount of time used by this group/core since start-up.";
+                    }
+
+                    leaf capacity-usage {
+                        type decimal64 {
+                            range "0..100";
+                            fraction-digits 2;
+                        }
+                        units "percent";
+                        description "Relative amount of time used by the busiest task/core.";
+                    }
+
+                } // container agg-shapers-algorithm
+
+                container agg-schedulers-algorithm {
+                    description "Enter the agg-schedulers-algorithm context";
+
+                    leaf cpu-time {
+                        status deprecated;
+                        type types-sros:time-duration;
+                        units "microseconds";
+                        description
+                            "Number of microseconds used by this group/core. (This leaf may experience
+                             overflow because it is a 32-bit integer. Please use the neighboring leaf,
+                             time-used, it is 64-bit.)";
+                    }
+
+                    leaf time-used {
+                        type types-sros:time-duration-64;
+                        units "microseconds";
+                        description "Number of microseconds used by this group/core since start-up.";
+                    }
+
+                    leaf cpu-usage {
+                        type decimal64 {
+                            range "0..100";
+                            fraction-digits 2;
+                        }
+                        units "percent";
+                        description "Relative amount of time used by this group/core since start-up.";
+                    }
+
+                    leaf capacity-usage {
+                        type decimal64 {
+                            range "0..100";
+                            fraction-digits 2;
+                        }
+                        units "percent";
+                        description "Relative amount of time used by the busiest task/core.";
+                    }
+
+                } // container agg-schedulers-algorithm
+
+                container dcpu-control {
+                    description "Enter the dcpu-control context";
+
+                    leaf cpu-time {
+                        status deprecated;
+                        type types-sros:time-duration;
+                        units "microseconds";
+                        description
+                            "Number of microseconds used by this group/core. (This leaf may experience
+                             overflow because it is a 32-bit integer. Please use the neighboring leaf,
+                             time-used, it is 64-bit.)";
+                    }
+
+                    leaf time-used {
+                        type types-sros:time-duration-64;
+                        units "microseconds";
+                        description "Number of microseconds used by this group/core since start-up.";
+                    }
+
+                    leaf cpu-usage {
+                        type decimal64 {
+                            range "0..100";
+                            fraction-digits 2;
+                        }
+                        units "percent";
+                        description "Relative amount of time used by this group/core since start-up.";
+                    }
+
+                    leaf capacity-usage {
+                        type decimal64 {
+                            range "0..100";
+                            fraction-digits 2;
+                        }
+                        units "percent";
+                        description "Relative amount of time used by the busiest task/core.";
+                    }
+
+                } // container dcpu-control
+
+                container hpol-algorithm {
+                    description "Enter the hpol-algorithm context";
+
+                    leaf cpu-time {
+                        status deprecated;
+                        type types-sros:time-duration;
+                        units "microseconds";
+                        description
+                            "Number of microseconds used by this group/core. (This leaf may experience
+                             overflow because it is a 32-bit integer. Please use the neighboring leaf,
+                             time-used, it is 64-bit.)";
+                    }
+
+                    leaf time-used {
+                        type types-sros:time-duration-64;
+                        units "microseconds";
+                        description "Number of microseconds used by this group/core since start-up.";
+                    }
+
+                    leaf cpu-usage {
+                        type decimal64 {
+                            range "0..100";
+                            fraction-digits 2;
+                        }
+                        units "percent";
+                        description "Relative amount of time used by this group/core since start-up.";
+                    }
+
+                    leaf capacity-usage {
+                        type decimal64 {
+                            range "0..100";
+                            fraction-digits 2;
+                        }
+                        units "percent";
+                        description "Relative amount of time used by the busiest task/core.";
+                    }
+
+                } // container hpol-algorithm
+
+                container hpol-statistics {
+                    description "Enter the hpol-statistics context";
+
+                    leaf cpu-time {
+                        status deprecated;
+                        type types-sros:time-duration;
+                        units "microseconds";
+                        description
+                            "Number of microseconds used by this group/core. (This leaf may experience
+                             overflow because it is a 32-bit integer. Please use the neighboring leaf,
+                             time-used, it is 64-bit.)";
+                    }
+
+                    leaf time-used {
+                        type types-sros:time-duration-64;
+                        units "microseconds";
+                        description "Number of microseconds used by this group/core since start-up.";
+                    }
+
+                    leaf cpu-usage {
+                        type decimal64 {
+                            range "0..100";
+                            fraction-digits 2;
+                        }
+                        units "percent";
+                        description "Relative amount of time used by this group/core since start-up.";
+                    }
+
+                    leaf capacity-usage {
+                        type decimal64 {
+                            range "0..100";
+                            fraction-digits 2;
+                        }
+                        units "percent";
+                        description "Relative amount of time used by the busiest task/core.";
+                    }
+
+                } // container hpol-statistics
 
                 container hqos-algorithm {
                     description "Enter the hqos-algorithm context";
@@ -6924,11 +8725,11 @@ submodule nokia-state-system {
                 } // container ospf
 
                 container openflow {
-                    status deprecated;
+                    status obsolete;
                     description "Enter the openflow context";
 
                     leaf max-allowed {
-                        status deprecated;
+                        status obsolete;
                         type uint64 {
                             range "1..max";
                         }
@@ -6937,7 +8738,7 @@ submodule nokia-state-system {
                     }
 
                     leaf current-size {
-                        status deprecated;
+                        status obsolete;
                         type uint64 {
                             range "0..max";
                         }
@@ -6946,7 +8747,7 @@ submodule nokia-state-system {
                     }
 
                     leaf max-so-far {
-                        status deprecated;
+                        status obsolete;
                         type uint64 {
                             range "0..max";
                         }
@@ -6955,7 +8756,7 @@ submodule nokia-state-system {
                     }
 
                     leaf in-use {
-                        status deprecated;
+                        status obsolete;
                         type uint64 {
                             range "0..max";
                         }
@@ -6964,6 +8765,43 @@ submodule nokia-state-system {
                     }
 
                 } // container openflow
+
+                container sdn-protocols {
+                    description "Enter the sdn-protocols context";
+
+                    leaf max-allowed {
+                        type uint64 {
+                            range "1..max";
+                        }
+                        units "bytes";
+                        description "Maximum allowed amount of memory that can be allocated for a group.";
+                    }
+
+                    leaf current-size {
+                        type uint64 {
+                            range "0..max";
+                        }
+                        units "bytes";
+                        description "Current amount of allocated memory for a group.";
+                    }
+
+                    leaf max-so-far {
+                        type uint64 {
+                            range "0..max";
+                        }
+                        units "bytes";
+                        description "The highest amount of allocated memory for a group.";
+                    }
+
+                    leaf in-use {
+                        type uint64 {
+                            range "0..max";
+                        }
+                        units "bytes";
+                        description "Amount of memory used by group.";
+                    }
+
+                } // container sdn-protocols
 
                 container pim-l2mcast {
                     description "Enter the pim-l2mcast context";
@@ -9031,6 +10869,118 @@ submodule nokia-state-system {
 
             } // container statistics
 
+            container mpls-resource-usage {
+                description "Enter the mpls-resource-usage context";
+
+                container nhlfe {
+                    description "Enter the nhlfe context";
+
+                    leaf total {
+                        type uint32;
+                        description "Total number of mpls resources in the system.";
+                    }
+
+                    leaf allocated {
+                        type uint32;
+                        description "Total number of mpls resources allocated in the system.";
+                    }
+
+                    leaf free {
+                        type uint32;
+                        description "Total number of free mpls resources in the system.";
+                    }
+
+                    list by-owner {
+                        key "owner";
+                        description "Enter the by-owner list instance";
+
+                        leaf owner {
+                            type types-system:mpls-resource-owner;
+                            description "Application that uses the mpls resources.";
+                        }
+
+                        leaf allocated {
+                            type uint32;
+                            description "Total number of mpls resources allocated in the system by the owner.";
+                        }
+
+                    } // list by-owner
+
+                } // container nhlfe
+
+                container ltn {
+                    description "Enter the ltn context";
+
+                    leaf total {
+                        type uint32;
+                        description "Total number of mpls resources in the system.";
+                    }
+
+                    leaf allocated {
+                        type uint32;
+                        description "Total number of mpls resources allocated in the system.";
+                    }
+
+                    leaf free {
+                        type uint32;
+                        description "Total number of free mpls resources in the system.";
+                    }
+
+                    list by-owner {
+                        key "owner";
+                        description "Enter the by-owner list instance";
+
+                        leaf owner {
+                            type types-system:mpls-resource-owner;
+                            description "Application that uses the mpls resources.";
+                        }
+
+                        leaf allocated {
+                            type uint32;
+                            description "Total number of mpls resources allocated in the system by the owner.";
+                        }
+
+                    } // list by-owner
+
+                } // container ltn
+
+                container label {
+                    description "Enter the label context";
+
+                    leaf total {
+                        type uint32;
+                        description "Total number of mpls resources in the system.";
+                    }
+
+                    leaf allocated {
+                        type uint32;
+                        description "Total number of mpls resources allocated in the system.";
+                    }
+
+                    leaf free {
+                        type uint32;
+                        description "Total number of free mpls resources in the system.";
+                    }
+
+                    list by-owner {
+                        key "owner";
+                        description "Enter the by-owner list instance";
+
+                        leaf owner {
+                            type types-system:mpls-resource-owner;
+                            description "Application that uses the mpls resources.";
+                        }
+
+                        leaf allocated {
+                            type uint32;
+                            description "Total number of mpls resources allocated in the system by the owner.";
+                        }
+
+                    } // list by-owner
+
+                } // container label
+
+            } // container mpls-resource-usage
 
             container resource-usage {
                 description "Enter the resource-usage context";
@@ -9294,6 +11244,48 @@ submodule nokia-state-system {
                     }
 
                 } // container subscriber-next-hop-entries
+
+                container video {
+                    description "Enter the video context";
+
+                    container rtcp {
+                        description "Enter the rtcp context";
+
+                        leaf in-use {
+                            type boolean;
+                            description
+                                "Base license to use any of the following video services:
+                                 fast channel change (FCC), retransmission (RET), extended unicast (eUni) or video quality monitoring (VQM)";
+                        }
+
+                        leaf session {
+                            type yang:counter32;
+                            description
+                                "This license supports 10,000 concurrent video sessions utilized for
+                                 fast channel change (FCC), retransmission (RET) and extended unicast (eUni).
+                                 Multiple licenses are required to match the video session scaling.";
+                        }
+
+                    } // container rtcp
+
+                    container perfect-stream {
+                        description "Enter the perfect-stream context";
+
+                        leaf in-use {
+                            type boolean;
+                            description "Base license to use the video perfect stream service";
+                        }
+
+                        leaf channel {
+                            type yang:counter32;
+                            description
+                                "This license can repair 50 channels in total (50x2 ingress video streams) utilizing the video perfect stream service.
+                                 Multiple licenses are required to match the video channel scaling.";
+                        }
+
+                    } // container perfect-stream
+
+                } // container video
 
                 container sap {
                     description "Enter the sap context";
@@ -9873,9 +11865,19 @@ submodule nokia-state-system {
                                 description "Application that uses the pool resources.";
                             }
 
+                            leaf total {
+                                type yang:counter32;
+                                description "The total number of resources.";
+                            }
+
                             leaf allocated {
                                 type yang:counter32;
                                 description "The number of resources that are currently allocated.";
+                            }
+
+                            leaf free {
+                                type yang:counter32;
+                                description "The number of free resources that are currently available.";
                             }
 
                         } // list by-owner
@@ -10402,6 +12404,22 @@ submodule nokia-state-system {
 
                 } // container ixr
 
+                container subscriber-management {
+                    description "Enter the subscriber-management context";
+
+                    container wlan-gw {
+                        description "Enter the wlan-gw context";
+
+                        leaf in-use {
+                            type boolean;
+                            description "Whether WLAN Gateway functionalities are in use.";
+                        }
+
+                    } // container wlan-gw
+
+
+                } // container subscriber-management
+
             } // container resource-usage
 
             container switch-fabric {
@@ -10470,6 +12488,41 @@ submodule nokia-state-system {
 
                 } // container failure-recovery
 
+                list utilization {
+                    key "card-slot fp-number sample-period";
+                    description "Enter the utilization list instance";
+
+                    leaf card-slot {
+                        type union {
+                            type types-card:iom-card-slot;
+                            type types-card:cpm-card-slot;
+                        }
+                        description "The IOM or CPM slot.";
+                    }
+
+                    leaf fp-number {
+                        type uint32;
+                        description "The forwarding plane number. This value is 0 for a CPM slot.";
+                    }
+
+                    leaf sample-period {
+                        type types-sros:time-duration {
+                            range "60|300";
+                        }
+                        units "seconds";
+                        description "The sample time to collect switch fabric utilization information.";
+                    }
+
+                    leaf usage {
+                        type uint32 {
+                            range "0..100";
+                        }
+                        units "percent";
+                        description "The switch fabric usage.";
+                    }
+
+                } // list utilization
+
             } // container switch-fabric
 
             container last-reboot {
@@ -10511,6 +12564,7 @@ submodule nokia-state-system {
 
             uses state-system-bluetooth;
             uses state-system-bootup;
+            uses state-system-central-frequency-clock;
             uses state-system-cron;
             uses state-system-licensing;
             uses state-system-ptp;

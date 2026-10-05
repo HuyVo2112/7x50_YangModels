@@ -7,8 +7,9 @@ submodule nokia-state-port-eth-lldp {
     import ietf-yang-types                { prefix "yang"; }
     import nokia-sros-yang-extensions     { prefix "sros-ext"; }
     import nokia-types-lldp               { prefix "types-lldp"; }
+    import nokia-types-sros               { prefix "types-sros"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -31,7 +32,7 @@ submodule nokia-state-port-eth-lldp {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-07-30";
+    revision "2025-03-12";
 
     grouping state-port-eth-lldp {
         container lldp {
@@ -43,7 +44,12 @@ submodule nokia-state-port-eth-lldp {
 
                 leaf mac-type {
                     type types-lldp:mac-addr-type;
-                    description "Destination MAC address type";
+                    description "The identifier which uniquely identifies the MAC address type.";
+                }
+
+                leaf override-lag-name {
+                    type types-sros:lag-interface;
+                    description "Name of the lag that has the LLDP configuration that overrides this one.";
                 }
 
                 list remote-system {
@@ -272,7 +278,7 @@ submodule nokia-state-port-eth-lldp {
                             enum system-ipv6                    { value 2; }
                             enum oob-ipv6                       { value 3; }
                         }
-                        description "Management address to transmit";
+                        description "The identifier which uniquely identifies the management address.";
                     }
 
                     leaf mgmt-address {

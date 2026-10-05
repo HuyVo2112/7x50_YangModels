@@ -12,7 +12,7 @@ submodule nokia-conf-system-security-tls {
     include nokia-conf-system-security;
     include nokia-conf-system-security-pki;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -35,7 +35,7 @@ submodule nokia-conf-system-security-tls {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2024-03-06";
+    revision "2026-07-22";
 
     grouping conf-system-security-tls {
         container tls {
@@ -213,6 +213,8 @@ submodule nokia-conf-system-security-tls {
                             enum tls-rsa-with-aes256-cbc-sha256 { value 61; }
                             enum tls-rsa-with-aes128-gcm-sha256 { value 156; }
                             enum tls-rsa-with-aes256-gcm-sha384 { value 157; }
+                            enum tls-ecdhe-rsa-aes128-gcm-sha256 { value 49199; }
+                            enum tls-ecdhe-rsa-aes256-gcm-sha384 { value 49200; }
                             enum tls-rsa-with-null-md5          { status obsolete; }
                             enum tls-rsa-with-null-sha          { status obsolete; }
                             enum tls-rsa-with-null-sha256       { status obsolete; }
@@ -263,6 +265,8 @@ submodule nokia-conf-system-security-tls {
                             enum tls-rsa-with-aes256-cbc-sha256 { value 61; }
                             enum tls-rsa-with-aes128-gcm-sha256 { value 156; }
                             enum tls-rsa-with-aes256-gcm-sha384 { value 157; }
+                            enum tls-ecdhe-rsa-aes128-gcm-sha256 { value 49199; }
+                            enum tls-ecdhe-rsa-aes256-gcm-sha384 { value 49200; }
                         }
                         mandatory true;
                         description "Cipher suite code";
@@ -539,6 +543,8 @@ submodule nokia-conf-system-security-tls {
                             enum tls-rsa-with-aes256-cbc-sha256 { value 61; }
                             enum tls-rsa-with-aes128-gcm-sha256 { value 156; }
                             enum tls-rsa-with-aes256-gcm-sha384 { value 157; }
+                            enum tls-ecdhe-rsa-aes128-gcm-sha256 { value 49199; }
+                            enum tls-ecdhe-rsa-aes256-gcm-sha384 { value 49200; }
                             enum tls-rsa-with-null-md5          { status obsolete; }
                             enum tls-rsa-with-null-sha          { status obsolete; }
                             enum tls-rsa-with-null-sha256       { status obsolete; }
@@ -589,6 +595,8 @@ submodule nokia-conf-system-security-tls {
                             enum tls-rsa-with-aes256-cbc-sha256 { value 61; }
                             enum tls-rsa-with-aes128-gcm-sha256 { value 156; }
                             enum tls-rsa-with-aes256-gcm-sha384 { value 157; }
+                            enum tls-ecdhe-rsa-aes128-gcm-sha256 { value 49199; }
+                            enum tls-ecdhe-rsa-aes256-gcm-sha384 { value 49200; }
                         }
                         mandatory true;
                         description "Cipher suite code";
@@ -898,6 +906,23 @@ submodule nokia-conf-system-security-tls {
                         description "Default result of certificate status verification";
                     }
 
+                    container ee-revocation {
+                        description "Enter the ee-revocation context";
+
+                        leaf primary {
+                            type types-sros:tls-cert-revocation-status;
+                            default "crl";
+                            description "Primary method used to verify certificate revocation";
+                        }
+
+                        leaf secondary {
+                            type types-sros:tls-cert-revocation-status-with-none;
+                            default "none";
+                            description "Secondary method used to verify certificate revocation";
+                        }
+
+                    } // container ee-revocation
+
                 } // container status-verify
 
             } // list client-tls-profile
@@ -987,6 +1012,23 @@ submodule nokia-conf-system-security-tls {
                         default "revoked";
                         description "Default result of certificate status verification";
                     }
+
+                    container ee-revocation {
+                        description "Enter the ee-revocation context";
+
+                        leaf primary {
+                            type types-sros:tls-cert-revocation-status;
+                            default "crl";
+                            description "Primary method used to verify certificate revocation";
+                        }
+
+                        leaf secondary {
+                            type types-sros:tls-cert-revocation-status-with-none;
+                            default "none";
+                            description "Secondary method used to verify certificate revocation";
+                        }
+
+                    } // container ee-revocation
 
                 } // container status-verify
 

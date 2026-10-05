@@ -12,7 +12,7 @@ submodule nokia-state-router-ospf3 {
     import nokia-types-router             { prefix "types-router"; }
     import nokia-types-sros               { prefix "types-sros"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -35,7 +35,7 @@ submodule nokia-state-router-ospf3 {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-01-04";
+    revision "2026-02-11";
 
     grouping state-router-ospf3 {
         list ospf3 {
@@ -46,7 +46,11 @@ submodule nokia-state-router-ospf3 {
                 type uint32 {
                     range "0..31|64..95";
                 }
-                description "Value for the integrated OSPF instance";
+                description
+                    "Specifies the value of the integrated OSPF instance.
+
+                     [0..31]   ipv6-unicast address-family
+                     [64..95]  ipv4-unicast address-family";
             }
 
             leaf oper-state {
@@ -215,7 +219,7 @@ submodule nokia-state-router-ospf3 {
             }
 
             container export-limit {
-                description "Enable the export-limit context";
+                description "Enter the export-limit context";
 
                 leaf state {
                     type enumeration {
@@ -229,7 +233,7 @@ submodule nokia-state-router-ospf3 {
             } // container export-limit
 
             container rtr-adv-lsa-limit {
-                description "Enable the rtr-adv-lsa-limit context";
+                description "Enter the rtr-adv-lsa-limit context";
 
                 leaf state {
                     type enumeration {
@@ -752,7 +756,7 @@ submodule nokia-state-router-ospf3 {
 
                 leaf area-id {
                     type types-sros:ipv4-address;
-                    description "Area-ID attribute";
+                    description "Attribute area-id";
                 }
 
                 leaf area-bdr-rtr-count {
@@ -915,7 +919,7 @@ submodule nokia-state-router-ospf3 {
 
                     leaf interface-name {
                         type types-sros:interface-name;
-                        description "Router interface name";
+                        description "Router interface name.";
                     }
 
                     leaf type {
@@ -1295,7 +1299,7 @@ submodule nokia-state-router-ospf3 {
 
                     list neighbor {
                         key "address";
-                        description "Add a list entry for neighbor";
+                        description "Enter the neighbor list instance";
 
                         leaf address {
                             type types-sros:ip-address;
@@ -1696,7 +1700,7 @@ submodule nokia-state-router-ospf3 {
 
                         leaf advertisement {
                             type string {
-                                length "1..9778";
+                                length "56..19558";
                             }
                             description "Contents of the link state advertisement.";
                         }
@@ -1736,7 +1740,7 @@ submodule nokia-state-router-ospf3 {
 
                         leaf advertisement {
                             type string {
-                                length "1..9778";
+                                length "56..19558";
                             }
                             description "Contents of the link state advertisement.";
                         }
@@ -1751,14 +1755,14 @@ submodule nokia-state-router-ospf3 {
 
                     leaf router-id {
                         type types-sros:ipv4-address;
-                        description "Router ID of the virtual link neighbor";
+                        description "Router identity of the virtual link neighbor";
                     }
 
                     leaf transit-area {
                         type leafref {
                             path "../../../area/area-id";
                         }
-                        description "Transit area linking backbone and non-connected area";
+                        description "<IPv4-address> | [0..4294967295]";
                     }
 
                     leaf oper-state {
@@ -2055,7 +2059,7 @@ submodule nokia-state-router-ospf3 {
 
                     leaf advertisement {
                         type string {
-                            length "1..9778";
+                            length "56..19558";
                         }
                         description "Contents of the link state advertisement.";
                     }
@@ -2103,7 +2107,7 @@ submodule nokia-state-router-ospf3 {
 
                     leaf advertisement {
                         type string {
-                            length "1..9778";
+                            length "56..19558";
                         }
                         description "Contents of the link state advertisement.";
                     }
@@ -2334,27 +2338,27 @@ submodule nokia-state-router-ospf3 {
 
                 leaf flags {
                     type bits {
-                        bit bit-N                          { position 0; }
-                        bit bit-P                          { position 1; }
-                        bit bit-M                          { position 2; }
-                        bit bit-E                          { position 3; }
-                        bit bit-V                          { position 4; }
-                        bit bit-L                          { position 5; }
-                        bit bit-IA                         { position 6; }
-                        bit bit-AT                         { position 7; }
-                        bit bit-B                          { position 8; }
+                        bit bit-n                          { position 0; }
+                        bit bit-p                          { position 1; }
+                        bit bit-m                          { position 2; }
+                        bit bit-e                          { position 3; }
+                        bit bit-v                          { position 4; }
+                        bit bit-l                          { position 5; }
+                        bit bit-ia                         { position 6; }
+                        bit bit-at                         { position 7; }
+                        bit bit-b                          { position 8; }
                     }
                     description
                         "The value of the object flags indicates the flags of a prefix-SID advertised extended prefix TLV.
-                         bit-N (0)  - node-SID flag. the N-flag is set on prefix-SI-ds attached to a router loopback address.
-                         bit-P (1)  - no-PHP flag. if set, then the penultimate hop MUST NOT pop the prefix-SID before delivering the packet to the node that advertised the prefix-SID.
-                         bit-M (2)  - mapping server flag. if set, the SID is advertised from the segment routing mapping server functionality
-                         bit-E (3)  - explicit-null flag. if set, any upstream neighbor of the prefix-SID originator MUST replace the prefix-SID with a prefix-SID having an explicit-NULL value (0 for I-pv4) before forwarding the packet.
-                         bit-V (4)  - value flag. if set, then the prefix-SID carries a value (instead of an index).
-                         bit-L (5)  - local flag. if set, then the value/index carried by the prefix-SID has local significance.
-                         bit-IA (6) - inter area flag.
-                         bit-AT (7) - attached flag.
-                         bit-B (8)  - backup SID (seamless MPLS)";
+                         bit-n (0)  - node-SID flag. the N-flag is set on prefix-SI-ds attached to a router loopback address.
+                         bit-p (1)  - no-PHP flag. if set, then the penultimate hop MUST NOT pop the prefix-SID before delivering the packet to the node that advertised the prefix-SID.
+                         bit-m (2)  - mapping server flag. if set, the SID is advertised from the segment routing mapping server functionality
+                         bit-e (3)  - explicit-null flag. if set, any upstream neighbor of the prefix-SID originator MUST replace the prefix-SID with a prefix-SID having an explicit-NULL value (0 for I-pv4) before forwarding the packet.
+                         bit-v (4)  - value flag. if set, then the prefix-SID carries a value (instead of an index).
+                         bit-l (5)  - local flag. if set, then the value/index carried by the prefix-SID has local significance.
+                         bit-ia (6) - inter area flag.
+                         bit-at (7) - attached flag.
+                         bit-b (8)  - backup SID (seamless MPLS)";
                 }
 
                 leaf srms {
@@ -2413,7 +2417,7 @@ submodule nokia-state-router-ospf3 {
                     type uint32 {
                         range "0..max";
                     }
-                    description "When type is adjacency-set then this is the adjacency-set for whcih the sid is used";
+                    description "When type is adjacency-set then this is the adjacency-set for which the sid is used";
                 }
 
                 leaf interface {
@@ -2477,7 +2481,7 @@ submodule nokia-state-router-ospf3 {
 
                 leaf area-id {
                     type types-sros:ipv4-address;
-                    description "Area-ID attribute";
+                    description "Attribute area-id";
                 }
 
                 leaf nodes-covered {
@@ -2555,7 +2559,7 @@ submodule nokia-state-router-ospf3 {
 
                 leaf advertisement {
                     type string {
-                        length "1..9778";
+                        length "56..19558";
                     }
                     description "Contents of the link state advertisement.";
                 }
@@ -2595,7 +2599,7 @@ submodule nokia-state-router-ospf3 {
 
                 leaf advertisement {
                     type string {
-                        length "1..9778";
+                        length "56..19558";
                     }
                     description "Contents of the link state advertisement.";
                 }
@@ -2740,7 +2744,7 @@ submodule nokia-state-router-ospf3 {
                 description "Enter the hostname list instance";
 
                 leaf router-id {
-                    type types-igp:router-id;
+                    type types-igp:router-id-allow-zero;
                     description "Specifies the router-id for which we map the hostname";
                 }
 

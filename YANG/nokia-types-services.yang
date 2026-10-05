@@ -9,7 +9,7 @@ module nokia-types-services {
     import nokia-sros-yang-extensions     { prefix "sros-ext"; }
     import nokia-types-sros               { prefix "types-sros"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -32,14 +32,14 @@ module nokia-types-services {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2024-02-02";
+    revision "2025-07-16";
 
     typedef sdp-id {
         type uint32 {
             range "1..32767";
         }
         description
-            "A number used to identify a Service Distribution Point.
+            "A number used to identify a Service Destination Point.
              This ID must be unique only within the ESR where it is defined.";
     }
 
@@ -47,7 +47,7 @@ module nokia-types-services {
         type uint32 {
             range "0..32767";
         }
-        description "A number used to identify a Service Distribution Point.";
+        description "A number used to identify a Service Destination Point.";
     }
 
     typedef vrtr-mpls-lsp-id {
@@ -315,7 +315,7 @@ module nokia-types-services {
 
     typedef service-id-maf {
         type uint32 {
-            range "1..2147483647|2147483648|2147483649|2147483650|2147483651..2147483690|2147483691..2148007980|2148007981..2148012076|2148012077..2148016172|2148016173..2148278316|2148278317|2148278318..2148278381|2148278382|2148278383..2148278386";
+            range "1..2147483647|2147483648|2147483649|2147483650|2147483651..2147483690|2147483691..2148007980|2148007981..2148012076|2148012077..2148016172|2148016173..2148278316|2148278317|2148278318..2148278381|2148278382|2148278383..2148278386|2148278387..2148282482";
         }
         description
             "A number used to identify a  external or internal service. This ID
@@ -856,15 +856,21 @@ module nokia-types-services {
             pattern "([1-9]|[1-9][0-9]{1,3}|[1-2][0-9]{4}|3[0-1][0-9]{3}|32[0-6][0-9]{2}|327[0-5][0-9]|3276[0-7]):([1-9]|[1-9][0-9]{1,8}|[1-3][0-9]{9}|4[0-1][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[0-1][0-9]{2}|42949672[0-8][0-9]|429496729[0-5])";
         }
         description
-            "A Service Distribution Point (SDP) binding identification in the following format: <sdp-id>:<vc-id>.
+            "A Service Destination Point (SDP) binding identification in the following format: <sdp-id>:<vc-id>.
              sdp-id - [1..32767]
              vc-id - [1..4294967295]";
     }
 
     typedef ies-sdp-bind-vc-type {
         type enumeration {
-            enum ether                          { value 2; }
-            enum ipipe                          { value 11; }
+            enum ether {
+                value 2;
+                description "Ethernet pseudowire associated with SDP binding";
+            }
+            enum ipipe {
+                value 11;
+                description "Ipipe pseudowire associated with SDP binding";
+            }
         }
         description
             "This textual convention is used when default value is unknown and
@@ -1506,7 +1512,7 @@ module nokia-types-services {
             pattern "([0-9]|[1-9][0-9]{1,3}|[1-2][0-9]{4}|3[0-1][0-9]{3}|32[0-6][0-9]{2}|327[0-5][0-9]|3276[0-7]):([0-9]|[1-9][0-9]{1,8}|[1-3][0-9]{9}|4[0-1][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[0-1][0-9]{2}|42949672[0-8][0-9]|429496729[0-5])";
         }
         description
-            "A Service Distribution Point (SDP) binding identification in the following format: <sdp-id>:<vc-id>.
+            "A Service Destination Point (SDP) binding identification in the following format: <sdp-id>:<vc-id>.
              sdp-id - [0..32767]
              vc-id - [0..4294967295]";
     }
@@ -2364,6 +2370,44 @@ module nokia-types-services {
             bit hash-label-mismatch            { position 5; }
         }
         description "Operational Flags";
+    }
+
+    typedef fp-any {
+        type union {
+            type int32 {
+                range "1..12";
+            }
+            type enumeration {
+                enum any                            { value 0; }
+            }
+        }
+        description
+            "The value which specifies the forwarding plane within
+             a specific IOM card in the system.";
+    }
+
+    typedef port-any {
+        type union {
+            type types-sros:port;
+            type enumeration {
+                enum any                            { value 0; }
+            }
+        }
+        description "A physical or logical port.";
+    }
+
+    typedef reserved-label-block-user {
+        type enumeration {
+            enum static-sdp-bind                { value 1; }
+            enum static-sdp-bind-cw             { value 2; }
+            enum tldp-sdp-bind                  { value 3; }
+            enum tldp-sdp-bind-cw               { value 4; }
+            enum evpn-mcast                     { value 5; }
+            enum evpn-mcast-cw                  { value 6; }
+            enum evpn                           { value 7; }
+            enum evpn-cw                        { value 8; }
+        }
+        description "Reserved label block user";
     }
 
 }

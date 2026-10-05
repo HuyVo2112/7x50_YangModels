@@ -18,7 +18,7 @@ submodule nokia-conf-log {
     include nokia-conf-system-security;
     include nokia-conf-system-security-tls;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -41,7 +41,7 @@ submodule nokia-conf-log {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2024-04-12";
+    revision "2026-07-22";
 
     grouping conf-log {
         container log {
@@ -2872,7 +2872,7 @@ submodule nokia-conf-log {
 
                     leaf event {
                         type types-log:dot1x-events;
-                        description "Events for dynsvc module.";
+                        description "Events for dynsvc module";
                     }
 
                     leaf severity {
@@ -7204,7 +7204,7 @@ submodule nokia-conf-log {
 
                     leaf event {
                         type types-log:sr-policy-events;
-                        description "Events for sr-policy module.";
+                        description "Events for SR policy module";
                     }
 
                     leaf severity {
@@ -10056,7 +10056,7 @@ submodule nokia-conf-log {
 
                     leaf event {
                         type types-log:dot1x-events;
-                        description "Events for dynsvc module.";
+                        description "Events for dynsvc module";
                     }
 
                     leaf admin-state {
@@ -16668,7 +16668,7 @@ submodule nokia-conf-log {
 
                     leaf event {
                         type types-log:sr-policy-events;
-                        description "Events for sr-policy module.";
+                        description "Events for SR policy module";
                     }
 
                     leaf admin-state {
@@ -19306,7 +19306,7 @@ submodule nokia-conf-log {
 
                 leaf address {
                     type types-sros:ip-unicast-address;
-                    description "IP address of the Syslog target host";
+                    description "IP address or FQDN of the Syslog target host";
                 }
 
                 leaf facility {
@@ -19386,6 +19386,16 @@ submodule nokia-conf-log {
                     type types-qos:tcp-udp-match-port;
                     default "514";
                     description "Destination port when sending syslog over UDP";
+                }
+
+                leaf timestamp-format {
+                    type enumeration {
+                        enum millisecond {
+                            value 1;
+                            description "Set timestamp format to milliseconds";
+                        }
+                    }
+                    description "Syslog timestamp format";
                 }
 
                 leaf-list apply-groups {

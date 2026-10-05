@@ -7,20 +7,15 @@ module nokia-sr-openconfig-bfd-deviations {
     import nokia-sros-yang-extensions     { prefix "sros-ext"; }
     import openconfig-bfd                 { prefix "oc-bfd"; }
     import openconfig-extensions          { prefix "oc-ext"; }
-    import openconfig-if-types            { prefix "oc-ift"; }
-    import openconfig-inet-types          { prefix "oc-inet"; }
-    import openconfig-interfaces          { prefix "oc-if"; }
-    import openconfig-policy-types        { prefix "oc-pol-types"; }
-    import openconfig-types               { prefix "oc-types"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
          Web: <http://www.nokia.com>";
     description
         "This module contains the list of deviations against the openconfig-bfd
-          module for the Nokia SR OS based routers.
+         module for the Nokia SR OS based routers.
 
          Copyright 2016 Nokia. All rights reserved. Reproduction of this document
          is authorized on the condition that the foregoing copyright notice is included.
@@ -37,7 +32,7 @@ module nokia-sr-openconfig-bfd-deviations {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2021-03-17";
+    revision "2025-03-12";
 
     deviation /oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:config/oc-bfd:enabled {
         deviate add {
@@ -58,6 +53,9 @@ module nokia-sr-openconfig-bfd-deviations {
         deviate add {
             default "100000";
         }
+        deviate add {
+            must "(. mod 1000) = 0";
+        }
     }
 
     deviation /oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:config/oc-bfd:required-minimum-receive {
@@ -68,6 +66,9 @@ module nokia-sr-openconfig-bfd-deviations {
         }
         deviate add {
             default "100000";
+        }
+        deviate add {
+            must "(. mod 1000) = 0";
         }
     }
 
@@ -101,6 +102,9 @@ module nokia-sr-openconfig-bfd-deviations {
         deviate add {
             default "100000";
         }
+        deviate add {
+            must "(. mod 1000) = 0";
+        }
     }
 
     deviation /oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:state/oc-bfd:required-minimum-receive {
@@ -111,6 +115,9 @@ module nokia-sr-openconfig-bfd-deviations {
         }
         deviate add {
             default "100000";
+        }
+        deviate add {
+            must "(. mod 1000) = 0";
         }
     }
 

@@ -20,8 +20,9 @@ submodule nokia-conf-port-ethernet {
     include nokia-conf-port-eth-egress;
     include nokia-conf-port-eth-lldp;
     include nokia-conf-port-eth-network;
+    include nokia-conf-qos;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -44,7 +45,7 @@ submodule nokia-conf-port-ethernet {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2024-04-12";
+    revision "2026-07-22";
 
     grouping conf-port-ethernet {
         container ethernet {
@@ -195,6 +196,18 @@ submodule nokia-conf-port-ethernet {
                 type boolean;
                 default "false";
                 description "Discard received pause frames";
+            }
+
+            leaf tx-pause-frames {
+                type boolean;
+                default "true";
+                description "Transmit PAUSE frames based on received traffic rate";
+            }
+
+            leaf ptp-tunnel {
+                type boolean;
+                default "false";
+                description "Enable the tunneling of PTP frames on the port";
             }
 
             leaf-list apply-groups {
@@ -474,7 +487,7 @@ submodule nokia-conf-port-ethernet {
                     }
                     units "seconds";
                     default "10";
-                    description "Time interval between keep-alive PDUs";
+                    description "Time interval between keepalive PDUs";
                 }
 
                 leaf retry-timeout {
@@ -490,6 +503,12 @@ submodule nokia-conf-port-ethernet {
                     type boolean;
                     default "false";
                     description "Use broadcast MAC address for destination MAC address";
+                }
+
+                leaf tunneling {
+                    type boolean;
+                    default "true";
+                    description "Enable down-when-looped tunneling";
                 }
 
             } // container down-when-looped
@@ -669,8 +688,14 @@ submodule nokia-conf-port-ethernet {
 
                         leaf low-priority-defect {
                             type enumeration {
-                                enum all-def                        { value 1; }
-                                enum mac-rem-err-xcon               { value 2; }
+                                enum all-def {
+                                    value 1;
+                                    description "Generate AIS frame for any defect in CCM state machine";
+                                }
+                                enum mac-rem-err-xcon {
+                                    value 2;
+                                    description "Generate AIS frame for def-mac-status defect or higher";
+                                }
                             }
                             default "all-def";
                             description "Lowest priority defect allowed to generate fault alarm";
@@ -820,6 +845,7 @@ submodule nokia-conf-port-ethernet {
                     description "Maximum ingress bandwidth";
                 }
 
+
             } // container ingress
 
             container elmi {
@@ -893,7 +919,7 @@ submodule nokia-conf-port-ethernet {
                         enum sdh                            { value 3; }
                     }
                     default "sdh";
-                    description "Encoding of synchronization status messages";
+                    description "Encoding type of SSMs";
                 }
 
                 leaf esmc-tunnel {
@@ -1048,6 +1074,46 @@ submodule nokia-conf-port-ethernet {
                 } // list traffic-type
 
             } // container storm-control
+
+            container ptp-timestamping {
+                presence "Enable the ptp-timestamping context";
+                description "Enable the ptp-timestamping context";
+
+                leaf admin-state {
+                    type types-sros:admin-state;
+                    default "disable";
+                    description "Administrative state of PTP timestamping";
+                }
+
+                leaf ipv4-address {
+                    type types-sros:ipv4-address;
+                    description "IPv4 destination address for PTP messages into port";
+                }
+
+                leaf ipv6-address {
+                    type types-sros:ipv6-address;
+                    description "IPv6 destination address for PTP messages into port";
+                }
+
+                leaf-list apply-groups {
+                    type leafref {
+                        path "../../../../groups/group/name";
+                    }
+                    max-elements 8;
+                    ordered-by user;
+                    description "Apply a configuration group at this level";
+                }
+
+                leaf-list apply-groups-exclude {
+                    type leafref {
+                        path "../../../../groups/group/name";
+                    }
+                    max-elements 8;
+                    ordered-by user;
+                    description "Exclude a configuration group at this level";
+                }
+
+            } // container ptp-timestamping
 
             uses conf-port-eth-access;
             uses conf-port-eth-dot1x;

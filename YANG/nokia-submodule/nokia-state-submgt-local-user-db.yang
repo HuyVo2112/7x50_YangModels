@@ -7,7 +7,7 @@ submodule nokia-state-submgt-local-user-db {
     import nokia-sros-yang-extensions     { prefix "sros-ext"; }
     import nokia-types-sros               { prefix "types-sros"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -30,7 +30,7 @@ submodule nokia-state-submgt-local-user-db {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-01-30";
+    revision "2025-03-12";
 
     grouping state-submgt-local-user-db {
         list local-user-db {
@@ -39,7 +39,7 @@ submodule nokia-state-submgt-local-user-db {
 
             leaf name {
                 type types-sros:named-item;
-                description "Local user database name";
+                description "The name identifies this local user database.";
             }
 
             leaf host-count {
@@ -61,7 +61,7 @@ submodule nokia-state-submgt-local-user-db {
 
                     leaf host-name {
                         type types-sros:named-item;
-                        description "Host name";
+                        description "The host key.";
                     }
 
                     container unmatched {
@@ -103,7 +103,7 @@ submodule nokia-state-submgt-local-user-db {
 
                     leaf host-name {
                         type types-sros:named-item;
-                        description "Host name";
+                        description "The host key.";
                     }
 
                     container unmatched {

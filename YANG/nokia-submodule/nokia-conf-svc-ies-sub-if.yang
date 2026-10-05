@@ -44,7 +44,7 @@ submodule nokia-conf-svc-ies-sub-if {
     include nokia-conf-system-security;
     include nokia-conf-vrrp;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -67,7 +67,7 @@ submodule nokia-conf-svc-ies-sub-if {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-06-29";
+    revision "2026-07-22";
 
     grouping conf-svc-ies-sub-if-subscriber-interface {
         list subscriber-interface {
@@ -462,6 +462,12 @@ submodule nokia-conf-svc-ies-sub-if {
                             type boolean;
                             default "false";
                             description "Update the source IP address of a DHCP RELEASE message";
+                        }
+
+                        leaf allow-forcerenew-without-lease {
+                            type boolean;
+                            default "false";
+                            description "Allow DHCPv4 FORCERENEW messages without lease state";
                         }
 
                         leaf siaddr-override {
@@ -2170,6 +2176,12 @@ submodule nokia-conf-svc-ies-sub-if {
                                 description "Update the source IP address of a DHCP RELEASE message";
                             }
 
+                            leaf allow-forcerenew-without-lease {
+                                type boolean;
+                                default "false";
+                                description "Allow DHCPv4 FORCERENEW messages without lease state";
+                            }
+
                             leaf siaddr-override {
                                 type types-sros:ipv4-unicast-address;
                                 description "DHCP server IP address for address hiding function";
@@ -2437,6 +2449,12 @@ submodule nokia-conf-svc-ies-sub-if {
                             leaf link-address {
                                 type types-sros:ipv6-address;
                                 description "Link address for the DHCPv6 relay messages";
+                            }
+
+                            leaf allow-reconfigure-without-lease {
+                                type boolean;
+                                default "false";
+                                description "Allow DHCPv6 Reconfigure messages without lease state";
                             }
 
                             leaf-list server {
@@ -3692,6 +3710,13 @@ submodule nokia-conf-svc-ies-sub-if {
                         description "Send one gratuitous ARP to each SAP";
                     }
 
+                    leaf oper-group {
+                        type leafref {
+                            path "../../../../../oper-group/name";
+                        }
+                        description "Operational group associated with an SRRP instance";
+                    }
+
                     leaf-list apply-groups {
                         type leafref {
                             path "../../../../../../groups/group/name";
@@ -4379,6 +4404,14 @@ submodule nokia-conf-svc-ies-sub-if {
                                 type boolean;
                                 default "false";
                                 description "Mark top Q-tags";
+                            }
+
+                            leaf latency-budget {
+                                type uint32 {
+                                    range "1..1000000";
+                                }
+                                units "microseconds";
+                                description "SAP egress latency budget";
                             }
 
                             container sap-egress {

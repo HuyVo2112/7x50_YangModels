@@ -10,7 +10,7 @@ submodule nokia-conf-submgt-vrgw {
     include nokia-conf-aaa;
     include nokia-conf-groups;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -33,7 +33,7 @@ submodule nokia-conf-submgt-vrgw {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2021-11-05";
+    revision "2026-07-22";
 
     grouping conf-submgt-vrgw {
         container vrgw {
@@ -342,7 +342,7 @@ submodule nokia-conf-submgt-vrgw {
                                         enum m-node                         { value 4; }
                                         enum h-node                         { value 8; }
                                     }
-                                    description "DHCP option as NetBIOS node type.";
+                                    description "DHCP option as NetBIOS node type";
                                 }
 
                             }
@@ -356,7 +356,7 @@ submodule nokia-conf-submgt-vrgw {
                                         range "10..315446399";
                                     }
                                     units "seconds";
-                                    description "DHCP option as time duration.";
+                                    description "DHCP option as time duration";
                                 }
 
                             }
@@ -380,7 +380,7 @@ submodule nokia-conf-submgt-vrgw {
                                         description "empty not supported for this option";
                                     }
                                     type empty;
-                                    description "Empty DHCP option.";
+                                    description "Remove DHCP option configuration";
                                 }
 
                             }
@@ -409,7 +409,6 @@ submodule nokia-conf-submgt-vrgw {
                 } // container radius-authentication
 
             } // list brg-profile
-
 
         } // container vrgw
 

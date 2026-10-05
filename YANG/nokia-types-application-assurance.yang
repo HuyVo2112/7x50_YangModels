@@ -9,7 +9,7 @@ module nokia-types-application-assurance {
     import nokia-sros-yang-extensions     { prefix "sros-ext"; }
     import nokia-types-sros               { prefix "types-sros"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -32,7 +32,7 @@ module nokia-types-application-assurance {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-06-29";
+    revision "2025-10-30";
 
     typedef isa-aa-grp-id {
         type uint32 {
@@ -223,6 +223,8 @@ module nokia-types-application-assurance {
         type enumeration {
             enum permit-deny                    { value 0; }
             enum priority-mark                  { value 1; }
+            enum monitor                        { value 2; }
+            enum peak-measure                   { value 3; }
         }
         default "permit-deny";
         description "AA policer action to permit/deny or mark in/out of profile.";
@@ -314,8 +316,8 @@ module nokia-types-application-assurance {
         type enumeration {
             enum volume                         { value 1; }
             enum tcp-performance                { value 2; }
-            enum rtp-performance                { value 3; }
             enum comprehensive                  { value 4; }
+            enum rtp-performance                { status obsolete; }
         }
         description "AA exported cflowd record type.";
     }
@@ -517,6 +519,28 @@ module nokia-types-application-assurance {
             enum out-of-order                   { value 2; }
         }
         description "specifies which fragments if any must be dropped as policy.";
+    }
+
+    typedef ecn-remark-name {
+        type enumeration {
+            enum not-capable-transport {
+                value 1;
+                description "Remark the ECN value to 00";
+            }
+            enum capable-transport-1 {
+                value 2;
+                description "Remark the ECN value to 01";
+            }
+            enum capable-transport-0 {
+                value 3;
+                description "Remark the ECN value to 10";
+            }
+            enum congestion-experienced {
+                value 4;
+                description "Remark the ECN value to 11";
+            }
+        }
+        description "specifies the IP ECN bits value.";
     }
 
     typedef tcp-segment-size {
@@ -819,6 +843,7 @@ module nokia-types-application-assurance {
                 enum ms-info-change-notification-response { value 129; }
                 enum data-record-transfer-request   { value 240; }
                 enum data-record-transfer-response  { value 241; }
+                enum tunnel-status                  { value 253; }
                 enum end-marker                     { value 254; }
                 enum g-pdu                          { value 255; }
             }
@@ -1136,6 +1161,17 @@ module nokia-types-application-assurance {
                    complete    (1)   - load-balance completed.";
     }
 
+    typedef avoid-subs-mode {
+        type enumeration {
+            enum normal                         { value 1; }
+            enum avoid-subs                     { value 2; }
+        }
+        description
+            "Specifies the status of a subscriber load-balancing for an ISA-AA MDA group.  The status may be one of:
+                   normal                 (1)   - load-balance mode
+                   avoid-subs             (2)   - avoiding subscribers (operator configured)";
+    }
+
     typedef aso-val-derived-from {
         type enumeration {
             enum unknown                        { value 0; }
@@ -1199,6 +1235,7 @@ module nokia-types-application-assurance {
             enum illinois                       { value 2; }
             enum new-reno                       { value 3; }
             enum bbr                            { value 4; }
+            enum bbrv2                          { value 5; }
         }
         default "westwood";
         description "AA TCP stack and congestion control algorithm supported for TCP Optimizer.";
@@ -1260,6 +1297,15 @@ module nokia-types-application-assurance {
         description
             "Represents the set of TCP or UDP protocols in which AA uses the TTL
              to help determine the tethering state of a flow or subscriber.";
+    }
+
+    typedef dns-enrich-option-type {
+        type enumeration {
+            enum device-id                      { value 1; }
+        }
+        description
+            "Specifies whether the dns option is a device id or other type
+             that might be available in the future";
     }
 
 }

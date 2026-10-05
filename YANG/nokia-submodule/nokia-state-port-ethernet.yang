@@ -18,7 +18,7 @@ submodule nokia-state-port-ethernet {
     include nokia-state-port-eth-lldp;
     include nokia-state-port-eth-network;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -41,7 +41,7 @@ submodule nokia-state-port-ethernet {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2024-04-12";
+    revision "2026-07-22";
 
     grouping state-port-ethernet {
         container ethernet {
@@ -153,6 +153,16 @@ submodule nokia-state-port-ethernet {
                 description "Indicates the interface operational mtu-profile";
             }
 
+            leaf oper-autonegotiate {
+                type enumeration {
+                    enum not-applicable                 { value 0; }
+                    enum unsupported                    { value 1; }
+                    enum down                           { value 2; }
+                    enum up                             { value 3; }
+                }
+                description "Indicates the operational state of speed and duplex autonegotiation";
+            }
+
             container crc-monitor {
                 description "Enter the crc-monitor context";
 
@@ -224,19 +234,23 @@ submodule nokia-state-port-ethernet {
                         type leafref {
                             path "../../../../../eth-cfm/domain/md-admin-name";
                         }
-                        description "Maintenance Domain (MD) name";
+                        description "A unique administratively assigned name used to identify a domain.";
                     }
 
                     leaf ma-admin-name {
                         type leafref {
                             path "../../../../../eth-cfm/domain[md-admin-name=current()/../md-admin-name]/association/ma-admin-name";
                         }
-                        description "Maintenance Association (MA) name";
+                        description "A unique administratively assigned name used to identify an association.";
                     }
 
                     leaf mep-id {
                         type types-eth-cfm:mep-id-type;
-                        description "Maintenance Endpoint (MEP) ID";
+                        description
+                            "A CFM Virtual Maintenance Endpoint
+
+                             Specifies a local Maintenance association End Point identifier unique
+                             over a given maintanance association.";
                     }
 
                     leaf if-index {
@@ -250,7 +264,7 @@ submodule nokia-state-port-ethernet {
                     }
 
                     container ais {
-                        description "Enable the ais context";
+                        description "Enter the ais context";
 
                         container received {
                             description "Enter the received context";
@@ -287,7 +301,7 @@ submodule nokia-state-port-ethernet {
                     } // container ais
 
                     container csf {
-                        description "Enable the csf context";
+                        description "Enter the csf context";
 
                         container received {
                             description "Enter the received context";
@@ -849,6 +863,7 @@ submodule nokia-state-port-ethernet {
                     description "Indicates the quality level of transmitted SSM messages.";
                 }
 
+
             } // container ssm
 
             container statistics {
@@ -1305,7 +1320,7 @@ submodule nokia-state-port-ethernet {
 
                     leaf storm-traffic-type {
                         type types-sros:strm-ctrl-traffic-type;
-                        description "Storm-control traffic type";
+                        description "Specifies the traffic type for storm control.";
                     }
 
                     leaf oper-rate {
@@ -1325,6 +1340,7 @@ submodule nokia-state-port-ethernet {
                 } // list traffic-type
 
             } // container storm-control
+
 
             uses state-port-eth-access;
             uses state-port-eth-dot1x;

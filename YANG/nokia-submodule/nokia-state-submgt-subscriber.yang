@@ -18,7 +18,7 @@ submodule nokia-state-submgt-subscriber {
     import nokia-types-sros               { prefix "types-sros"; }
     import nokia-types-subscriber-mgmt    { prefix "types-submgt"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -41,7 +41,7 @@ submodule nokia-state-submgt-subscriber {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-12-01";
+    revision "2025-12-17";
 
     grouping state-submgt-subscriber {
         list subscriber {
@@ -83,6 +83,11 @@ submodule nokia-state-submgt-subscriber {
             leaf application-profile {
                 type types-sros:named-item;
                 description "The application profile used by this subscriber.";
+            }
+
+            leaf oversubscribed {
+                type boolean;
+                description "Indicates if the subscriber is created in oversubscribed state.";
             }
 
             container mcac {
@@ -162,7 +167,7 @@ submodule nokia-state-submgt-subscriber {
 
                             leaf scheduler-name {
                                 type types-sros:named-item;
-                                description "Scheduler name";
+                                description "Specifies the scheduler name.";
                             }
 
                             container statistics {
@@ -222,7 +227,7 @@ submodule nokia-state-submgt-subscriber {
 
                         leaf arbiter-name {
                             type types-sros:named-item;
-                            description "Arbiter name";
+                            description "Specifies the arbiter name.";
                         }
 
                         container statistics {
@@ -520,6 +525,33 @@ submodule nokia-state-submgt-subscriber {
                         description "True if the egress aggregate rate limit was below min-resv-bw and has been set to min-resv-bw.";
                     }
 
+                    list aggregate-rate-state {
+                        key "card";
+                        description "Enter the aggregate-rate-state list instance";
+
+                        leaf card {
+                            type int32;
+                            description "Card number";
+                        }
+
+                        leaf rate {
+                            type types-qos:kbps;
+                            units "kilobps";
+                            description "Rate";
+                        }
+
+                        leaf limit-unused-bandwidth {
+                            type boolean;
+                            description "Aggregate rate limit-unused-bandwidth";
+                        }
+
+                        leaf on-the-wire {
+                            type types-qos:on-the-wire;
+                            description "On the wire";
+                        }
+
+                    } // list aggregate-rate-state
+
                     container scheduler-policy {
                         description "Enter the scheduler-policy context";
 
@@ -534,7 +566,7 @@ submodule nokia-state-submgt-subscriber {
 
                             leaf scheduler-name {
                                 type types-sros:named-item;
-                                description "Scheduler name";
+                                description "Specifies the scheduler name.";
                             }
 
                             container statistics {
@@ -584,6 +616,410 @@ submodule nokia-state-submgt-subscriber {
 
                             } // container overrides
 
+                            list subscriber-scheduler {
+                                key "card";
+                                description "Enter the subscriber-scheduler list instance";
+
+                                leaf card {
+                                    type int32;
+                                    description "Card number";
+                                }
+
+                                leaf members {
+                                    type uint32;
+                                    description "Members";
+                                }
+
+                                leaf max-pir {
+                                    type types-qos:sched-pir;
+                                    description "Max PIR rate";
+                                }
+
+                                leaf oper-pir {
+                                    type types-qos:sched-pir;
+                                    description "Operational PIR rate";
+                                }
+
+                                leaf parent-limit-unused-bandwidth {
+                                    type boolean;
+                                    description "Parent limit unused bandwidth";
+                                }
+
+                                leaf orphan {
+                                    type boolean;
+                                    description "Orphan";
+                                }
+
+                                container within-cir {
+                                    description "Enter the within-cir context";
+
+                                    leaf consumed {
+                                        type types-qos:kbps;
+                                        units "kilobps";
+                                        description "Consumed";
+                                    }
+
+                                    leaf offered {
+                                        type types-qos:kbps;
+                                        units "kilobps";
+                                        description "Offered";
+                                    }
+
+                                    leaf parent-level {
+                                        type int32;
+                                        description "Parent level";
+                                    }
+
+                                } // container within-cir
+
+                                container above-cir {
+                                    description "Enter the above-cir context";
+
+                                    leaf consumed {
+                                        type types-qos:kbps;
+                                        units "kilobps";
+                                        description "Consumed";
+                                    }
+
+                                    leaf offered {
+                                        type types-qos:kbps;
+                                        units "kilobps";
+                                        description "Offered";
+                                    }
+
+                                    leaf parent-level {
+                                        type int32;
+                                        description "Parent level";
+                                    }
+
+                                } // container above-cir
+
+                                list level {
+                                    key "level-index";
+                                    description "Enter the level list instance";
+
+                                    leaf level-index {
+                                        type int32 {
+                                            range "0..8";
+                                        }
+                                    }
+
+                                    container within-cir {
+                                        description "Enter the within-cir context";
+
+                                        leaf members {
+                                            type uint32;
+                                            description "Members";
+                                        }
+
+                                        leaf consumed {
+                                            type types-qos:kbps;
+                                            units "kilobps";
+                                            description "Consumed";
+                                        }
+
+                                        leaf offered {
+                                            type types-qos:kbps;
+                                            units "kilobps";
+                                            description "Offered";
+                                        }
+
+                                        container sched-hierarchy {
+                                            description "Enter the sched-hierarchy context";
+
+                                            container queue {
+                                                description "Enter the queue context";
+
+                                                container sla-profile-instance {
+                                                    description "Enter the sla-profile-instance context";
+
+                                                    list queue {
+                                                        key "member";
+                                                        description "Enter the queue list instance";
+
+                                                        leaf member {
+                                                            type uint32;
+                                                            description "Member information";
+                                                        }
+
+                                                        leaf queue-id {
+                                                            type int32;
+                                                            description "Queue identifier";
+                                                        }
+
+                                                        leaf subscriber-id {
+                                                            type types-submgt:subscriber-id;
+                                                            description "Subscriber Identification string";
+                                                        }
+
+                                                        leaf sla-profile-instance-id {
+                                                            type types-submgt:sla-profile-instance-id;
+                                                            description "SLA profile instance Identification string";
+                                                        }
+
+                                                        leaf fp {
+                                                            type int32;
+                                                            description "FP number";
+                                                        }
+
+                                                    } // list queue
+
+                                                } // container sla-profile-instance
+
+                                            } // container queue
+
+                                            container scheduler {
+                                                description "Enter the scheduler context";
+
+                                                container subscriber {
+                                                    description "Enter the subscriber context";
+
+                                                    list scheduler {
+                                                        key "member";
+                                                        description "Enter the scheduler list instance";
+
+                                                        leaf member {
+                                                            type uint32;
+                                                            description "Member information";
+                                                        }
+
+                                                        leaf scheduler-name {
+                                                            type string;
+                                                            description "Name";
+                                                        }
+
+                                                        leaf subscriber-id {
+                                                            type types-submgt:subscriber-id;
+                                                            description "Subscriber Identification string";
+                                                        }
+
+                                                    } // list scheduler
+
+                                                } // container subscriber
+
+                                                container sla-profile-instance {
+                                                    description "Enter the sla-profile-instance context";
+
+                                                    list scheduler {
+                                                        key "member";
+                                                        description "Enter the scheduler list instance";
+
+                                                        leaf member {
+                                                            type uint32;
+                                                            description "Member information";
+                                                        }
+
+                                                        leaf scheduler-name {
+                                                            type string;
+                                                            description "Name";
+                                                        }
+
+                                                        leaf subscriber-id {
+                                                            type types-submgt:subscriber-id;
+                                                            description "Subscriber Identification string";
+                                                        }
+
+                                                        leaf sla-profile-instance-id {
+                                                            type types-submgt:sla-profile-instance-id;
+                                                            description "SLA profile instance Identification string";
+                                                        }
+
+                                                    } // list scheduler
+
+                                                    list t0-scheduler {
+                                                        key "member";
+                                                        description "Enter the t0-scheduler list instance";
+
+                                                        leaf member {
+                                                            type uint32;
+                                                            description "Member information";
+                                                        }
+
+                                                        leaf scheduler-name {
+                                                            type string;
+                                                            description "Name";
+                                                        }
+
+                                                        leaf subscriber-id {
+                                                            type types-submgt:subscriber-id;
+                                                            description "Subscriber Identification string";
+                                                        }
+
+                                                        leaf sla-profile-instance-id {
+                                                            type types-submgt:sla-profile-instance-id;
+                                                            description "SLA profile instance Identification string";
+                                                        }
+
+                                                    } // list t0-scheduler
+
+                                                } // container sla-profile-instance
+
+                                            } // container scheduler
+
+                                        } // container sched-hierarchy
+
+                                    } // container within-cir
+
+                                    container above-cir {
+                                        description "Enter the above-cir context";
+
+                                        leaf members {
+                                            type uint32;
+                                            description "Members";
+                                        }
+
+                                        leaf consumed {
+                                            type types-qos:kbps;
+                                            units "kilobps";
+                                            description "Consumed";
+                                        }
+
+                                        leaf offered {
+                                            type types-qos:kbps;
+                                            units "kilobps";
+                                            description "Offered";
+                                        }
+
+                                        container sched-hierarchy {
+                                            description "Enter the sched-hierarchy context";
+
+                                            container queue {
+                                                description "Enter the queue context";
+
+                                                container sla-profile-instance {
+                                                    description "Enter the sla-profile-instance context";
+
+                                                    list queue {
+                                                        key "member";
+                                                        description "Enter the queue list instance";
+
+                                                        leaf member {
+                                                            type uint32;
+                                                            description "Member information";
+                                                        }
+
+                                                        leaf queue-id {
+                                                            type int32;
+                                                            description "Queue identifier";
+                                                        }
+
+                                                        leaf subscriber-id {
+                                                            type types-submgt:subscriber-id;
+                                                            description "Subscriber Identification string";
+                                                        }
+
+                                                        leaf sla-profile-instance-id {
+                                                            type types-submgt:sla-profile-instance-id;
+                                                            description "SLA profile instance Identification string";
+                                                        }
+
+                                                        leaf fp {
+                                                            type int32;
+                                                            description "FP number";
+                                                        }
+
+                                                    } // list queue
+
+                                                } // container sla-profile-instance
+
+                                            } // container queue
+
+                                            container scheduler {
+                                                description "Enter the scheduler context";
+
+                                                container subscriber {
+                                                    description "Enter the subscriber context";
+
+                                                    list scheduler {
+                                                        key "member";
+                                                        description "Enter the scheduler list instance";
+
+                                                        leaf member {
+                                                            type uint32;
+                                                            description "Member information";
+                                                        }
+
+                                                        leaf scheduler-name {
+                                                            type string;
+                                                            description "Name";
+                                                        }
+
+                                                        leaf subscriber-id {
+                                                            type types-submgt:subscriber-id;
+                                                            description "Subscriber Identification string";
+                                                        }
+
+                                                    } // list scheduler
+
+                                                } // container subscriber
+
+                                                container sla-profile-instance {
+                                                    description "Enter the sla-profile-instance context";
+
+                                                    list scheduler {
+                                                        key "member";
+                                                        description "Enter the scheduler list instance";
+
+                                                        leaf member {
+                                                            type uint32;
+                                                            description "Member information";
+                                                        }
+
+                                                        leaf scheduler-name {
+                                                            type string;
+                                                            description "Name";
+                                                        }
+
+                                                        leaf subscriber-id {
+                                                            type types-submgt:subscriber-id;
+                                                            description "Subscriber Identification string";
+                                                        }
+
+                                                        leaf sla-profile-instance-id {
+                                                            type types-submgt:sla-profile-instance-id;
+                                                            description "SLA profile instance Identification string";
+                                                        }
+
+                                                    } // list scheduler
+
+                                                    list t0-scheduler {
+                                                        key "member";
+                                                        description "Enter the t0-scheduler list instance";
+
+                                                        leaf member {
+                                                            type uint32;
+                                                            description "Member information";
+                                                        }
+
+                                                        leaf scheduler-name {
+                                                            type string;
+                                                            description "Name";
+                                                        }
+
+                                                        leaf subscriber-id {
+                                                            type types-submgt:subscriber-id;
+                                                            description "Subscriber Identification string";
+                                                        }
+
+                                                        leaf sla-profile-instance-id {
+                                                            type types-submgt:sla-profile-instance-id;
+                                                            description "SLA profile instance Identification string";
+                                                        }
+
+                                                    } // list t0-scheduler
+
+                                                } // container sla-profile-instance
+
+                                            } // container scheduler
+
+                                        } // container sched-hierarchy
+
+                                    } // container above-cir
+
+                                } // list level
+
+                            } // list subscriber-scheduler
+
                         } // list scheduler
 
                     } // container scheduler-policy
@@ -594,7 +1030,7 @@ submodule nokia-state-submgt-subscriber {
 
                         leaf arbiter-name {
                             type types-sros:named-item;
-                            description "Arbiter name";
+                            description "Specifies the arbiter name.";
                         }
 
                         container statistics {
@@ -1900,6 +2336,16 @@ submodule nokia-state-submgt-subscriber {
                                     description "The committed buffer size";
                                 }
 
+                                leaf parent-weight {
+                                    type types-qos:weight-override;
+                                    description "The weight that needs to be used by the scheduler to which this policer would be feeding to.";
+                                }
+
+                                leaf parent-cir-weight {
+                                    type types-qos:weight-override;
+                                    description "The weight that needs to be used until the committed rate by the scheduler to which this policer would be feeding to.";
+                                }
+
                             } // container overrides
 
                         } // list policer
@@ -2060,6 +2506,11 @@ submodule nokia-state-submgt-subscriber {
                                 leaf operational-burst-fir {
                                     type types-qos:int64-max;
                                     description "Oper burst FIR.";
+                                }
+
+                                leaf local-parent-rate {
+                                    type types-qos:kbps;
+                                    description "The local limit rate for the delay budget";
                                 }
 
                             } // list hardware-queue
@@ -2518,6 +2969,21 @@ submodule nokia-state-submgt-subscriber {
                                 leaf class-weight {
                                     type types-qos:hs-class-weight-override;
                                     description "The scheduling class weight.";
+                                }
+
+                                leaf burst-limit {
+                                    type types-qos:burst-limit-override-numeric;
+                                    description "The explicit shaping burst size of a queue.";
+                                }
+
+                                leaf parent-weight {
+                                    type types-qos:weight-override;
+                                    description "The weight that needs to be used by the scheduler to which this queue would be feeding to.";
+                                }
+
+                                leaf parent-cir-weight {
+                                    type types-qos:weight-override;
+                                    description "The weight that needs to be used until the committed rate by the scheduler to which this queue would be feeding to.";
                                 }
 
                             } // container overrides
@@ -3657,6 +4123,16 @@ submodule nokia-state-submgt-subscriber {
                                     description "The committed buffer size";
                                 }
 
+                                leaf parent-weight {
+                                    type types-qos:weight-override;
+                                    description "The weight that needs to be used by the scheduler to which this policer would be feeding to.";
+                                }
+
+                                leaf parent-cir-weight {
+                                    type types-qos:weight-override;
+                                    description "The weight that needs to be used until the committed rate by the scheduler to which this policer would be feeding to.";
+                                }
+
                             } // container overrides
 
                         } // list policer
@@ -3780,6 +4256,11 @@ submodule nokia-state-submgt-subscriber {
                                     description "Depth CIR.";
                                 }
 
+                                leaf operational-burst-limit {
+                                    type uint32;
+                                    description "Sepcifies the operational burst-limit value.";
+                                }
+
                                 leaf operational-exceed-burst {
                                     type types-qos:int64-max;
                                     description "Oper burst exceed.";
@@ -3793,6 +4274,16 @@ submodule nokia-state-submgt-subscriber {
                                 leaf operational-burst-fir {
                                     type types-qos:int64-max;
                                     description "Oper burst FIR.";
+                                }
+
+                                leaf orphan {
+                                    type boolean;
+                                    description "Orphan queue";
+                                }
+
+                                leaf local-parent-rate {
+                                    type types-qos:kbps;
+                                    description "The local limit rate for the delay budget";
                                 }
 
                                 leaf port {
@@ -3839,6 +4330,33 @@ submodule nokia-state-submgt-subscriber {
                                     }
 
                                 } // container low-slope
+
+                                container aggregate-rate {
+                                    description "Enter the aggregate-rate context";
+
+                                    leaf rate {
+                                        type types-qos:kbps;
+                                        units "kilobps";
+                                        description "Rate";
+                                    }
+
+                                    leaf on-the-wire {
+                                        type types-qos:on-the-wire;
+                                        description "On the wire";
+                                    }
+
+                                    leaf type {
+                                        type types-qos:qos-location;
+                                        description "Aggregate rate type";
+                                    }
+
+                                    leaf vport-rate {
+                                        type types-qos:kbps;
+                                        units "kilobps";
+                                        description "Vport rate";
+                                    }
+
+                                } // container aggregate-rate
 
                             } // list hardware-queue
 
@@ -4000,6 +4518,21 @@ submodule nokia-state-submgt-subscriber {
                                     description "The scheduling class weight.";
                                 }
 
+                                leaf burst-limit {
+                                    type types-qos:burst-limit-override-numeric;
+                                    description "The explicit shaping burst size of a queue.";
+                                }
+
+                                leaf parent-weight {
+                                    type types-qos:weight-override;
+                                    description "The weight that needs to be used by the scheduler to which this queue would be feeding to.";
+                                }
+
+                                leaf parent-cir-weight {
+                                    type types-qos:weight-override;
+                                    description "The weight that needs to be used until the committed rate by the scheduler to which this queue would be feeding to.";
+                                }
+
                             } // container overrides
 
                         } // list queue
@@ -4018,7 +4551,7 @@ submodule nokia-state-submgt-subscriber {
 
                                 leaf scheduler-name {
                                     type types-sros:named-item;
-                                    description "Scheduler name";
+                                    description "Specifies the scheduler name.";
                                 }
 
                                 container statistics {
@@ -4036,7 +4569,431 @@ submodule nokia-state-submgt-subscriber {
 
                                 } // container statistics
 
+                                list sla-profile-instance-scheduler {
+                                    key "card";
+                                    description "Enter the sla-profile-instance-scheduler list instance";
+
+                                    leaf card {
+                                        type int32;
+                                        description "Card number";
+                                    }
+
+                                    leaf members {
+                                        type uint32;
+                                        description "Members";
+                                    }
+
+                                    leaf max-pir {
+                                        type types-qos:sched-pir;
+                                        description "Max PIR rate";
+                                    }
+
+                                    leaf oper-pir {
+                                        type types-qos:sched-pir;
+                                        description "Operational PIR rate";
+                                    }
+
+                                    leaf parent-limit-unused-bandwidth {
+                                        type boolean;
+                                        description "Parent limit unused bandwidth";
+                                    }
+
+                                    leaf orphan {
+                                        type boolean;
+                                        description "Orphan";
+                                    }
+
+                                    container within-cir {
+                                        description "Enter the within-cir context";
+
+                                        leaf consumed {
+                                            type types-qos:kbps;
+                                            units "kilobps";
+                                            description "Consumed";
+                                        }
+
+                                        leaf offered {
+                                            type types-qos:kbps;
+                                            units "kilobps";
+                                            description "Offered";
+                                        }
+
+                                        leaf parent-level {
+                                            type int32;
+                                            description "Parent level";
+                                        }
+
+                                    } // container within-cir
+
+                                    container above-cir {
+                                        description "Enter the above-cir context";
+
+                                        leaf consumed {
+                                            type types-qos:kbps;
+                                            units "kilobps";
+                                            description "Consumed";
+                                        }
+
+                                        leaf offered {
+                                            type types-qos:kbps;
+                                            units "kilobps";
+                                            description "Offered";
+                                        }
+
+                                        leaf parent-level {
+                                            type int32;
+                                            description "Parent level";
+                                        }
+
+                                    } // container above-cir
+
+                                    list level {
+                                        key "level-index";
+                                        description "Enter the level list instance";
+
+                                        leaf level-index {
+                                            type int32 {
+                                                range "0..8";
+                                            }
+                                        }
+
+                                        container within-cir {
+                                            description "Enter the within-cir context";
+
+                                            leaf members {
+                                                type uint32;
+                                                description "Members";
+                                            }
+
+                                            leaf consumed {
+                                                type types-qos:kbps;
+                                                units "kilobps";
+                                                description "Consumed";
+                                            }
+
+                                            leaf offered {
+                                                type types-qos:kbps;
+                                                units "kilobps";
+                                                description "Offered";
+                                            }
+
+                                            container sched-hierarchy {
+                                                description "Enter the sched-hierarchy context";
+
+                                                container queue {
+                                                    description "Enter the queue context";
+
+                                                    container sla-profile-instance {
+                                                        description "Enter the sla-profile-instance context";
+
+                                                        list queue {
+                                                            key "member";
+                                                            description "Enter the queue list instance";
+
+                                                            leaf member {
+                                                                type uint32;
+                                                                description "Member information";
+                                                            }
+
+                                                            leaf queue-id {
+                                                                type int32;
+                                                                description "Queue identifier";
+                                                            }
+
+                                                            leaf subscriber-id {
+                                                                type types-submgt:subscriber-id;
+                                                                description "Subscriber Identification string";
+                                                            }
+
+                                                            leaf sla-profile-instance-id {
+                                                                type types-submgt:sla-profile-instance-id;
+                                                                description "SLA profile instance Identification string";
+                                                            }
+
+                                                            leaf fp {
+                                                                type int32;
+                                                                description "FP number";
+                                                            }
+
+                                                        } // list queue
+
+                                                    } // container sla-profile-instance
+
+                                                } // container queue
+
+                                                container scheduler {
+                                                    description "Enter the scheduler context";
+
+                                                    container sla-profile-instance {
+                                                        description "Enter the sla-profile-instance context";
+
+                                                        list scheduler {
+                                                            key "member";
+                                                            description "Enter the scheduler list instance";
+
+                                                            leaf member {
+                                                                type uint32;
+                                                                description "Member information";
+                                                            }
+
+                                                            leaf scheduler-name {
+                                                                type string;
+                                                                description "Name";
+                                                            }
+
+                                                            leaf subscriber-id {
+                                                                type types-submgt:subscriber-id;
+                                                                description "Subscriber Identification string";
+                                                            }
+
+                                                            leaf sla-profile-instance-id {
+                                                                type types-submgt:sla-profile-instance-id;
+                                                                description "SLA profile instance Identification string";
+                                                            }
+
+                                                        } // list scheduler
+
+                                                        list t0-scheduler {
+                                                            key "member";
+                                                            description "Enter the t0-scheduler list instance";
+
+                                                            leaf member {
+                                                                type uint32;
+                                                                description "Member information";
+                                                            }
+
+                                                            leaf scheduler-name {
+                                                                type string;
+                                                                description "Name";
+                                                            }
+
+                                                            leaf subscriber-id {
+                                                                type types-submgt:subscriber-id;
+                                                                description "Subscriber Identification string";
+                                                            }
+
+                                                            leaf sla-profile-instance-id {
+                                                                type types-submgt:sla-profile-instance-id;
+                                                                description "SLA profile instance Identification string";
+                                                            }
+
+                                                        } // list t0-scheduler
+
+                                                    } // container sla-profile-instance
+
+                                                } // container scheduler
+
+                                            } // container sched-hierarchy
+
+                                        } // container within-cir
+
+                                        container above-cir {
+                                            description "Enter the above-cir context";
+
+                                            leaf members {
+                                                type uint32;
+                                                description "Members";
+                                            }
+
+                                            leaf consumed {
+                                                type types-qos:kbps;
+                                                units "kilobps";
+                                                description "Consumed";
+                                            }
+
+                                            leaf offered {
+                                                type types-qos:kbps;
+                                                units "kilobps";
+                                                description "Offered";
+                                            }
+
+                                            container sched-hierarchy {
+                                                description "Enter the sched-hierarchy context";
+
+                                                container queue {
+                                                    description "Enter the queue context";
+
+                                                    container sla-profile-instance {
+                                                        description "Enter the sla-profile-instance context";
+
+                                                        list queue {
+                                                            key "member";
+                                                            description "Enter the queue list instance";
+
+                                                            leaf member {
+                                                                type uint32;
+                                                                description "Member information";
+                                                            }
+
+                                                            leaf queue-id {
+                                                                type int32;
+                                                                description "Queue identifier";
+                                                            }
+
+                                                            leaf subscriber-id {
+                                                                type types-submgt:subscriber-id;
+                                                                description "Subscriber Identification string";
+                                                            }
+
+                                                            leaf sla-profile-instance-id {
+                                                                type types-submgt:sla-profile-instance-id;
+                                                                description "SLA profile instance Identification string";
+                                                            }
+
+                                                            leaf fp {
+                                                                type int32;
+                                                                description "FP number";
+                                                            }
+
+                                                        } // list queue
+
+                                                    } // container sla-profile-instance
+
+                                                } // container queue
+
+                                                container scheduler {
+                                                    description "Enter the scheduler context";
+
+                                                    container sla-profile-instance {
+                                                        description "Enter the sla-profile-instance context";
+
+                                                        list scheduler {
+                                                            key "member";
+                                                            description "Enter the scheduler list instance";
+
+                                                            leaf member {
+                                                                type uint32;
+                                                                description "Member information";
+                                                            }
+
+                                                            leaf scheduler-name {
+                                                                type string;
+                                                                description "Name";
+                                                            }
+
+                                                            leaf subscriber-id {
+                                                                type types-submgt:subscriber-id;
+                                                                description "Subscriber Identification string";
+                                                            }
+
+                                                            leaf sla-profile-instance-id {
+                                                                type types-submgt:sla-profile-instance-id;
+                                                                description "SLA profile instance Identification string";
+                                                            }
+
+                                                        } // list scheduler
+
+                                                        list t0-scheduler {
+                                                            key "member";
+                                                            description "Enter the t0-scheduler list instance";
+
+                                                            leaf member {
+                                                                type uint32;
+                                                                description "Member information";
+                                                            }
+
+                                                            leaf scheduler-name {
+                                                                type string;
+                                                                description "Name";
+                                                            }
+
+                                                            leaf subscriber-id {
+                                                                type types-submgt:subscriber-id;
+                                                                description "Subscriber Identification string";
+                                                            }
+
+                                                            leaf sla-profile-instance-id {
+                                                                type types-submgt:sla-profile-instance-id;
+                                                                description "SLA profile instance Identification string";
+                                                            }
+
+                                                        } // list t0-scheduler
+
+                                                    } // container sla-profile-instance
+
+                                                } // container scheduler
+
+                                            } // container sched-hierarchy
+
+                                        } // container above-cir
+
+                                    } // list level
+
+                                } // list sla-profile-instance-scheduler
+
                             } // list scheduler
+
+                            list t0-scheduler {
+                                key "card scheduler-name";
+                                description "Enter the t0-scheduler list instance";
+
+                                leaf card {
+                                    type int32;
+                                    description "Card number";
+                                }
+
+                                leaf scheduler-name {
+                                    type string;
+                                    description "Name";
+                                }
+
+                                leaf orphan {
+                                    type boolean;
+                                    description "Orphan";
+                                }
+
+                                leaf members {
+                                    type uint32;
+                                    description "Members";
+                                }
+
+                                container sched-hierarchy {
+                                    description "Enter the sched-hierarchy context";
+
+                                    container queue {
+                                        description "Enter the queue context";
+
+                                        container sla-profile-instance {
+                                            description "Enter the sla-profile-instance context";
+
+                                            list queue {
+                                                key "member";
+                                                description "Enter the queue list instance";
+
+                                                leaf member {
+                                                    type uint32;
+                                                    description "Member information";
+                                                }
+
+                                                leaf queue-id {
+                                                    type int32;
+                                                    description "Queue identifier";
+                                                }
+
+                                                leaf subscriber-id {
+                                                    type types-submgt:subscriber-id;
+                                                    description "Subscriber Identification string";
+                                                }
+
+                                                leaf sla-profile-instance-id {
+                                                    type types-submgt:sla-profile-instance-id;
+                                                    description "SLA profile instance Identification string";
+                                                }
+
+                                                leaf fp {
+                                                    type int32;
+                                                    description "FP number";
+                                                }
+
+                                            } // list queue
+
+                                        } // container sla-profile-instance
+
+                                    } // container queue
+
+                                } // container sched-hierarchy
+
+                            } // list t0-scheduler
 
                         } // container scheduler-policy
 
@@ -4046,7 +5003,7 @@ submodule nokia-state-submgt-subscriber {
 
                             leaf group-id {
                                 type types-qos:hs-wrr-group-id;
-                                description "HS WRR group identifier";
+                                description "HS WRR group identifier.";
                             }
 
                             container overrides {
@@ -4834,6 +5791,23 @@ submodule nokia-state-submgt-subscriber {
                             description "Identification of the Gx diameter session for the session";
                         }
 
+                        container pysros {
+                            description "Enter the pysros context";
+
+                            leaf script-policy {
+                                type types-sros:named-item;
+                                description "Policy for subscriber-mgmt triggered pySROS script";
+                            }
+
+                            leaf script-params {
+                                type string {
+                                    length "1..1000";
+                                }
+                                description "Parameters for subscriber-mgmt triggered pySROS script";
+                            }
+
+                        } // container pysros
+
                         list radius-accounting-overrides {
                             key "index";
                             description "Enter the radius-accounting-overrides list instance";
@@ -4980,6 +5954,33 @@ submodule nokia-state-submgt-subscriber {
                             }
 
                         } // container lcp-keepalive
+
+                        container l2tp-lac-fragmentation {
+                            description "Enter the l2tp-lac-fragmentation context";
+
+                            leaf action {
+                                type types-l2tp:lac-fragmentation-action;
+                                description "Configured action.";
+                            }
+
+                            leaf fpe-id {
+                                type uint32 {
+                                    range "0 | 1..64";
+                                }
+                                description "The related FPE id.";
+                            }
+
+                            leaf state {
+                                type enumeration {
+                                    enum not-applicable                 { value 0; }
+                                    enum active                         { value 1; }
+                                    enum inactive                       { value 2; }
+                                    enum failed                         { value 3; }
+                                }
+                                description "Operational state.";
+                            }
+
+                        } // container l2tp-lac-fragmentation
 
                         container l2tp-steering {
                             description "Enter the l2tp-steering context";
@@ -5887,82 +6888,66 @@ submodule nokia-state-submgt-subscriber {
 
                                     leaf bit0 {
                                         type boolean;
-                                        description "Set bit in charging characteristics information element";
                                     }
 
                                     leaf bit1 {
                                         type boolean;
-                                        description "Set bit in charging characteristics information element";
                                     }
 
                                     leaf bit2 {
                                         type boolean;
-                                        description "Set bit in charging characteristics information element";
                                     }
 
                                     leaf bit3 {
                                         type boolean;
-                                        description "Set bit in charging characteristics information element";
                                     }
 
                                     leaf bit4 {
                                         type boolean;
-                                        description "Set bit in charging characteristics information element";
                                     }
 
                                     leaf bit5 {
                                         type boolean;
-                                        description "Set bit in charging characteristics information element";
                                     }
 
                                     leaf bit6 {
                                         type boolean;
-                                        description "Set bit in charging characteristics information element";
                                     }
 
                                     leaf bit7 {
                                         type boolean;
-                                        description "Set bit in charging characteristics information element";
                                     }
 
                                     leaf bit8 {
                                         type boolean;
-                                        description "Set bit in charging characteristics information element";
                                     }
 
                                     leaf bit9 {
                                         type boolean;
-                                        description "Set bit in charging characteristics information element";
                                     }
 
                                     leaf bit10 {
                                         type boolean;
-                                        description "Set bit in charging characteristics information element";
                                     }
 
                                     leaf bit11 {
                                         type boolean;
-                                        description "Set bit in charging characteristics information element";
                                     }
 
                                     leaf bit12 {
                                         type boolean;
-                                        description "Set bit in charging characteristics information element";
                                     }
 
                                     leaf bit13 {
                                         type boolean;
-                                        description "Set bit in charging characteristics information element";
                                     }
 
                                     leaf bit14 {
                                         type boolean;
-                                        description "Set bit in charging characteristics information element";
                                     }
 
                                     leaf bit15 {
                                         type boolean;
-                                        description "Set bit in charging characteristics information element";
                                     }
 
                                 } // container charging-characteristics
@@ -6364,6 +7349,11 @@ submodule nokia-state-submgt-subscriber {
                             leaf broadcast {
                                 type types-sros:ipv4-address;
                                 description "Broadcast ip-address";
+                            }
+
+                            leaf chaddr {
+                                type types-sros:mac-unicast-address;
+                                description "DHCP client hardware address";
                             }
 
                         } // container dhcp-lease
@@ -7280,6 +8270,16 @@ submodule nokia-state-submgt-subscriber {
                                         description "The committed buffer size";
                                     }
 
+                                    leaf parent-weight {
+                                        type types-qos:weight-override;
+                                        description "The weight that needs to be used by the scheduler to which this policer would be feeding to.";
+                                    }
+
+                                    leaf parent-cir-weight {
+                                        type types-qos:weight-override;
+                                        description "The weight that needs to be used until the committed rate by the scheduler to which this policer would be feeding to.";
+                                    }
+
                                 } // list policer
 
                                 list queue {
@@ -7325,6 +8325,21 @@ submodule nokia-state-submgt-subscriber {
                                     leaf class-weight {
                                         type types-qos:hs-class-weight-override;
                                         description "The scheduling class weight.";
+                                    }
+
+                                    leaf burst-limit {
+                                        type types-qos:burst-limit-override-numeric;
+                                        description "The explicit shaping burst size of a queue.";
+                                    }
+
+                                    leaf parent-weight {
+                                        type types-qos:weight-override;
+                                        description "The weight that needs to be used by the scheduler to which this queue would be feeding to.";
+                                    }
+
+                                    leaf parent-cir-weight {
+                                        type types-qos:weight-override;
+                                        description "The weight that needs to be used until the committed rate by the scheduler to which this queue would be feeding to.";
                                     }
 
                                 } // list queue
@@ -7459,6 +8474,16 @@ submodule nokia-state-submgt-subscriber {
                                         description "The committed buffer size";
                                     }
 
+                                    leaf parent-weight {
+                                        type types-qos:weight-override;
+                                        description "The weight that needs to be used by the scheduler to which this policer would be feeding to.";
+                                    }
+
+                                    leaf parent-cir-weight {
+                                        type types-qos:weight-override;
+                                        description "The weight that needs to be used until the committed rate by the scheduler to which this policer would be feeding to.";
+                                    }
+
                                 } // list policer
 
                                 list queue {
@@ -7506,6 +8531,21 @@ submodule nokia-state-submgt-subscriber {
                                         description "The scheduling class weight.";
                                     }
 
+                                    leaf burst-limit {
+                                        type types-qos:burst-limit-override-numeric;
+                                        description "The explicit shaping burst size of a queue.";
+                                    }
+
+                                    leaf parent-weight {
+                                        type types-qos:weight-override;
+                                        description "The weight that needs to be used by the scheduler to which this queue would be feeding to.";
+                                    }
+
+                                    leaf parent-cir-weight {
+                                        type types-qos:weight-override;
+                                        description "The weight that needs to be used until the committed rate by the scheduler to which this queue would be feeding to.";
+                                    }
+
                                 } // list queue
 
                                 list scheduler {
@@ -7537,7 +8577,7 @@ submodule nokia-state-submgt-subscriber {
 
                                     leaf group-id {
                                         type types-qos:hs-wrr-group-id;
-                                        description "HS WRR group identifier";
+                                        description "HS WRR group identifier.";
                                     }
 
                                     leaf pir {
@@ -7775,6 +8815,7 @@ submodule nokia-state-submgt-subscriber {
                                         type enumeration {
                                             enum queue                          { value 1; }
                                             enum arbiter                        { value 2; }
+                                            enum policer                        { value 3; }
                                         }
                                         description
                                             "Specifies that the level-2 QOS handling for the
@@ -8064,6 +9105,16 @@ submodule nokia-state-submgt-subscriber {
                                         description "The committed buffer size";
                                     }
 
+                                    leaf parent-weight {
+                                        type types-qos:weight-override;
+                                        description "The weight that needs to be used by the scheduler to which this policer would be feeding to.";
+                                    }
+
+                                    leaf parent-cir-weight {
+                                        type types-qos:weight-override;
+                                        description "The weight that needs to be used until the committed rate by the scheduler to which this policer would be feeding to.";
+                                    }
+
                                 } // list policer
 
                                 list queue {
@@ -8109,6 +9160,21 @@ submodule nokia-state-submgt-subscriber {
                                     leaf class-weight {
                                         type types-qos:hs-class-weight-override;
                                         description "The scheduling class weight.";
+                                    }
+
+                                    leaf burst-limit {
+                                        type types-qos:burst-limit-override-numeric;
+                                        description "The explicit shaping burst size of a queue.";
+                                    }
+
+                                    leaf parent-weight {
+                                        type types-qos:weight-override;
+                                        description "The weight that needs to be used by the scheduler to which this queue would be feeding to.";
+                                    }
+
+                                    leaf parent-cir-weight {
+                                        type types-qos:weight-override;
+                                        description "The weight that needs to be used until the committed rate by the scheduler to which this queue would be feeding to.";
                                     }
 
                                 } // list queue
@@ -8203,6 +9269,16 @@ submodule nokia-state-submgt-subscriber {
                                         description "The committed buffer size";
                                     }
 
+                                    leaf parent-weight {
+                                        type types-qos:weight-override;
+                                        description "The weight that needs to be used by the scheduler to which this policer would be feeding to.";
+                                    }
+
+                                    leaf parent-cir-weight {
+                                        type types-qos:weight-override;
+                                        description "The weight that needs to be used until the committed rate by the scheduler to which this policer would be feeding to.";
+                                    }
+
                                 } // list policer
 
                                 list queue {
@@ -8250,6 +9326,21 @@ submodule nokia-state-submgt-subscriber {
                                         description "The scheduling class weight.";
                                     }
 
+                                    leaf burst-limit {
+                                        type types-qos:burst-limit-override-numeric;
+                                        description "The explicit shaping burst size of a queue.";
+                                    }
+
+                                    leaf parent-weight {
+                                        type types-qos:weight-override;
+                                        description "The weight that needs to be used by the scheduler to which this queue would be feeding to.";
+                                    }
+
+                                    leaf parent-cir-weight {
+                                        type types-qos:weight-override;
+                                        description "The weight that needs to be used until the committed rate by the scheduler to which this queue would be feeding to.";
+                                    }
+
                                 } // list queue
 
                                 list scheduler {
@@ -8281,7 +9372,7 @@ submodule nokia-state-submgt-subscriber {
 
                                     leaf group-id {
                                         type types-qos:hs-wrr-group-id;
-                                        description "HS WRR group identifier";
+                                        description "HS WRR group identifier.";
                                     }
 
                                     leaf pir {

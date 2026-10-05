@@ -5,19 +5,17 @@ module nokia-sr-openconfig-telemetry-deviations {
     prefix "nokia-oc-telemetry-devs";
 
     import nokia-sros-yang-extensions     { prefix "sros-ext"; }
-    import openconfig-extensions          { prefix "oc-ext"; }
     import openconfig-inet-types          { prefix "oc-inet"; }
     import openconfig-telemetry           { prefix "oc-telemetry"; }
-    import openconfig-telemetry-types     { prefix "oc-telemetry-types"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
          Web: <http://www.nokia.com>";
     description
         "This module contains the list of deviations against the openconfig-telemetry
-          module for the Nokia SR OS based routers.
+         module for the Nokia SR OS based routers.
 
          Copyright 2016 Nokia. All rights reserved. Reproduction of this document
          is authorized on the condition that the foregoing copyright notice is included.
@@ -34,7 +32,7 @@ module nokia-sr-openconfig-telemetry-deviations {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2018-08-17";
+    revision "2025-03-12";
 
     deviation /oc-telemetry:telemetry-system/oc-telemetry:sensor-groups/oc-telemetry:sensor-group/oc-telemetry:config/oc-telemetry:sensor-group-id {
         description "Added limit to string length.";
@@ -57,7 +55,7 @@ module nokia-sr-openconfig-telemetry-deviations {
     deviation /oc-telemetry:telemetry-system/oc-telemetry:sensor-groups/oc-telemetry:sensor-group/oc-telemetry:sensor-paths/oc-telemetry:sensor-path/oc-telemetry:config/oc-telemetry:path {
         deviate replace {
             type string {
-                length "1..4096";
+                length "1..512";
             }
         }
     }
@@ -69,7 +67,7 @@ module nokia-sr-openconfig-telemetry-deviations {
     deviation /oc-telemetry:telemetry-system/oc-telemetry:sensor-groups/oc-telemetry:sensor-group/oc-telemetry:sensor-paths/oc-telemetry:sensor-path/oc-telemetry:state/oc-telemetry:path {
         deviate replace {
             type string {
-                length "1..4096";
+                length "1..512";
             }
         }
     }
@@ -221,9 +219,6 @@ module nokia-sr-openconfig-telemetry-deviations {
         }
     }
 
-    deviation /oc-telemetry:telemetry-system/oc-telemetry:subscriptions/oc-telemetry:dynamic-subscriptions/oc-telemetry:dynamic-subscription/oc-telemetry:state/oc-telemetry:heartbeat-interval {
-        deviate not-supported;
-    }
 
     deviation /oc-telemetry:telemetry-system/oc-telemetry:subscriptions/oc-telemetry:dynamic-subscriptions/oc-telemetry:dynamic-subscription/oc-telemetry:state/oc-telemetry:suppress-redundant {
         deviate not-supported;
@@ -232,7 +227,7 @@ module nokia-sr-openconfig-telemetry-deviations {
     deviation /oc-telemetry:telemetry-system/oc-telemetry:subscriptions/oc-telemetry:dynamic-subscriptions/oc-telemetry:dynamic-subscription/oc-telemetry:sensor-paths/oc-telemetry:sensor-path/oc-telemetry:state/oc-telemetry:path {
         deviate replace {
             type string {
-                length "1..4096";
+                length "1..512";
             }
         }
     }

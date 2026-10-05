@@ -5,21 +5,20 @@ module nokia-sr-openconfig-vlan-deviations {
     prefix "nokia-oc-vlan-devs";
 
     import nokia-sros-yang-extensions     { prefix "sros-ext"; }
-    import openconfig-extensions          { prefix "oc-ext"; }
     import openconfig-if-aggregate        { prefix "oc-lag"; }
     import openconfig-if-ethernet         { prefix "oc-eth"; }
     import openconfig-interfaces          { prefix "oc-if"; }
     import openconfig-vlan                { prefix "oc-vlan"; }
     import openconfig-vlan-types          { prefix "oc-vlan-types"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
          Web: <http://www.nokia.com>";
     description
         "This module contains the list of deviations against the openconfig-vlan
-          module for the Nokia SR OS based routers.
+         module for the Nokia SR OS based routers.
 
          Copyright 2016 Nokia. All rights reserved. Reproduction of this document
          is authorized on the condition that the foregoing copyright notice is included.
@@ -36,7 +35,7 @@ module nokia-sr-openconfig-vlan-deviations {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2017-07-14";
+    revision "2025-10-30";
 
     deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-vlan:vlan/oc-vlan:config/oc-vlan:vlan-id {
         deviate replace {
@@ -58,6 +57,31 @@ module nokia-sr-openconfig-vlan-deviations {
                 type oc-vlan-types:qinq-id;
             }
         }
+    }
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-vlan:vlan/oc-vlan:match {
+        deviate not-supported;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-vlan:vlan/oc-vlan:ingress-mapping {
+        deviate not-supported;
+    }
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-vlan:vlan/oc-vlan:egress-mapping {
+        deviate not-supported;
     }
 
     deviation /oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan {

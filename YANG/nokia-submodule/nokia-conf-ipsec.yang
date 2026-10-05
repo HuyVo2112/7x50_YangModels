@@ -16,7 +16,7 @@ submodule nokia-conf-ipsec {
     include nokia-conf-system-security;
     include nokia-conf-system-security-pki;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -39,7 +39,7 @@ submodule nokia-conf-ipsec {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-03-27";
+    revision "2026-07-22";
 
     grouping conf-ipsec {
         container ipsec {
@@ -286,6 +286,22 @@ submodule nokia-conf-ipsec {
                         description "Tunnel template ID";
                     }
 
+                    leaf action {
+                        type enumeration {
+                            enum accept {
+                                value 1;
+                                description "Accept the IPsec client";
+                            }
+                            enum reject {
+                                value 2;
+                                description "Reject the IPsec client";
+                            }
+                        }
+                        sros-ext:auto-restart-to-modify;
+                        default "accept";
+                        description "IPsec client action";
+                    }
+
                     leaf-list apply-groups {
                         type leafref {
                             path "../../../../groups/group/name";
@@ -412,6 +428,15 @@ submodule nokia-conf-ipsec {
                                     }
 
                                 }
+                                case regexp {
+
+                                    leaf regexp {
+                                        type types-sros:display-string-or-empty;
+                                        sros-ext:auto-restart-to-modify;
+                                        description "Regular expression pattern used to match the IDi";
+                                    }
+
+                                }
                             }
                         } // container idi
 
@@ -453,6 +478,72 @@ submodule nokia-conf-ipsec {
                         } // container peer-ip-prefix
 
                     } // container identification
+
+                    container local {
+                        sros-ext:auto-restart-to-modify;
+                        description "Enter the local context";
+
+                        container address-assignment {
+                            sros-ext:auto-restart-to-modify;
+                            description "Enter the address-assignment context";
+
+                            container ipv4 {
+                                sros-ext:auto-restart-to-modify;
+                                description "Enter the ipv4 context";
+
+                                leaf router-instance {
+                                    type string;
+                                    sros-ext:auto-restart-to-modify;
+                                    description "Router instance for the local DHCPv4 server";
+                                }
+
+                                leaf dhcp-server {
+                                    type types-sros:named-item;
+                                    sros-ext:auto-restart-to-modify;
+                                    description "Local DHCPv4 server name";
+                                }
+
+                                leaf pool {
+                                    type types-sros:named-item;
+                                    sros-ext:auto-restart-to-modify;
+                                    description "DHCPv4 server pool name";
+                                }
+
+                                leaf secondary-pool {
+                                    type types-sros:named-item;
+                                    sros-ext:auto-restart-to-modify;
+                                    description "DHCPv4 secondary server pool name";
+                                }
+
+                            } // container ipv4
+
+                            container ipv6 {
+                                sros-ext:auto-restart-to-modify;
+                                description "Enter the ipv6 context";
+
+                                leaf router-instance {
+                                    type string;
+                                    sros-ext:auto-restart-to-modify;
+                                    description "Router instance for the local DHCPv6 server";
+                                }
+
+                                leaf dhcp-server {
+                                    type types-sros:named-item;
+                                    sros-ext:auto-restart-to-modify;
+                                    description "Local DHCPv6 server name";
+                                }
+
+                                leaf pool {
+                                    type types-sros:named-item;
+                                    sros-ext:auto-restart-to-modify;
+                                    description "DHCPv6 server pool name";
+                                }
+
+                            } // container ipv6
+
+                        } // container address-assignment
+
+                    } // container local
 
                 } // list client
 
@@ -607,6 +698,12 @@ submodule nokia-conf-ipsec {
                                 type boolean;
                                 default "true";
                                 description "Send IDr payload in last IKE authentication response";
+                            }
+
+                            leaf ppk-required {
+                                type boolean;
+                                default "false";
+                                description "Force the use of PPK";
                             }
 
                             container ikev2-fragment {
@@ -827,7 +924,7 @@ submodule nokia-conf-ipsec {
                 leaf dh-group {
                     type types-ipsec:dh-group;
                     default "group-2";
-                    description "Diffie-Helman group used to calculate session keys";
+                    description "Key exchange group to derive IKE_SA and CHILD_SA keys";
                 }
 
                 leaf ike-auth-algorithm {
@@ -839,7 +936,7 @@ submodule nokia-conf-ipsec {
                 leaf ike-encryption-algorithm {
                     type types-ipsec:ike-encryption-algorithms;
                     default "aes-128";
-                    description "IKE encryption algorith for the IKE transform instance";
+                    description "IKE encryption algorithm for the IKE transform instance";
                 }
 
                 leaf ike-prf-algorithm {
@@ -943,6 +1040,95 @@ submodule nokia-conf-ipsec {
                 }
 
             } // list ipsec-transform
+
+            list ppk-list {
+                key "name";
+                max-elements 128;
+                description "Enter the ppk-list list instance";
+
+                leaf name {
+                    type types-sros:named-item;
+                    description "PPK list instance name";
+                }
+
+                leaf-list apply-groups {
+                    type leafref {
+                        path "../../../groups/group/name";
+                    }
+                    max-elements 8;
+                    ordered-by user;
+                    description "Apply a configuration group at this level";
+                }
+
+                leaf-list apply-groups-exclude {
+                    type leafref {
+                        path "../../../groups/group/name";
+                    }
+                    max-elements 8;
+                    ordered-by user;
+                    description "Exclude a configuration group at this level";
+                }
+
+                list ppk {
+                    key "ppk-id";
+                    max-elements 128;
+                    description "Enter the ppk list instance";
+
+                    leaf ppk-id {
+                        type types-sros:named-item-64;
+                        description "PPK ID";
+                    }
+
+                    leaf-list apply-groups {
+                        type leafref {
+                            path "../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Apply a configuration group at this level";
+                    }
+
+                    leaf-list apply-groups-exclude {
+                        type leafref {
+                            path "../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Exclude a configuration group at this level";
+                    }
+
+                    container value {
+                        presence "Enable the value context";
+                        description "Enable the value context";
+
+                        choice value {
+                            mandatory true;
+                            case ascii {
+
+                                leaf ascii {
+                                    type types-sros:encrypted-leaf {
+                                        length "1..115";
+                                    }
+                                    description "PPK value as an ASCII string";
+                                }
+
+                            }
+                            case hex {
+
+                                leaf hex {
+                                    type types-sros:encrypted-leaf-hex {
+                                        length "1..115";
+                                    }
+                                    description "PPK value as a hexadecimal string with prefix 0x";
+                                }
+
+                            }
+                        }
+                    } // container value
+
+                } // list ppk
+
+            } // list ppk-list
 
             list static-sa {
                 key "name";
@@ -1978,6 +2164,13 @@ submodule nokia-conf-ipsec {
                     description "Enable traffic class copy upon decapsulation";
                 }
 
+                leaf ppk-list {
+                    type leafref {
+                        path "../../ppk-list/name";
+                    }
+                    description "PPK list to use in the tunnel template";
+                }
+
                 leaf propagate-pmtu-v4 {
                     type boolean;
                     default "true";
@@ -2049,6 +2242,27 @@ submodule nokia-conf-ipsec {
                     } // container pkt-too-big
 
                 } // container icmp6-generation
+
+                container reverse-route {
+                    description "Enter the reverse-route context";
+
+                    leaf metric {
+                        type uint32 {
+                            range "0..65535";
+                        }
+                        default "0";
+                        description "Metric used for DL2L tunnel reverse routes";
+                    }
+
+                    leaf preference {
+                        type uint32 {
+                            range "0..255";
+                        }
+                        default "0";
+                        description "Preference used for DL2L tunnel reverse routes";
+                    }
+
+                } // container reverse-route
 
                 container icmp-generation {
                     description "Enter the icmp-generation context";
@@ -2278,6 +2492,25 @@ submodule nokia-conf-ipsec {
                                 }
                             }
                         } // container id
+
+                        container ppk {
+                            description "Enter the ppk context";
+
+                            leaf list {
+                                type leafref {
+                                    path "../../../../../ppk-list/name";
+                                }
+                                description "PPK list instance name";
+                            }
+
+                            leaf id {
+                                type leafref {
+                                    path "../../../../../ppk-list[name=current()/../list]/ppk/ppk-id";
+                                }
+                                description "PPK ID";
+                            }
+
+                        } // container ppk
 
                     } // container dynamic
 

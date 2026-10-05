@@ -14,7 +14,7 @@ submodule nokia-conf-mirror {
     include nokia-conf-groups;
     include nokia-conf-qos;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -37,7 +37,7 @@ submodule nokia-conf-mirror {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-11-10";
+    revision "2026-07-22";
 
     grouping conf-mirror {
         container mirror {
@@ -49,6 +49,12 @@ submodule nokia-conf-mirror {
                 }
                 default "0";
                 description "System wide global sampling rate";
+            }
+
+            leaf allow-egress-filter-mirror-source {
+                type boolean;
+                default "false";
+                description "Allow egress filters as mirror sources";
             }
 
             leaf-list apply-groups {
@@ -102,7 +108,7 @@ submodule nokia-conf-mirror {
 
                 leaf sampling-rate {
                     type uint32 {
-                        range "256..10000";
+                        range "1..60000";
                     }
                     description "Sampling rate";
                 }
@@ -353,9 +359,7 @@ submodule nokia-conf-mirror {
                             case ing-vc-label {
 
                                 leaf ing-vc-label {
-                                    type uint32 {
-                                        range "32..18431";
-                                    }
+                                    type types-services:ingress-vc-label;
                                     description "Ingress virtual circuit label";
                                 }
 
@@ -406,9 +410,7 @@ submodule nokia-conf-mirror {
                             description "Enter the ingress context";
 
                             leaf vc-label {
-                                type uint32 {
-                                    range "32..18431";
-                                }
+                                type types-services:ingress-vc-label;
                                 sros-ext:auto-restart-to-modify;
                                 description "MPLS VC label that sends packets to the far end device";
                             }
@@ -512,9 +514,7 @@ submodule nokia-conf-mirror {
                         description "Enter the ingress context";
 
                         leaf vc-label {
-                            type uint32 {
-                                range "32..18431";
-                            }
+                            type types-services:ingress-vc-label;
                             sros-ext:auto-restart-to-modify;
                             description "MPLS VC label that sends packets to the far end device";
                         }
@@ -690,6 +690,11 @@ submodule nokia-conf-mirror {
                     leaf file-url {
                         type types-sros:ts-url;
                         description "URL and file name for packet capture transfer";
+                    }
+
+                    leaf router-instance {
+                        type types-sros:named-item-64;
+                        description "Router name used for FTP transmission of the PCAP file";
                     }
 
                     leaf-list apply-groups {

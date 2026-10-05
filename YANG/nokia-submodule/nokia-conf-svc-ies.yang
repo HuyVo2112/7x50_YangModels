@@ -15,6 +15,7 @@ submodule nokia-conf-svc-ies {
     import nokia-types-subscriber-mgmt    { prefix "types-submgt"; }
 
     include nokia-conf-aa-group;
+    include nokia-conf-anysec;
     include nokia-conf-application-assurance;
     include nokia-conf-bfd;
     include nokia-conf-eth-cfm;
@@ -39,12 +40,13 @@ submodule nokia-conf-svc-ies {
     include nokia-conf-svc-epipe;
     include nokia-conf-svc-ies-sub-if;
     include nokia-conf-svc-ies-vdo-if;
+    include nokia-conf-svc-nat;
     include nokia-conf-system;
     include nokia-conf-system-security;
     include nokia-conf-test-oam;
     include nokia-conf-vrrp;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -67,7 +69,7 @@ submodule nokia-conf-svc-ies {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2023-10-13";
+    revision "2026-07-22";
 
     grouping conf-svc-ies {
         list ies {
@@ -447,6 +449,225 @@ submodule nokia-conf-svc-ies {
 
             } // list aa-interface
 
+            list dms-interface {
+                key "interface-name";
+                description "Enter the dms-interface list instance";
+
+                leaf interface-name {
+                    type types-sros:interface-name;
+                    description "Interface name";
+                }
+
+                leaf description {
+                    type types-sros:very-long-description;
+                    description "Text description";
+                }
+
+                leaf admin-state {
+                    type types-sros:admin-state;
+                    default "enable";
+                    description "Administrative state of the interface";
+                }
+
+                leaf ip-mtu {
+                    type types-router:ip-mtu-ext;
+                    units "bytes";
+                    description "IP MTU applied to outgoing packets";
+                }
+
+                leaf-list apply-groups {
+                    type leafref {
+                        path "../../../../groups/group/name";
+                    }
+                    max-elements 8;
+                    ordered-by user;
+                    description "Apply a configuration group at this level";
+                }
+
+                leaf-list apply-groups-exclude {
+                    type leafref {
+                        path "../../../../groups/group/name";
+                    }
+                    max-elements 8;
+                    ordered-by user;
+                    description "Exclude a configuration group at this level";
+                }
+
+                list sap {
+                    key "sap-id";
+                    max-elements 1;
+                    description "Enter the sap list instance";
+
+                    leaf sap-id {
+                        type types-sros:sap;
+                        description "SAP identifier";
+                    }
+
+                    leaf description {
+                        type types-sros:long-description;
+                        description "Text description";
+                    }
+
+                    leaf admin-state {
+                        type types-sros:admin-state;
+                        default "enable";
+                        description "Administrative state of the SAP";
+                    }
+
+                    leaf-list apply-groups {
+                        type leafref {
+                            path "../../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Apply a configuration group at this level";
+                    }
+
+                    leaf-list apply-groups-exclude {
+                        type leafref {
+                            path "../../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Exclude a configuration group at this level";
+                    }
+
+                    container ingress {
+                        description "Enter the ingress context";
+
+                        container qos {
+                            description "Enter the qos context";
+
+                            container sap-ingress {
+                                description "Enter the sap-ingress context";
+
+                                leaf policy-name {
+                                    type leafref {
+                                        path "../../../../../../../../qos/sap-ingress/sap-ingress-policy-name";
+                                    }
+                                    description "Policy ID";
+                                }
+
+                                container overrides {
+                                    description "Enter the overrides context";
+
+                                } // container overrides
+
+                            } // container sap-ingress
+
+                        } // container qos
+
+                    } // container ingress
+
+                    container egress {
+                        description "Enter the egress context";
+
+                        container qos {
+                            description "Enter the qos context";
+
+                            container sap-egress {
+                                description "Enter the sap-egress context";
+
+                                leaf policy-name {
+                                    type leafref {
+                                        path "../../../../../../../../qos/sap-egress/sap-egress-policy-name";
+                                    }
+                                    description "Policy ID to associate with SAP for mirrored service";
+                                }
+
+                            } // container sap-egress
+
+                        } // container qos
+
+                        container filter {
+                            description "Enter the filter context";
+
+                            leaf ip {
+                                type leafref {
+                                    path "../../../../../../../filter/ip-filter/filter-name";
+                                }
+                                description "IPv4 filter policy name";
+                            }
+
+                        } // container filter
+
+                        container virtual-port {
+                            description "Enter the virtual-port context";
+
+                            leaf vport-name {
+                                type leafref {
+                                    path "../../../../../../../port/ethernet/access/egress/virtual-port/vport-name";
+                                }
+                                description "Virtual port assigned to the SAP";
+                            }
+
+                        } // container virtual-port
+
+                    } // container egress
+
+                    container lag {
+                        description "Enter the lag context";
+
+                    } // container lag
+
+                    container fwd-wholesale {
+                        description "Enter the fwd-wholesale context";
+
+                        leaf pppoe-service {
+                            type leafref {
+                                path "../../../../../epipe/service-name";
+                            }
+                            description "PPPoE service name";
+                        }
+
+                    } // container fwd-wholesale
+
+                } // list sap
+
+                container ipv4 {
+                    description "Enter the ipv4 context";
+
+                    container primary {
+                        presence "Enable the primary context";
+                        description "Enable the primary context";
+
+                        leaf address {
+                            type types-sros:ipv4-unicast-address;
+                            mandatory true;
+                            description "Primary IPv4 address assigned to the interface";
+                        }
+
+                        leaf prefix-length {
+                            type uint32 {
+                                range "0..32";
+                            }
+                            mandatory true;
+                            description "IPv4 address prefix length";
+                        }
+
+                        leaf-list apply-groups {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Apply a configuration group at this level";
+                        }
+
+                        leaf-list apply-groups-exclude {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Exclude a configuration group at this level";
+                        }
+
+                    } // container primary
+
+                } // container ipv4
+
+            } // list dms-interface
 
             list interface {
                 key "interface-name";
@@ -482,9 +703,15 @@ submodule nokia-conf-svc-ies {
                     description "Enable/disable tunnel interface";
                 }
 
+                leaf ip-tunnel-interface {
+                    type boolean;
+                    sros-ext:immutable;
+                    default "false";
+                    description "Enable IP tunnel interface";
+                }
+
                 leaf loopback {
                     type boolean;
-                    default "false";
                     description "Use interface as a loopback interface";
                 }
 
@@ -635,6 +862,36 @@ submodule nokia-conf-svc-ies {
 
                 } // container ptp-hw-assist
 
+                container egress {
+                    when "../ip-tunnel-interface = 'true'" {
+                        description "only allowed in ip-tunnel interface";
+                    }
+                    description "Enter the egress context";
+
+                    container filter {
+                        when "../../ip-tunnel-interface = 'true'" {
+                            description "only allowed in ip-tunnel interface";
+                        }
+                        description "Enter the filter context";
+
+                        leaf ip {
+                            type leafref {
+                                path "../../../../../../filter/ip-filter/filter-name";
+                            }
+                            description "IP filter name";
+                        }
+
+                        leaf ipv6 {
+                            type leafref {
+                                path "../../../../../../filter/ipv6-filter/filter-name";
+                            }
+                            description "IPv6 filter name";
+                        }
+
+                    } // container filter
+
+                } // container egress
+
                 container ingress {
                     description "Enter the ingress context";
 
@@ -650,6 +907,28 @@ submodule nokia-conf-svc-ies {
                         default "false";
                         description "Enable BGP destination class lookup";
                     }
+
+                    container filter {
+                        when "../../ip-tunnel-interface = 'true'" {
+                            description "only allowed in ip-tunnel interface";
+                        }
+                        description "Enter the filter context";
+
+                        leaf ip {
+                            type leafref {
+                                path "../../../../../../filter/ip-filter/filter-name";
+                            }
+                            description "IP filter name";
+                        }
+
+                        leaf ipv6 {
+                            type leafref {
+                                path "../../../../../../filter/ipv6-filter/filter-name";
+                            }
+                            description "IPv6 filter name";
+                        }
+
+                    } // container filter
 
                 } // container ingress
 
@@ -681,6 +960,194 @@ submodule nokia-conf-svc-ies {
                     }
 
                 } // container load-balancing
+
+                container urpf-check {
+                    when "../ip-tunnel-interface = 'false'" {
+                        description "not allowed in a tunnel interface";
+                    }
+                    presence "Enable the urpf-check context";
+                    description "Enable the urpf-check context";
+
+                    leaf ignore-default {
+                        type boolean;
+                        default "false";
+                        description "Ignore default route when performing a uRPF check";
+                    }
+
+                    leaf mode {
+                        type types-router:urpf-check-mode;
+                        default "strict";
+                        description "Unicast RPF check mode";
+                    }
+
+                } // container urpf-check
+
+                container autoconfigure {
+                    description "Enter the autoconfigure context";
+
+                    container ipv4 {
+                        when "../../tunnel = 'false' and ../../ip-tunnel-interface = 'false'" {
+                            description "not allowed in a tunnel interface";
+                        }
+                        description "Enter the ipv4 context";
+
+                        container dhcp-client {
+                            presence "Enable the dhcp-client context";
+                            description "Enable the dhcp-client context";
+
+                            leaf admin-state {
+                                type types-sros:admin-state;
+                                default "disable";
+                                description "Administrative state of the DHCP client";
+                            }
+
+                            leaf lease-time {
+                                type union {
+                                    type types-sros:time-duration {
+                                        range "10..315446399";
+                                    }
+                                    type enumeration {
+                                        enum infinite {
+                                            value -1;
+                                            description "Request an infinite lease with no expiry";
+                                        }
+                                    }
+                                }
+                                sros-ext:auto-restart-to-modify;
+                                default "86400";
+                                description "Lease time the DHCP client requests";
+                            }
+
+                            leaf-list apply-groups {
+                                type leafref {
+                                    path "../../../../../../../groups/group/name";
+                                }
+                                max-elements 8;
+                                ordered-by user;
+                                sros-ext:auto-restart-to-modify;
+                                description "Apply a configuration group at this level";
+                            }
+
+                            leaf-list apply-groups-exclude {
+                                type leafref {
+                                    path "../../../../../../../groups/group/name";
+                                }
+                                max-elements 8;
+                                ordered-by user;
+                                sros-ext:auto-restart-to-modify;
+                                description "Exclude a configuration group at this level";
+                            }
+
+                            container class-id {
+                                sros-ext:auto-restart-to-modify;
+                                description "Enter the class-id context";
+
+                                choice format {
+                                    case ascii-string {
+
+                                        leaf ascii-string {
+                                            type string {
+                                                length "1..127";
+                                            }
+                                            sros-ext:auto-restart-to-modify;
+                                            description "Vendor class ID as an ASCII string";
+                                        }
+
+                                    }
+                                    case hex-string {
+
+                                        leaf hex-string {
+                                            type types-sros:hex-string {
+                                                length "1..256";
+                                            }
+                                            sros-ext:auto-restart-to-modify;
+                                            description "Vendor class ID as a hexadecimal string";
+                                        }
+
+                                    }
+                                }
+                            } // container class-id
+
+                            container client-id {
+                                sros-ext:auto-restart-to-modify;
+                                description "Enter the client-id context";
+
+                                choice format {
+                                    case mac {
+
+                                        leaf mac {
+                                            type empty;
+                                            sros-ext:auto-restart-to-modify;
+                                            description "MAC address as the client ID";
+                                        }
+
+                                    }
+                                    case interface {
+
+                                        leaf interface {
+                                            type empty;
+                                            sros-ext:auto-restart-to-modify;
+                                            description "Interface name as the client ID";
+                                        }
+
+                                    }
+                                    case ascii-string {
+
+                                        leaf ascii-string {
+                                            type string {
+                                                length "1..127";
+                                            }
+                                            sros-ext:auto-restart-to-modify;
+                                            description "Client ID as an ASCII string";
+                                        }
+
+                                    }
+                                    case hex-string {
+
+                                        leaf hex-string {
+                                            type types-sros:hex-string {
+                                                length "1..256";
+                                            }
+                                            sros-ext:auto-restart-to-modify;
+                                            description "Client ID as a hexadecimal string";
+                                        }
+
+                                    }
+                                }
+                            } // container client-id
+
+                            container request-options {
+                                sros-ext:auto-restart-to-modify;
+                                description "Enter the request-options context";
+
+                                leaf dns-server {
+                                    type boolean;
+                                    sros-ext:auto-restart-to-modify;
+                                    default "false";
+                                    description "Include the DNS server option";
+                                }
+
+                                leaf router {
+                                    type boolean;
+                                    sros-ext:auto-restart-to-modify;
+                                    default "false";
+                                    description "Include the router option";
+                                }
+
+                                leaf static-route {
+                                    type boolean;
+                                    sros-ext:auto-restart-to-modify;
+                                    default "false";
+                                    description "Include the static route option";
+                                }
+
+                            } // container request-options
+
+                        } // container dhcp-client
+
+                    } // container ipv4
+
+                } // container autoconfigure
 
                 container ping-template {
                     presence "Enable the ping-template context";
@@ -1153,6 +1620,28 @@ submodule nokia-conf-svc-ies {
                                             }
                                         } // container id
 
+                                        container ppk {
+                                            sros-ext:auto-restart-to-modify;
+                                            description "Enter the ppk context";
+
+                                            leaf list {
+                                                type leafref {
+                                                    path "../../../../../../../../../ipsec/ppk-list/name";
+                                                }
+                                                sros-ext:auto-restart-to-modify;
+                                                description "PPK list instance name";
+                                            }
+
+                                            leaf id {
+                                                type leafref {
+                                                    path "../../../../../../../../../ipsec/ppk-list[name=current()/../list]/ppk/ppk-id";
+                                                }
+                                                sros-ext:auto-restart-to-modify;
+                                                description "PPK ID";
+                                            }
+
+                                        } // container ppk
+
                                     } // container dynamic
 
                                 }
@@ -1386,6 +1875,13 @@ submodule nokia-conf-svc-ies {
                         sros-ext:immutable;
                         default "ether";
                         description "Virtual circuit type associated with the SDP binding";
+                    }
+
+                    leaf anysec-encryption-group {
+                        type leafref {
+                            path "../../../../../anysec/service-encryption/encryption-group/group-name";
+                        }
+                        description "ANYsec encryption group name";
                     }
 
                     leaf-list apply-groups {
@@ -2762,6 +3258,7 @@ submodule nokia-conf-svc-ies {
                             }
 
                             leaf burst {
+                                status obsolete;
                                 type types-qos:aggr-policer-burst;
                                 default "default";
                                 description "Aggregate policer burst";
@@ -2775,8 +3272,30 @@ submodule nokia-conf-svc-ies {
 
                             leaf cbs {
                                 type types-qos:aggr-policer-cbs;
-                                units "kilobytes";
+                                units "kilobits";
                                 description "Aggregate policer CBS";
+                            }
+
+                            leaf mbs {
+                                type types-qos:aggr-policer-mbs;
+                                units "kilobits";
+                                default "default";
+                                description "Aggregate policer mbs";
+                            }
+
+                            leaf algorithm-type {
+                                type enumeration {
+                                    enum trtcm-ds {
+                                        value 1;
+                                        description "Use the TRTCM non-coupled mode";
+                                    }
+                                    enum trtcm-ds-coupled {
+                                        value 2;
+                                        description "Use the TRTCM coupled mode";
+                                    }
+                                }
+                                default "trtcm-ds-coupled";
+                                description "Policer algorithm type";
                             }
 
                         } // container aggregate-policer
@@ -2886,6 +3405,25 @@ submodule nokia-conf-svc-ies {
                                 type boolean;
                                 default "false";
                                 description "Mark top Q-tags";
+                            }
+
+                            leaf burst-limit {
+                                type types-qos:vlan-qos-burst-limit;
+                                description "Maximum traffic burst size for SAP egress";
+                            }
+
+                            leaf latency-budget {
+                                type uint32 {
+                                    range "1..1000000";
+                                }
+                                units "microseconds";
+                                description "SAP egress latency budget";
+                            }
+
+                            leaf sink-excess-bw {
+                                type boolean;
+                                default "false";
+                                description "Use virtual flows to sink excess bandwidth";
                             }
 
                             container sap-egress {
@@ -3854,6 +4392,13 @@ submodule nokia-conf-svc-ies {
                                 description "Enable the generation and the reception of AIS messages";
                             }
 
+                            leaf monitor-oper-group {
+                                type leafref {
+                                    path "../../../../../../oper-group/name";
+                                }
+                                description "Operational group to monitor";
+                            }
+
                             leaf-list apply-groups {
                                 type leafref {
                                     path "../../../../../../../groups/group/name";
@@ -4757,6 +5302,13 @@ submodule nokia-conf-svc-ies {
 
                         } // container max-history-key-records
 
+                        container mixed-tunnel-mode {
+                            presence "Enable the mixed-tunnel-mode context";
+                            sros-ext:auto-restart-to-modify;
+                            description "Enable the mixed-tunnel-mode context";
+
+                        } // container mixed-tunnel-mode
+
                     } // list ipsec-gateway
 
                     container static-host {
@@ -5073,9 +5625,6 @@ submodule nokia-conf-svc-ies {
                 } // list vpls
 
                 container hold-time {
-                    when "../tunnel = 'false' or not(../loopback = 'false')" {
-                        description "not allowed in a tunnel interface unless it is a loopback interface";
-                    }
                     description "Enter the hold-time context";
 
                     container ipv4 {
@@ -5556,8 +6105,46 @@ submodule nokia-conf-svc-ies {
 
                     } // container addresses
 
+                    container nat {
+                        presence "Enable the nat context";
+                        description "Enable the nat context";
+
+                        leaf cpm-nat-policy {
+                            type leafref {
+                                path "../../../../../nat/cpm-nat-policy/name";
+                            }
+                            description "CPM NAT policy association with public IPv4 interface";
+                        }
+
+                        leaf cpm-spf-nat-policy {
+                            type leafref {
+                                path "../../../../../nat/cpm-nat-policy/name";
+                            }
+                            description "CPM NAT policy for static port forwards";
+                        }
+
+                        leaf-list apply-groups {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Apply a configuration group at this level";
+                        }
+
+                        leaf-list apply-groups-exclude {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Exclude a configuration group at this level";
+                        }
+
+                    } // container nat
+
                     container neighbor-discovery {
-                        when "../../tunnel = 'false'" {
+                        when "../../tunnel = 'false' and ../../ip-tunnel-interface = 'false'" {
                             description "not allowed in a tunnel interface";
                         }
                         description "Enter the neighbor-discovery context";
@@ -5758,6 +6345,9 @@ submodule nokia-conf-svc-ies {
                     } // container neighbor-discovery
 
                     container dhcp {
+                        when "../../ip-tunnel-interface = 'false'" {
+                            description "not allowed in a tunnel interface";
+                        }
                         description "Enter the dhcp context";
 
                         leaf admin-state {
@@ -6043,6 +6633,12 @@ submodule nokia-conf-svc-ies {
                                 type boolean;
                                 default "false";
                                 description "Update the source IP address of a DHCP RELEASE message";
+                            }
+
+                            leaf allow-forcerenew-without-lease {
+                                type boolean;
+                                default "false";
+                                description "Allow DHCPv4 FORCERENEW messages without lease state";
                             }
 
                             leaf siaddr-override {
@@ -6593,7 +7189,7 @@ submodule nokia-conf-svc-ies {
                     } // list address
 
                     container dhcp6 {
-                        when "../../tunnel = 'false'" {
+                        when "../../tunnel = 'false' and ../../ip-tunnel-interface = 'false'" {
                             description "not allowed in a tunnel interface";
                         }
                         description "Enter the dhcp6 context";
@@ -6628,6 +7224,12 @@ submodule nokia-conf-svc-ies {
                                 type types-sros:admin-state;
                                 default "disable";
                                 description "Administrative state of DHCPv6 Relay";
+                            }
+
+                            leaf allow-reconfigure-without-lease {
+                                type boolean;
+                                default "false";
+                                description "Allow DHCPv6 Reconfigure messages without lease state";
                             }
 
                             leaf link-address {
@@ -6906,7 +7508,7 @@ submodule nokia-conf-svc-ies {
                     } // container dhcp6
 
                     container neighbor-discovery {
-                        when "../../tunnel = 'false'" {
+                        when "../../tunnel = 'false' and ../../ip-tunnel-interface = 'false'" {
                             description "not allowed in a tunnel interface";
                         }
                         description "Enter the neighbor-discovery context";
@@ -7114,7 +7716,6 @@ submodule nokia-conf-svc-ies {
 
                         leaf-list backup {
                             type types-sros:ipv6-address;
-                            max-elements 4;
                             description "Virtual router IP addresses for the interface";
                         }
 
@@ -7322,6 +7923,97 @@ submodule nokia-conf-svc-ies {
 
                 } // container if-attribute
 
+                list ip-tunnel {
+                    when "../ip-tunnel-interface = 'true'" {
+                        description "only allowed in ip-tunnel interface";
+                    }
+                    key "tunnel-name";
+                    max-elements 1;
+                    description "Enter the ip-tunnel list instance";
+
+                    leaf tunnel-name {
+                        type types-sros:interface-name;
+                        description "IP tunnel name";
+                    }
+
+                    leaf admin-state {
+                        type types-sros:admin-state;
+                        default "disable";
+                        description "Administrative state of the tunnel";
+                    }
+
+                    leaf description {
+                        type types-sros:description;
+                        description "Text description";
+                    }
+
+                    leaf delivery-routing-instance {
+                        type string;
+                        sros-ext:auto-restart-to-modify;
+                        description "Delivery routing instance";
+                    }
+
+                    leaf remote-ip-address {
+                        type types-sros:ip-address;
+                        sros-ext:auto-restart-to-modify;
+                        description "Remote IP address of the tunnel";
+                    }
+
+                    leaf local-ip-address {
+                        type types-sros:ip-address;
+                        sros-ext:auto-restart-to-modify;
+                        description "Local IP address of the tunnel";
+                    }
+
+                    leaf ingress-stats {
+                        type boolean;
+                        default "false";
+                        description "Gather ingress statistics for the tunnel";
+                    }
+
+                    leaf egress-stats {
+                        type boolean;
+                        default "false";
+                        description "Gather egress statistics for the tunnel";
+                    }
+
+                    leaf encapsulated-ip-mtu {
+                        type types-router:ip-mtu-ext;
+                        units "bytes";
+                        description "Encapsulated IP MTU size for the tunnel";
+                    }
+
+                    leaf-list apply-groups {
+                        type leafref {
+                            path "../../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Apply a configuration group at this level";
+                    }
+
+                    leaf-list apply-groups-exclude {
+                        type leafref {
+                            path "../../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Exclude a configuration group at this level";
+                    }
+
+                    container gre-header {
+                        description "Enter the gre-header context";
+
+                        leaf admin-state {
+                            type types-sros:admin-state;
+                            default "disable";
+                            description "Administrative state of the GRE header in the tunnel";
+                        }
+
+                    } // container gre-header
+
+                } // list ip-tunnel
+
             } // list interface
 
             list redundant-interface {
@@ -7425,6 +8117,13 @@ submodule nokia-conf-svc-ies {
                         type types-sros:admin-state;
                         default "enable";
                         description "Administrative state of the SDP binding to the service";
+                    }
+
+                    leaf vc-type {
+                        type types-services:ies-sdp-bind-vc-type;
+                        sros-ext:immutable;
+                        default "ether";
+                        description "Encapsulation and pseudowire type";
                     }
 
                     leaf control-word {
@@ -7546,6 +8245,64 @@ submodule nokia-conf-svc-ies {
                     } // container primary
 
                 } // container ipv4
+
+                container ipv6 {
+                    presence "Enable the ipv6 context";
+                    description "Enable the ipv6 context";
+
+                    list address {
+                        key "ipv6-address";
+                        max-elements 1;
+                        description "Enter the address list instance";
+
+                        leaf ipv6-address {
+                            type types-sros:ipv6-address;
+                            description "IPv6 address assigned to the interface";
+                        }
+
+                        leaf prefix-length {
+                            type uint32 {
+                                range "4..128";
+                            }
+                            mandatory true;
+                            description "IPv6 address prefix length";
+                        }
+
+                        leaf eui-64 {
+                            type boolean;
+                            sros-ext:immutable;
+                            default "false";
+                            description "Form IPv6 address from prefix and 64-bit interface ID";
+                        }
+
+                        leaf duplicate-address-detection {
+                            type boolean;
+                            sros-ext:immutable;
+                            default "true";
+                            description "Enable Duplicate Address Detection";
+                        }
+
+                        leaf-list apply-groups {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Apply a configuration group at this level";
+                        }
+
+                        leaf-list apply-groups-exclude {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Exclude a configuration group at this level";
+                        }
+
+                    } // list address
+
+                } // container ipv6
 
             } // list redundant-interface
 
@@ -7776,6 +8533,7 @@ submodule nokia-conf-svc-ies {
                 } // container ingress
 
             } // container network
+
 
             uses conf-svc-ies-sub-if-subscriber-interface;
             uses conf-svc-ies-vdo-if-video-interface;

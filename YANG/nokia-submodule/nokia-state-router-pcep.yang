@@ -9,7 +9,7 @@ submodule nokia-state-router-pcep {
     import nokia-types-router             { prefix "types-router"; }
     import nokia-types-sros               { prefix "types-sros"; }
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -32,14 +32,14 @@ submodule nokia-state-router-pcep {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2024-01-31";
+    revision "2025-07-16";
 
     grouping state-router-pcep {
         container pcep {
             description "Enter the pcep context";
 
             container pcc {
-                description "Enable the pcc context";
+                description "Enter the pcc context";
 
                 leaf-list capabilities {
                     type types-router:pcep-capabilities;
@@ -163,7 +163,7 @@ submodule nokia-state-router-pcep {
 
                     leaf ip-address {
                         type types-sros:ip-unicast-address;
-                        description "Destination IP address of a PCE peer in a PCEP session";
+                        description "This value specifies the address of the PCE peer";
                     }
 
                     leaf oper-state {
@@ -595,6 +595,14 @@ submodule nokia-state-router-pcep {
                              It is the METRIC object used in PCReq messages.";
                     }
 
+                    leaf delay-metric {
+                        type uint32;
+                        description
+                            "The value indicates Delay metric that must be optimized
+                             by the path computation algorithm for providing the cost of computed path.
+                             It is the METRIC object used in PCReq messages.";
+                    }
+
                     leaf hop-count {
                         type uint32;
                         description
@@ -743,7 +751,7 @@ submodule nokia-state-router-pcep {
             } // container pcc
 
             container pce {
-                description "Enable the pce context";
+                description "Enter the pce context";
 
                 leaf-list capabilities {
                     type types-router:pcep-capabilities;
@@ -864,7 +872,7 @@ submodule nokia-state-router-pcep {
 
                     leaf ip-address {
                         type types-sros:ip-unicast-address;
-                        description "Destination IP address of a PCE peer in a PCEP session";
+                        description "This value specifies the address of the PCE peer";
                     }
 
                     leaf speaker-id {

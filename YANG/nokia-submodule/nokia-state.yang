@@ -20,6 +20,7 @@ module nokia-state {
     include nokia-state-cflowd;
     include nokia-state-chassis;
     include nokia-state-cpm;
+    include nokia-state-dms;
     include nokia-state-esa;
     include nokia-state-eth-cfm;
     include nokia-state-eth-ring;
@@ -32,6 +33,7 @@ module nokia-state {
     include nokia-state-isa-video-group;
     include nokia-state-lag;
     include nokia-state-log;
+    include nokia-state-macsec;
     include nokia-state-mcast-cac;
     include nokia-state-mcast-mgmt;
     include nokia-state-mirror;
@@ -127,6 +129,7 @@ module nokia-state {
     include nokia-state-system;
     include nokia-state-system-bluetooth;
     include nokia-state-system-bootup;
+    include nokia-state-system-central-frequency-clock;
     include nokia-state-system-cron;
     include nokia-state-system-licensing;
     include nokia-state-system-ptp;
@@ -146,7 +149,7 @@ module nokia-state {
     include nokia-state-users;
     include nokia-state-vrrp;
 
-    sros-ext:sros-major-release "rel23";
+    sros-ext:sros-major-release "rel25";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -169,7 +172,7 @@ module nokia-state {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2024-03-06";
+    revision "2026-07-22";
 
     container state {
         config false;
@@ -185,6 +188,7 @@ module nokia-state {
         uses state-cflowd;
         uses state-chassis;
         uses state-cpm;
+        uses state-dms-defender-mitigation-system;
         uses state-esa;
         uses state-eth-cfm;
         uses state-eth-ring;
@@ -195,6 +199,7 @@ module nokia-state {
         uses state-isa;
         uses state-lag;
         uses state-log;
+        uses state-macsec;
         uses state-mcast-cac-mcac;
         uses state-mirror;
         uses state-mcast-mgmt-multicast-management;
