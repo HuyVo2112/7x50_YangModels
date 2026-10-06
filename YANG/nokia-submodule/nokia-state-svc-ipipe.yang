@@ -13,7 +13,7 @@ submodule nokia-state-svc-ipipe {
 
     include nokia-state-eth-cfm;
 
-    sros-ext:sros-major-release "rel25";
+    sros-ext:sros-major-release "rel26";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -36,7 +36,7 @@ submodule nokia-state-svc-ipipe {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2025-12-17";
+    revision "2026-07-08";
 
     grouping state-svc-ipipe {
         list ipipe {
@@ -116,7 +116,7 @@ submodule nokia-state-svc-ipipe {
                             enum sap                            { value 1; }
                             enum sdp-bind                       { value 2; }
                             enum sdp-fec                        { value 3; }
-                            enum evpn-mpls                      { value 4; }
+                            enum evpn                           { value 4; }
                         }
                         description "The type of endpoint object that is current transmit active. ";
                     }
@@ -1067,7 +1067,7 @@ submodule nokia-state-svc-ipipe {
                                     }
 
                                     leaf adapted-admin-cbs {
-                                        type types-qos:bytes;
+                                        type int64;
                                         units "bytes";
                                         description "Admin CBS.";
                                     }
@@ -2143,7 +2143,7 @@ submodule nokia-state-svc-ipipe {
                                         description
                                             "Info queue-set-size-overridden is set to true when the shaper is created by
                                              the override configured for sap egress qos policy. When it is set to false,
-                                             it indicates that fp-resource-policy default-size setting is used to create 
+                                             it indicates that fp-resource-policy default-size setting is used to create
                                              this shaper.";
                                     }
 
@@ -2471,7 +2471,7 @@ submodule nokia-state-svc-ipipe {
                                     }
 
                                     leaf adapted-admin-mbs {
-                                        type types-qos:bytes;
+                                        type int64;
                                         units "bytes";
                                         description "Admin MBS.";
                                     }
@@ -2525,7 +2525,7 @@ submodule nokia-state-svc-ipipe {
                                     }
 
                                     leaf operational-cbs {
-                                        type types-qos:bytes;
+                                        type int64;
                                         units "bytes";
                                         description "Oper CBS.";
                                     }
@@ -2541,7 +2541,7 @@ submodule nokia-state-svc-ipipe {
                                     }
 
                                     leaf operational-mbs {
-                                        type types-qos:bytes;
+                                        type int64;
                                         units "bytes";
                                         description "Oper MBS.";
                                     }
@@ -3848,6 +3848,8 @@ submodule nokia-state-svc-ipipe {
                         bit vccv-bfd-down                  { position 32; }
                         bit stitching-svc-pw-fault         { position 33; }
                         bit out-of-anysec-resource         { position 34; }
+                        bit anysec-service-and-tunnel-config-conflict { position 35; }
+                        bit anysec-group-or-peer-oper-down { position 36; }
                     }
                     description
                         "This object indicates all the conditions that affect the

@@ -23,7 +23,7 @@ submodule nokia-state-svc-vpls {
     include nokia-state-router-segment-routing;
     include nokia-state-service;
 
-    sros-ext:sros-major-release "rel25";
+    sros-ext:sros-major-release "rel26";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -46,7 +46,7 @@ submodule nokia-state-svc-vpls {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2026-02-11";
+    revision "2026-07-08";
 
     grouping state-svc-vpls {
         list vpls {
@@ -450,6 +450,39 @@ submodule nokia-state-svc-vpls {
                         }
 
                     } // container srv6
+
+                    container mac-status {
+                        description "Enter the mac-status context";
+
+                        leaf type {
+                            type enumeration {
+                                enum global                         { value 0; }
+                                enum select                         { value 1; }
+                            }
+                            description "If the FDB MAC entry is global or selective.";
+                        }
+
+                        leaf status {
+                            type enumeration {
+                                enum pending                        { value 0; }
+                                enum pending-allocated              { value 1; }
+                                enum pending-free                   { value 2; }
+                                enum allocated                      { value 3; }
+                            }
+                            description "Status of the FDB MAC entry.";
+                        }
+
+                        leaf card {
+                            type union {
+                                type uint32;
+                                type enumeration {
+                                    enum all                            { value 0; }
+                                }
+                            }
+                            description "Card on which the FDB MAC entry is allocated.";
+                        }
+
+                    } // container mac-status
 
                 } // list mac
 
@@ -1058,6 +1091,11 @@ submodule nokia-state-svc-vpls {
                             range "1..2";
                         }
                         description "VXLAN instance";
+                    }
+
+                    leaf mcast-dest-usage-high {
+                        type boolean;
+                        description "Indicates if the number of VTEP-Egress VNIs exceeds the per-service VTEP-Egress VNI multicast limit";
                     }
 
                     container destinations {
@@ -3523,6 +3561,11 @@ submodule nokia-state-svc-vpls {
                 leaf instance {
                     type types-services:vpls-srv6-instance;
                     description "Segment routing v6 instance";
+                }
+
+                leaf mcast-dest-usage-high {
+                    type boolean;
+                    description "Indicates if the number of SRv6 tunnel endpoint-egress multicast binds exceeds the per-service limit";
                 }
 
                 list locator {
@@ -6551,6 +6594,145 @@ submodule nokia-state-svc-vpls {
                     description "Creation origin of BGP-EVPN in the service";
                 }
 
+                leaf tunnel-next-hop-usage-high {
+                    type boolean;
+                    description "Indicates if the number of EVPN tunnels next-hops exceeds the high limit of the system";
+                }
+
+                container dhcp {
+                    description "Enter the dhcp context";
+
+                    container statistics {
+                        description "Enter the statistics context";
+
+                        container client-packets {
+                            description "Enter the client-packets context";
+
+                            leaf snooped {
+                                type yang:counter32;
+                                description "The number of DHCP client packets that have been snooped on this SAP.";
+                            }
+
+                            leaf forwarded {
+                                type yang:counter32;
+                                description "The number  of  DHCP  client  packets  that have been forwarded on this SAP.";
+                            }
+
+                            leaf dropped {
+                                type yang:counter32;
+                                description "The number  of  DHCP  client  packets  that have been dropped on this SAP.";
+                            }
+
+                            container proxied {
+                                description "Enter the proxied context";
+
+                                leaf radius {
+                                    type yang:counter32;
+                                    description
+                                        "The number of DHCP client packets that have been proxied on this SAP
+                                         based on data received from a RADIUS server.";
+                                }
+
+                                leaf lease-split {
+                                    type yang:counter32;
+                                    description
+                                        "The number of DHCP client packets that have been proxied on this SAP
+                                         based on lease state.";
+                                }
+
+                            } // container proxied
+
+                        } // container client-packets
+
+                        container server-packets {
+                            description "Enter the server-packets context";
+
+                            leaf snooped {
+                                type yang:counter32;
+                                description "The number of DHCP server packets that have been snooped on this SAP.";
+                            }
+
+                            leaf forwarded {
+                                type yang:counter32;
+                                description "The number  of  DHCP  server  packets  that have been forwarded on this SAP.";
+                            }
+
+                            leaf dropped {
+                                type yang:counter32;
+                                description "The number  of  DHCP  server  packets  that have been dropped on this SAP.";
+                            }
+
+                        } // container server-packets
+
+                        container spoofed {
+                            description "Enter the spoofed context";
+
+                            leaf force-renews {
+                                type yang:counter32;
+                                description "The number of DHCP FORCERENEW messages spoofed on this SAP to the DHCP clients.";
+                            }
+
+                            leaf releases {
+                                type yang:counter32;
+                                description "The number of DHCP RELEASE messages spoofed on this SAP to the DHCP server.";
+                            }
+
+                        } // container spoofed
+
+                    } // container statistics
+
+                } // container dhcp
+
+                container dhcp6 {
+                    description "Enter the dhcp6 context";
+
+                    container statistics {
+                        description "Enter the statistics context";
+
+                        container client-packets {
+                            description "Enter the client-packets context";
+
+                            leaf snooped {
+                                type yang:counter32;
+                                description "The number of DHCP client packets that have been snooped on this SAP.";
+                            }
+
+                            leaf forwarded {
+                                type yang:counter32;
+                                description "The number  of  DHCP  client  packets  that have been forwarded on this SAP.";
+                            }
+
+                            leaf dropped {
+                                type yang:counter32;
+                                description "The number  of  DHCP  client  packets  that have been dropped on this SAP.";
+                            }
+
+                        } // container client-packets
+
+                        container server-packets {
+                            description "Enter the server-packets context";
+
+                            leaf snooped {
+                                type yang:counter32;
+                                description "The number of DHCP server packets that have been snooped on this SAP.";
+                            }
+
+                            leaf forwarded {
+                                type yang:counter32;
+                                description "The number  of  DHCP  server  packets  that have been forwarded on this SAP.";
+                            }
+
+                            leaf dropped {
+                                type yang:counter32;
+                                description "The number  of  DHCP  server  packets  that have been dropped on this SAP.";
+                            }
+
+                        } // container server-packets
+
+                    } // container statistics
+
+                } // container dhcp6
+
                 container mac-duplication {
                     description "Enter the mac-duplication context";
 
@@ -6835,6 +7017,11 @@ submodule nokia-state-svc-vpls {
                             range "1..2";
                         }
                         description "BGP instance.";
+                    }
+
+                    leaf mcast-dest-usage-high {
+                        type boolean;
+                        description "Indicates if the number of EVPN MPLS tunnel endpoint-egress multicast exceeds the high per-service limit";
                     }
 
                     container ingress {
@@ -7959,7 +8146,7 @@ submodule nokia-state-svc-vpls {
                             enum sap                            { value 1; }
                             enum sdp-bind                       { value 2; }
                             enum sdp-fec                        { value 3; }
-                            enum evpn-mpls                      { value 4; }
+                            enum evpn                           { value 4; }
                         }
                         description "The type of endpoint object that is current transmit active. ";
                     }
@@ -8244,7 +8431,7 @@ submodule nokia-state-svc-vpls {
                             }
                             description
                                 "Indicates the MC-LAG inactive state of the mep.  The value of
-                                 system/eth-cfm/redundancy/mc-lag/standby-mep must be 'true (1)' 
+                                 system/eth-cfm/redundancy/mc-lag/standby-mep must be 'true (1)'
                                  on the node for this leaf to have meaning.";
                         }
 
@@ -8337,6 +8524,8 @@ submodule nokia-state-svc-vpls {
                         bit vccv-bfd-down                  { position 32; }
                         bit stitching-svc-pw-fault         { position 33; }
                         bit out-of-anysec-resource         { position 34; }
+                        bit anysec-service-and-tunnel-config-conflict { position 35; }
+                        bit anysec-group-or-peer-oper-down { position 36; }
                     }
                     description
                         "This object indicates all the conditions that affect the
@@ -9051,7 +9240,7 @@ submodule nokia-state-svc-vpls {
                             description
                                 "The time remaining until the relearn-limit-exceeded oper-flag is cleared.
                                  When the value is 'indefinite', this flag will not be cleared automatically.
-                                 Relearn-limit-exceeded oper-flag is set when sdp-bind is brought down 
+                                 Relearn-limit-exceeded oper-flag is set when sdp-bind is brought down
                                  when mac-move max-rate is exceeded.";
                         }
 
@@ -9310,6 +9499,140 @@ submodule nokia-state-svc-vpls {
                     } // container stp
 
                 } // container l2pt
+
+                container dhcp {
+                    description "Enter the dhcp context";
+
+                    container statistics {
+                        description "Enter the statistics context";
+
+                        container client-packets {
+                            description "Enter the client-packets context";
+
+                            leaf snooped {
+                                type yang:counter32;
+                                description "The number of DHCP client packets that have been snooped on this SAP.";
+                            }
+
+                            leaf forwarded {
+                                type yang:counter32;
+                                description "The number  of  DHCP  client  packets  that have been forwarded on this SAP.";
+                            }
+
+                            leaf dropped {
+                                type yang:counter32;
+                                description "The number  of  DHCP  client  packets  that have been dropped on this SAP.";
+                            }
+
+                            container proxied {
+                                description "Enter the proxied context";
+
+                                leaf radius {
+                                    type yang:counter32;
+                                    description
+                                        "The number of DHCP client packets that have been proxied on this SAP
+                                         based on data received from a RADIUS server.";
+                                }
+
+                                leaf lease-split {
+                                    type yang:counter32;
+                                    description
+                                        "The number of DHCP client packets that have been proxied on this SAP
+                                         based on lease state.";
+                                }
+
+                            } // container proxied
+
+                        } // container client-packets
+
+                        container server-packets {
+                            description "Enter the server-packets context";
+
+                            leaf snooped {
+                                type yang:counter32;
+                                description "The number of DHCP server packets that have been snooped on this SAP.";
+                            }
+
+                            leaf forwarded {
+                                type yang:counter32;
+                                description "The number  of  DHCP  server  packets  that have been forwarded on this SAP.";
+                            }
+
+                            leaf dropped {
+                                type yang:counter32;
+                                description "The number  of  DHCP  server  packets  that have been dropped on this SAP.";
+                            }
+
+                        } // container server-packets
+
+                        container spoofed {
+                            description "Enter the spoofed context";
+
+                            leaf force-renews {
+                                type yang:counter32;
+                                description "The number of DHCP FORCERENEW messages spoofed on this SAP to the DHCP clients.";
+                            }
+
+                            leaf releases {
+                                type yang:counter32;
+                                description "The number of DHCP RELEASE messages spoofed on this SAP to the DHCP server.";
+                            }
+
+                        } // container spoofed
+
+                    } // container statistics
+
+                } // container dhcp
+
+                container dhcp6 {
+                    description "Enter the dhcp6 context";
+
+                    container statistics {
+                        description "Enter the statistics context";
+
+                        container client-packets {
+                            description "Enter the client-packets context";
+
+                            leaf snooped {
+                                type yang:counter32;
+                                description "The number of DHCP client packets that have been snooped on this SAP.";
+                            }
+
+                            leaf forwarded {
+                                type yang:counter32;
+                                description "The number  of  DHCP  client  packets  that have been forwarded on this SAP.";
+                            }
+
+                            leaf dropped {
+                                type yang:counter32;
+                                description "The number  of  DHCP  client  packets  that have been dropped on this SAP.";
+                            }
+
+                        } // container client-packets
+
+                        container server-packets {
+                            description "Enter the server-packets context";
+
+                            leaf snooped {
+                                type yang:counter32;
+                                description "The number of DHCP server packets that have been snooped on this SAP.";
+                            }
+
+                            leaf forwarded {
+                                type yang:counter32;
+                                description "The number  of  DHCP  server  packets  that have been forwarded on this SAP.";
+                            }
+
+                            leaf dropped {
+                                type yang:counter32;
+                                description "The number  of  DHCP  server  packets  that have been dropped on this SAP.";
+                            }
+
+                        } // container server-packets
+
+                    } // container statistics
+
+                } // container dhcp6
 
                 container igmp-snooping {
                     description "Enter the igmp-snooping context";
@@ -10960,7 +11283,7 @@ submodule nokia-state-svc-vpls {
                                 }
                                 description
                                     "Indicates the MC-LAG inactive state of the mep.  The value of
-                                     system/eth-cfm/redundancy/mc-lag/standby-mep must be 'true (1)' 
+                                     system/eth-cfm/redundancy/mc-lag/standby-mep must be 'true (1)'
                                      on the node for this leaf to have meaning.";
                             }
 
@@ -11206,6 +11529,8 @@ submodule nokia-state-svc-vpls {
                         bit vccv-bfd-down                  { position 32; }
                         bit stitching-svc-pw-fault         { position 33; }
                         bit out-of-anysec-resource         { position 34; }
+                        bit anysec-service-and-tunnel-config-conflict { position 35; }
+                        bit anysec-group-or-peer-oper-down { position 36; }
                     }
                     description
                         "This object indicates all the conditions that affect the
@@ -11483,6 +11808,140 @@ submodule nokia-state-svc-vpls {
 
                 } // container stp
 
+                container dhcp {
+                    description "Enter the dhcp context";
+
+                    container statistics {
+                        description "Enter the statistics context";
+
+                        container client-packets {
+                            description "Enter the client-packets context";
+
+                            leaf snooped {
+                                type yang:counter32;
+                                description "The number of DHCP client packets that have been snooped on this SAP.";
+                            }
+
+                            leaf forwarded {
+                                type yang:counter32;
+                                description "The number  of  DHCP  client  packets  that have been forwarded on this SAP.";
+                            }
+
+                            leaf dropped {
+                                type yang:counter32;
+                                description "The number  of  DHCP  client  packets  that have been dropped on this SAP.";
+                            }
+
+                            container proxied {
+                                description "Enter the proxied context";
+
+                                leaf radius {
+                                    type yang:counter32;
+                                    description
+                                        "The number of DHCP client packets that have been proxied on this SAP
+                                         based on data received from a RADIUS server.";
+                                }
+
+                                leaf lease-split {
+                                    type yang:counter32;
+                                    description
+                                        "The number of DHCP client packets that have been proxied on this SAP
+                                         based on lease state.";
+                                }
+
+                            } // container proxied
+
+                        } // container client-packets
+
+                        container server-packets {
+                            description "Enter the server-packets context";
+
+                            leaf snooped {
+                                type yang:counter32;
+                                description "The number of DHCP server packets that have been snooped on this SAP.";
+                            }
+
+                            leaf forwarded {
+                                type yang:counter32;
+                                description "The number  of  DHCP  server  packets  that have been forwarded on this SAP.";
+                            }
+
+                            leaf dropped {
+                                type yang:counter32;
+                                description "The number  of  DHCP  server  packets  that have been dropped on this SAP.";
+                            }
+
+                        } // container server-packets
+
+                        container spoofed {
+                            description "Enter the spoofed context";
+
+                            leaf force-renews {
+                                type yang:counter32;
+                                description "The number of DHCP FORCERENEW messages spoofed on this SAP to the DHCP clients.";
+                            }
+
+                            leaf releases {
+                                type yang:counter32;
+                                description "The number of DHCP RELEASE messages spoofed on this SAP to the DHCP server.";
+                            }
+
+                        } // container spoofed
+
+                    } // container statistics
+
+                } // container dhcp
+
+                container dhcp6 {
+                    description "Enter the dhcp6 context";
+
+                    container statistics {
+                        description "Enter the statistics context";
+
+                        container client-packets {
+                            description "Enter the client-packets context";
+
+                            leaf snooped {
+                                type yang:counter32;
+                                description "The number of DHCP client packets that have been snooped on this SAP.";
+                            }
+
+                            leaf forwarded {
+                                type yang:counter32;
+                                description "The number  of  DHCP  client  packets  that have been forwarded on this SAP.";
+                            }
+
+                            leaf dropped {
+                                type yang:counter32;
+                                description "The number  of  DHCP  client  packets  that have been dropped on this SAP.";
+                            }
+
+                        } // container client-packets
+
+                        container server-packets {
+                            description "Enter the server-packets context";
+
+                            leaf snooped {
+                                type yang:counter32;
+                                description "The number of DHCP server packets that have been snooped on this SAP.";
+                            }
+
+                            leaf forwarded {
+                                type yang:counter32;
+                                description "The number  of  DHCP  server  packets  that have been forwarded on this SAP.";
+                            }
+
+                            leaf dropped {
+                                type yang:counter32;
+                                description "The number  of  DHCP  server  packets  that have been dropped on this SAP.";
+                            }
+
+                        } // container server-packets
+
+                    } // container statistics
+
+                } // container dhcp6
+
                 container igmp-snooping {
                     description "Enter the igmp-snooping context";
 
@@ -13132,7 +13591,7 @@ submodule nokia-state-svc-vpls {
                                 }
                                 description
                                     "Indicates the MC-LAG inactive state of the mep.  The value of
-                                     system/eth-cfm/redundancy/mc-lag/standby-mep must be 'true (1)' 
+                                     system/eth-cfm/redundancy/mc-lag/standby-mep must be 'true (1)'
                                      on the node for this leaf to have meaning.";
                             }
 
@@ -14315,7 +14774,7 @@ submodule nokia-state-svc-vpls {
                                     }
 
                                     leaf adapted-admin-cbs {
-                                        type types-qos:bytes;
+                                        type int64;
                                         units "bytes";
                                         description "Admin CBS.";
                                     }
@@ -15921,7 +16380,7 @@ submodule nokia-state-svc-vpls {
                                         description
                                             "Info queue-set-size-overridden is set to true when the shaper is created by
                                              the override configured for sap egress qos policy. When it is set to false,
-                                             it indicates that fp-resource-policy default-size setting is used to create 
+                                             it indicates that fp-resource-policy default-size setting is used to create
                                              this shaper.";
                                     }
 
@@ -16249,7 +16708,7 @@ submodule nokia-state-svc-vpls {
                                     }
 
                                     leaf adapted-admin-mbs {
-                                        type types-qos:bytes;
+                                        type int64;
                                         units "bytes";
                                         description "Admin MBS.";
                                     }
@@ -16303,7 +16762,7 @@ submodule nokia-state-svc-vpls {
                                     }
 
                                     leaf operational-cbs {
-                                        type types-qos:bytes;
+                                        type int64;
                                         units "bytes";
                                         description "Oper CBS.";
                                     }
@@ -16319,7 +16778,7 @@ submodule nokia-state-svc-vpls {
                                     }
 
                                     leaf operational-mbs {
-                                        type types-qos:bytes;
+                                        type int64;
                                         units "bytes";
                                         description "Oper MBS.";
                                     }
@@ -19819,7 +20278,7 @@ submodule nokia-state-svc-vpls {
                             description
                                 "The time remaining until the relearn-limit-exceeded oper-flag is cleared.
                                  When the value is 'indefinite', this flag will not be cleared automatically.
-                                 Relearn-limit-exceeded oper-flag is set when sap is brought down 
+                                 Relearn-limit-exceeded oper-flag is set when sap is brought down
                                  when mac-move max-rate is exceeded.";
                         }
 
@@ -19981,6 +20440,101 @@ submodule nokia-state-svc-vpls {
                     }
 
                 } // container l2tpv3-session
+
+                container pppoe {
+                    description "Enter the pppoe context";
+
+                    container intermediate-agent {
+                        description "Enter the intermediate-agent context";
+
+                        container statistics {
+                            description "Enter the statistics context";
+
+                            container rx {
+                                description "Enter the rx context";
+
+                                leaf padi {
+                                    type uint32;
+                                    description "Count of PADI (PPPoE Active Discovery Initiation) packets received on this SAP.";
+                                }
+
+                                leaf padr {
+                                    type uint32;
+                                    description "Count of PADR (PPPoE Active Discovery Request) packets received on this SAP.";
+                                }
+
+                                leaf padt {
+                                    type uint32;
+                                    description "Count of PADT (PPPoE Active Discovery Terminate) packets received on this SAP.";
+                                }
+
+                                leaf invalid-version {
+                                    type uint32;
+                                    description "Count of PPPoE packets received with an invalid version field.";
+                                }
+
+                                leaf invalid-type {
+                                    type uint32;
+                                    description "Count of PPPoE packets received with an invalid type field.";
+                                }
+
+                                leaf invalid-code {
+                                    type uint32;
+                                    description "Count of PPPoE packets received with an invalid code field.";
+                                }
+
+                                leaf invalid-session {
+                                    type uint32;
+                                    description "Count of PPPoE packets received with an invalid session-id field.";
+                                }
+
+                                leaf invalid-len {
+                                    type uint32;
+                                    description "Count of PPPoE packets received with an invalid length field.";
+                                }
+
+                                leaf invalid-tags {
+                                    type uint32;
+                                    description "Count of PPPoE Active Discovery packets received with invalid tags.";
+                                }
+
+                                leaf invalid-mac {
+                                    type uint32;
+                                    description "Count of PPPoE packets received with an invalid MAC address.";
+                                }
+
+                                leaf mtu-exceeded {
+                                    type uint32;
+                                    description "Count of packets dropped on this SAP because the generated packet length is too long.";
+                                }
+
+                                leaf tag-too-long {
+                                    type uint32;
+                                    description "Count of packets dropped on this SAP because a generated tag is too long.";
+                                }
+
+                            } // container rx
+
+                            container tx {
+                                description "Enter the tx context";
+
+                                leaf pado-spoofed {
+                                    type uint32;
+                                    description "Count of spoofed PADO (PPPoE Active Discovery Offer) packets transmitted on this SAP.";
+                                }
+
+                                leaf pads-spoofed {
+                                    type uint32;
+                                    description "Count of spoofed PADS (PPPoE Active Discovery Session) packets transmitted on this SAP.";
+                                }
+
+                            } // container tx
+
+                        } // container statistics
+
+                    } // container intermediate-agent
+
+                } // container pppoe
 
                 container spb {
                     description "Enter the spb context";
@@ -21227,7 +21781,7 @@ submodule nokia-state-svc-vpls {
                                 }
                                 description
                                     "Indicates the MC-LAG inactive state of the mep.  The value of
-                                     system/eth-cfm/redundancy/mc-lag/standby-mep must be 'true (1)' 
+                                     system/eth-cfm/redundancy/mc-lag/standby-mep must be 'true (1)'
                                      on the node for this leaf to have meaning.";
                             }
 
@@ -21767,7 +22321,7 @@ submodule nokia-state-svc-vpls {
                     }
                     description
                         "The current operational state of the interface.
-                         This leaf has the same semantics as ifOperStatus. 
+                         This leaf has the same semantics as ifOperStatus.
                          in RFC 2863: The Interfaces Group MIB";
                 }
 
@@ -21788,7 +22342,7 @@ submodule nokia-state-svc-vpls {
                     }
                     description
                         "Indicates which protocols are configured on the interface.;
-                                         
+
                          Values:
                              ospfv2 - Indicates if OSPFv2 is configured.
                              rip    - Indicates if RIP is configured.
@@ -21875,7 +22429,7 @@ submodule nokia-state-svc-vpls {
                         }
                         description
                             "Indicates the reason for why the interface is operationally down.
-                                             
+
                              Values:
                                  admin-disabled                  - Administratively disabled.
                                  service-admin-disabled          - Assiocated service is administratively disabled.
@@ -21912,7 +22466,7 @@ submodule nokia-state-svc-vpls {
                                 type yang:counter32;
                                 description
                                     "Total Number of ICMPv4 messages received by this interface.
-                                                     
+
                                      This includes all those counted by icmp-in-errors. Note that this
                                      interface is the interface to which the ICMPv4 messages were
                                      addressed which may not be necessarily the input interface
@@ -21923,7 +22477,7 @@ submodule nokia-state-svc-vpls {
                                 type yang:counter32;
                                 description
                                     "Number of ICMPv4 errored messages received by this interface.
-                                                     
+
                                      This implies ICMPv4 messages determined as having specific
                                      ICMPv4 errors (bad ICMPv4 checksums, bad length, etc.).";
                             }
@@ -21987,7 +22541,7 @@ submodule nokia-state-svc-vpls {
                                 type yang:counter32;
                                 description
                                     "Total number of ICMPv4 messages this interface attempted to send.
-                                                     
+
                                      This includes all those counted by icmp-out-errors.";
                             }
 
@@ -21996,7 +22550,7 @@ submodule nokia-state-svc-vpls {
                                 description
                                     "Number of ICMPv4 messages this interface could not be send due to problems
                                      discovered within ICMPv4 such as lack of buffers.
-                                                     
+
                                      This value should not include errors discovered outside the ICMPv4 layer such as
                                      the inability of VRtr IPv4 to route the resultant datagram. In some implementations
                                      there may be no types of error which contribute to this counter's value.";
@@ -22110,6 +22664,7 @@ submodule nokia-state-svc-vpls {
                                     enum dynamic                        { value 2; }
                                     enum managed                        { value 100; }
                                     enum evpn                           { value 101; }
+                                    enum evpn-local-es                  { value 102; }
                                 }
                                 description "The type of mapping.";
                             }
@@ -22140,95 +22695,393 @@ submodule nokia-state-svc-vpls {
                     description "Enter the inclusive context";
 
                     leaf remain-data-delay-interval {
+                        status obsolete;
                         type uint32;
                         description "Remaining data delay interval for the inclusive provider.";
                     }
 
                     leaf lsp-name {
+                        status obsolete;
                         type types-sros:named-item-or-empty;
                         description "The LSP name used for signalling inclusive provider tunnel.";
                     }
 
                     leaf oper-state {
+                        status obsolete;
                         type types-sros:oper-state;
                         description "Operational status of the inclusive provider-tunnel.";
                     }
+
+                    container originating {
+                        description "Enter the originating context";
+
+                        leaf remain-data-delay-interval {
+                            type uint32;
+                            description "Remaining data delay interval for the inclusive provider.";
+                        }
+
+                        container ldp {
+                            description "Enter the ldp context";
+
+                            leaf tunnel-name {
+                                type string;
+                                description "Originating tunnel name";
+                            }
+
+                            leaf root-address {
+                                type types-sros:ip-address;
+                                description "Originating root address";
+                            }
+
+                            leaf lsp-id {
+                                type uint32;
+                                description "Originating lsp id";
+                            }
+
+                            leaf oper-state {
+                                type types-sros:oper-state;
+                                description "Operational status of originating ldp provider-tunnel";
+                            }
+
+                        } // container ldp
+
+                        container rsvp {
+                            description "Enter the rsvp context";
+
+                            leaf tunnel-name {
+                                type string;
+                                description "Originating tunnel name";
+                            }
+
+                            leaf p2mp-id {
+                                type uint32;
+                                description "Originating p2mp id";
+                            }
+
+                            leaf tunnel-id {
+                                type uint32;
+                                description "Originating tunnel id";
+                            }
+
+                            leaf external-tunnel-id {
+                                type types-sros:ip-address;
+                                description "Originating external-tunnel-id";
+                            }
+
+                            leaf oper-state {
+                                type types-sros:oper-state;
+                                description "Operational status of originating rsvp provider-tunnel";
+                            }
+
+                        } // container rsvp
+
+                    } // container originating
+
+                    container terminating {
+                        description "Enter the terminating context";
+
+                        list ldp {
+                            key "index";
+                            description "Enter the ldp list instance";
+
+                            leaf index {
+                                type uint32;
+                                description "The interface index of the entry";
+                            }
+
+                            leaf root-address {
+                                type types-sros:ip-address;
+                                description "Terminating root address";
+                            }
+
+                            leaf lsp-id {
+                                type uint32;
+                                description "Terminating lsp id";
+                            }
+
+                            leaf oper-state {
+                                type types-sros:oper-state;
+                                description "Operational status of Terminating ldp provider-tunnel";
+                            }
+
+                        } // list ldp
+
+                        list rsvp {
+                            key "index";
+                            description "Enter the rsvp list instance";
+
+                            leaf index {
+                                type uint32;
+                                description "The interface index of the entry";
+                            }
+
+                            leaf p2mp-id {
+                                type uint32;
+                                description "Terminating p2mp id";
+                            }
+
+                            leaf tunnel-id {
+                                type uint32;
+                                description "Terminating tunnel id";
+                            }
+
+                            leaf external-tunnel-id {
+                                type types-sros:ip-address;
+                                description "Terminating external-tunnel-id";
+                            }
+
+                            leaf oper-state {
+                                type types-sros:oper-state;
+                                description "Operational status of Terminating rsvp provider-tunnel";
+                            }
+
+                        } // list rsvp
+
+                    } // container terminating
 
                 } // container inclusive
 
                 container selective {
                     description "Enter the selective context";
 
+                    container originating {
+                        description "Enter the originating context";
+
+                        list multicast-tunnel {
+                            key "group-address source-address ip-origin-address root-address-index lsp-index";
+                            description "Enter the multicast-tunnel list instance";
+
+                            leaf group-address {
+                                type types-sros:ip-address;
+                                description "The multicast group address of the entry.";
+                            }
+
+                            leaf source-address {
+                                type types-sros:ip-address;
+                                description "The source address of the multicast sender.";
+                            }
+
+                            leaf ip-origin-address {
+                                type types-sros:ip-address;
+                                description "The ip origin address of the entry.";
+                            }
+
+                            leaf root-address-index {
+                                type types-sros:ip-address;
+                                description "The root address of the tunel used as a key.";
+                            }
+
+                            leaf lsp-index {
+                                type uint32;
+                                description "lsp-index identifying the pmsi information of the tunnel used as a key.";
+                            }
+
+                            leaf interface-index {
+                                type uint32;
+                                description "Interface index of the data MT.";
+                            }
+
+                            leaf up-time {
+                                type uint32;
+                                description "Time since the data MT entry was created.";
+                            }
+
+                            leaf lsp-id {
+                                type uint32;
+                                description "Unique identifier of the data Multicast Tunnel entry.";
+                            }
+
+                            leaf root-address {
+                                type types-sros:ip-address;
+                                description "Root IP Address used for the Multicast Tunnel.";
+                            }
+
+                            leaf counter {
+                                type uint32;
+                                description "Number of current receiver PE associated with the Multicast tunnel.";
+                            }
+
+                            leaf oper-state {
+                                type enumeration {
+                                    enum tx-join-pending                { value 0; }
+                                    enum tx-joined                      { value 1; }
+                                    enum rx-not-joined                  { value 2; }
+                                    enum rx-joined                      { value 3; }
+                                    enum rx-joined-tracking             { value 4; }
+                                    enum tx-leaving                     { value 5; }
+                                    enum max-p2mp-reached               { value 6; }
+                                }
+                                description "Operational status of the provider-tunnel.";
+                            }
+
+                            leaf remain-delay-interval {
+                                type uint32;
+                                description "Remain delay interval after which the selective provider Multicast tunnel is created.";
+                            }
+
+                        } // list multicast-tunnel
+
+                    } // container originating
+
+                    container terminating {
+                        description "Enter the terminating context";
+
+                        list multicast-tunnel {
+                            key "group-address source-address ip-origin-address root-address-index lsp-index";
+                            description "Enter the multicast-tunnel list instance";
+
+                            leaf group-address {
+                                type types-sros:ip-address;
+                                description "The multicast group address of the entry.";
+                            }
+
+                            leaf source-address {
+                                type types-sros:ip-address;
+                                description "The source address of the multicast sender.";
+                            }
+
+                            leaf ip-origin-address {
+                                type types-sros:ip-address;
+                                description "The ip origin address of the entry.";
+                            }
+
+                            leaf root-address-index {
+                                type types-sros:ip-address;
+                                description "The root address of the tunel used as a key.";
+                            }
+
+                            leaf lsp-index {
+                                type uint32;
+                                description "lsp-index identifying the pmsi information of the tunnel used as a key.";
+                            }
+
+                            leaf interface-index {
+                                type uint32;
+                                description "Interface index of the data MT.";
+                            }
+
+                            leaf up-time {
+                                type uint32;
+                                description "Time since the data MT entry was created.";
+                            }
+
+                            leaf lsp-id {
+                                type uint32;
+                                description "Unique identifier of the data Multicast Tunnel entry.";
+                            }
+
+                            leaf root-address {
+                                type types-sros:ip-address;
+                                description "Root IP Address used for the Multicast Tunnel.";
+                            }
+
+                            leaf counter {
+                                type uint32;
+                                description "Number of current receiver PE associated with the Multicast tunnel.";
+                            }
+
+                            leaf oper-state {
+                                type enumeration {
+                                    enum tx-join-pending                { value 0; }
+                                    enum tx-joined                      { value 1; }
+                                    enum rx-not-joined                  { value 2; }
+                                    enum rx-joined                      { value 3; }
+                                    enum rx-joined-tracking             { value 4; }
+                                    enum tx-leaving                     { value 5; }
+                                    enum max-p2mp-reached               { value 6; }
+                                }
+                                description "Operational status of the provider-tunnel.";
+                            }
+
+                        } // list multicast-tunnel
+
+                    } // container terminating
+
                     list multicast-tunnel {
+                        status obsolete;
                         key "group-address source-address ip-origin-address root-address-index lsp-index";
                         description "Enter the multicast-tunnel list instance";
 
                         leaf group-address {
+                            status obsolete;
                             type types-sros:ip-address;
                             description "The multicast group address of the entry.";
                         }
 
                         leaf source-address {
+                            status obsolete;
                             type types-sros:ip-address;
                             description "The source address of the multicast sender.";
                         }
 
                         leaf ip-origin-address {
+                            status obsolete;
                             type types-sros:ip-address;
                             description "The ip origin address of the entry.";
                         }
 
                         leaf root-address-index {
+                            status obsolete;
                             type types-sros:ip-address;
                             description "The root address of the tunel used as a key.";
                         }
 
                         leaf lsp-index {
+                            status obsolete;
                             type uint32;
                             description "lsp-index identifying the pmsi information of the tunnel used as a key.";
                         }
 
                         leaf interface-index {
+                            status obsolete;
                             type uint32;
                             description "Interface index of the data MT.";
                         }
 
                         leaf up-time {
+                            status obsolete;
                             type uint32;
                             description "Time since the data MT entry was created.";
                         }
 
                         leaf source-address-group-address-count {
+                            status obsolete;
                             type uint32;
                             description "Number of C-(S,G)'s mapped to the MT interface.";
                         }
 
                         leaf multi-stream-id {
+                            status obsolete;
                             type uint32;
                             description "Stream ID of the multi-stream SPMSI.";
                         }
 
                         leaf lsp-id {
+                            status obsolete;
                             type uint32;
                             description "Unique identifier of the data Multicast Tunnel entry.";
                         }
 
                         leaf remain-delay-interval {
+                            status obsolete;
                             type uint32;
                             description "Remain delay interval after which the selective provider Multicast tunnel is created.";
                         }
 
                         leaf root-address {
+                            status obsolete;
                             type types-sros:ip-address;
                             description "Root IP Address used for the Multicast Tunnel.";
                         }
 
                         leaf counter {
+                            status obsolete;
                             type uint32;
                             description "Number of current receiver PE associated with the Multicast tunnel.";
                         }
 
                         leaf oper-state {
+                            status obsolete;
                             type enumeration {
                                 enum tx-join-pending                { value 0; }
                                 enum tx-joined                      { value 1; }

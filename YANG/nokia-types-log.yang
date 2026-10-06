@@ -8,7 +8,7 @@ module nokia-types-log {
 
     import nokia-sros-yang-extensions     { prefix "sros-ext"; }
 
-    sros-ext:sros-major-release "rel25";
+    sros-ext:sros-major-release "rel26";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -31,7 +31,7 @@ module nokia-types-log {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2026-07-22";
+    revision "2026-07-08";
 
     typedef log-policy-id {
         type uint32 {
@@ -157,6 +157,16 @@ module nokia-types-log {
         description "Acc-policy is associated with oam pm with measurment interval duration type";
     }
 
+    typedef log-file-line-format {
+        type enumeration {
+            enum standard {
+                value 0;
+                description "The historical TiMOS on-disk line format (legacy text layout).";
+            }
+        }
+        description "Line format for event log files written to this file-id.";
+    }
+
     typedef file-log-type {
         type enumeration {
             enum none                           { value 0; }
@@ -202,6 +212,11 @@ module nokia-types-log {
             enum tmnxAnySecMkaSessionEstablished { value 2009; }
             enum tmnxAnySecMkaSessionEnded      { value 2010; }
             enum tmnxAnySecEgrVcIndex           { value 2011; }
+            enum tmnxAnySecSakCreate            { value 2012; }
+            enum tmnxAnySecSakInstalledRx       { value 2013; }
+            enum tmnxAnySecSakInstalledTx       { value 2014; }
+            enum tmnxAnySecMkaReplayAttemptDisc { value 2015; }
+            enum tmnxAnySecSakDelete            { value 2016; }
         }
         description "Events for ANYsec module.";
     }
@@ -800,7 +815,6 @@ module nokia-types-log {
             enum tmnxIPMacCpmFilterOverloadClear { value 2184; }
             enum tmnxIPv6CpmFilterOverload      { value 2185; }
             enum tmnxIPv6CpmFilterOverloadClear { value 2186; }
-            enum tmnxBluetoothModuleConnectionChg { value 2187; }
             enum tmnxGnssAcquiringFix           { value 2188; }
             enum tmnxGnssAcquiredFix            { value 2189; }
             enum tmnxPhysChassisPMOutFail       { value 2190; }
@@ -963,6 +977,9 @@ module nokia-types-log {
             enum tmnxEqFlashDiskFormatStart     { value 6021; }
             enum tmnxEqFlashDiskFormatFinish    { value 6022; }
             enum tmnxEsaColdRebooted            { value 6023; }
+            enum tmnxChassisAntiTheftMismatch   { value 6028; }
+            enum tmnxChassisAntiTheftMismatchClr { value 6029; }
+            enum tmnxBluetoothModuleConnectionChg { status obsolete; }
             enum tmnxIomRsrcUserOversubscribed  { status obsolete; }
             enum tmnxIomRsrcUserOversubscribedClr { status obsolete; }
         }
@@ -1105,10 +1122,10 @@ module nokia-types-log {
             enum tFilterRadSharedFltrAlarmRaised { value 2009; }
             enum tFilterRadSharedFltrAlarmClear { value 2010; }
             enum tFilterEmbeddingOperStateChange { value 2011; }
-            enum tFilterEmbedOpenflowOperStateChg { value 2012; }
-            enum tFilterOpenflowRequestRejected { value 2013; }
             enum tFilterEmbedFlowspecOperStateChg { value 2015; }
             enum tFilterRPActiveDestChangeEvent { value 2017; }
+            enum tFilterEmbedOpenflowOperStateChg { status obsolete; }
+            enum tFilterOpenflowRequestRejected { status obsolete; }
             enum tFilterEmbedVsdOperStateChg    { status obsolete; }
         }
         description "Events for filter module.";
@@ -1257,6 +1274,8 @@ module nokia-types-log {
             enum tmnxIsisRejectedPgId           { value 2070; }
             enum tmnxIsisSrv6LocError           { value 2071; }
             enum tmnxIsisSrv6StaticSidIfTypeError { value 2072; }
+            enum tmnxIsisMultiPartTlvTruncated  { value 2073; }
+            enum tmnxIsisMultiPartTlvReceived   { value 2074; }
         }
         description "Events for debug module.";
     }
@@ -1689,6 +1708,7 @@ module nokia-types-log {
             enum tmnxNatPlMemberExtBlockUsageHigh { value 2045; }
             enum tmnxNatPlLsnMemberPortUsageHigh { value 2046; }
             enum tmnxNatDetAddrMapOperStateChngd { value 2047; }
+            enum tmnxNatVrtrOutRoutesHigh       { value 2048; }
             enum tmnxNatDetPlcyOperStateChanged { status obsolete; }
             enum tmnxNatDetMapOperStateChanged  { status obsolete; }
         }
@@ -1958,6 +1978,14 @@ module nokia-types-log {
             enum tmnxEqPortFlexEMemberAlrmClr   { value 2100; }
             enum tmnxEqPortFlexEMbrPhyInstAlrm  { value 2101; }
             enum tmnxEqPortFlexEMbrPhyInstAlrmClr { value 2102; }
+            enum tmnxEqPortDataChanAlarm        { value 2103; }
+            enum tmnxEqPortDataChanAlarmClear   { value 2104; }
+            enum tmnxEqPortDataLoopbackStarted  { value 2105; }
+            enum tmnxEqPortDataLoopbackStopped  { value 2106; }
+            enum tmnxEqPortRs232LoopbackStarted { value 2107; }
+            enum tmnxEqPortRs232LoopbackStopped { value 2108; }
+            enum tmnxEqPortRS232Alarm           { value 2109; }
+            enum tmnxEqPortRS232AlarmClear      { value 2110; }
             enum yellowDiffDelayExceeded        { status obsolete; }
             enum redDiffDelayExceeded           { status obsolete; }
             enum bndlBadEndPtDiscriminator      { status obsolete; }
@@ -1995,13 +2023,13 @@ module nokia-types-log {
             enum tmnxPtpDynamicChange           { value 2007; }
             enum tmnxPtpPortNoTimestamping      { value 2008; }
             enum tmnxPtpPortPtsfUnusable        { value 2009; }
-            enum tmnxPtpRequiresSystemReboot    { value 2010; }
-            enum tmnxPtpRequiresSystemRebootClear { value 2011; }
             enum tmnxPtpTimeRecoveryStateChange { value 2012; }
             enum tmnxPtpPeerNoTxTimestamping    { value 2013; }
             enum tmnxPtpPeerNoTxTimestampingClear { value 2014; }
             enum tmnxPtpPeerNoRxTimestamping    { value 2015; }
             enum tmnxPtpPeerNoRxTimestampingClear { value 2016; }
+            enum tmnxPtpRequiresSystemReboot    { status obsolete; }
+            enum tmnxPtpRequiresSystemRebootClear { status obsolete; }
         }
         description "Events for ptp module.";
     }
@@ -2523,6 +2551,9 @@ module nokia-types-log {
             enum tmnxSubPysrosExec              { value 2627; }
             enum tmnxSubPysrosExecFail          { value 2628; }
             enum svcEvpnVxInstMHStandbyStatusChg { value 2629; }
+            enum sapCemAsymDelayControlEventStart { value 2630; }
+            enum sapCemAsymDelayControlEventStop { value 2631; }
+            enum sapCemActMultPathStateChg      { value 2632; }
             enum svcTlsVxlanReplicatorChgd      { status obsolete; }
             enum svcEvpnMHStandbyStatusChg      { status obsolete; }
             enum svcTlsDupVTEPEgrVNIDetected    { status obsolete; }
@@ -2629,10 +2660,8 @@ module nokia-types-log {
         description "Events for system module.";
     }
 
-    typedef treesid-events {
+    typedef tree-sid-events {
         type enumeration {
-            enum vRtrTreeSidCdtPathChanged      { value 2001; }
-            enum vRtrTreeSidCdtPathActInsChanged { value 2002; }
             enum vRtrTreeSidInSidRegFailure     { value 2003; }
             enum vRtrTreeSidTreeIdAllocFailure  { value 2004; }
             enum vRtrTreeSidRepSegResExhaustion { value 2005; }
@@ -2641,6 +2670,10 @@ module nokia-types-log {
             enum vRtrTreeSidLblRangeExhstCleared { value 2008; }
             enum vRtrTreeSidFailOverPriToStdBy  { value 2009; }
             enum vRtrTreeSidFailOverStdByToPri  { value 2010; }
+            enum vRtrTSidNgDBCdtPathChanged     { value 2011; }
+            enum vRtrTSidNgDBCdtPathActInsChangd { value 2012; }
+            enum vRtrTreeSidCdtPathChanged      { status obsolete; }
+            enum vRtrTreeSidCdtPathActInsChanged { status obsolete; }
         }
         description "Events for tree-sid module.";
     }
@@ -3048,6 +3081,7 @@ module nokia-types-log {
             enum tmnxTlsInitiateSession         { value 2001; }
             enum tmnxTlsTermination             { value 2002; }
             enum tmnxTlsFailure                 { value 2003; }
+            enum tmnxTlsSANCheckStatus          { value 2004; }
         }
         description "Events for tls module.";
     }
@@ -3073,7 +3107,7 @@ module nokia-types-log {
         type string {
             length "1..32";
             pattern "(([1-9]|[1-9][0-9]|100)|([^\\s0-9_])|([^\\s0-9_]\\P{C}*[^\\s])|([0-9]+[^\\s0-9])|([0-9]+[^0-9]\\P{C}*[^\\s]))" {
-                error-message "must be numeric in range 1..100, or alphanumeric not starting with underscore and without trailing spaces";
+                error-message "'snmp-trap-group-name' must be numeric 1..100 or alphanumeric not starting with underscore and without trailing spaces";
             }
         }
         description "The value of snmp-trap-group name specifies an event stream log associated with snmp-trap-group";
@@ -3083,7 +3117,7 @@ module nokia-types-log {
         type string {
             length "1..64";
             pattern "(([1-9]|[1-9][0-9])|([^\\s0-9_])|([^\\s0-9_]\\P{C}*[^\\s])|([0-9]+[^\\s0-9])|([0-9]+[^0-9]\\P{C}*[^\\s]))" {
-                error-message "must be numeric in range 1..99, or alphanumeric not starting with underscore and without trailing spaces";
+                error-message "'file-policy-name' must be numeric 1..99 or alphanumeric not starting with underscore and without trailing spaces";
             }
         }
         description "The value of file-policy-name to be used when creating a log or accounting file";
@@ -3093,7 +3127,7 @@ module nokia-types-log {
         type string {
             length "1..17";
             pattern "(([1-9]|[1-9][0-9]|100)|([^\\s0-9_])|([^\\s0-9_]\\P{C}*[^\\s])|([0-9]+[^\\s0-9])|([0-9]+[^0-9]\\P{C}*[^\\s]))" {
-                error-message "must be numeric in range 1..100, or alphanumeric not starting with underscore and without trailing spaces";
+                error-message "'svc-vprn-snmp-trap-group-name' must be numeric 1..100 or alphanumeric not starting with underscore and without trailing spaces";
             }
         }
         description "The value of snmp-trap-group name specifies an event stream log associated with snmp-trap-group";
@@ -3103,7 +3137,7 @@ module nokia-types-log {
         type string {
             length "1..64";
             pattern "(([1-9]|[1-9][0-9]|10[01])|([^\\s0-9_])|([^\\s0-9_]\\P{C}*[^\\s])|([0-9]+[^\\s0-9])|([0-9]+[^0-9]\\P{C}*[^\\s]))" {
-                error-message "must be numeric in range 1..101, or alphanumeric not starting with underscore and without leading or trailing spaces";
+                error-message "'log-name' must be numeric 1..101 or alphanumeric not starting with underscore and without leading or trailing spaces";
             }
         }
         description "The value of log name specifies an event stream log.";
@@ -3113,7 +3147,7 @@ module nokia-types-log {
         type string {
             length "1..64";
             pattern "(([1-9]|10)|([^\\s0-9_])|([^\\s0-9_]\\P{C}*[^\\s])|([0-9]+[^\\s0-9])|([0-9]+[^0-9]\\P{C}*[^\\s]))" {
-                error-message "must be numeric in range 1..10, or alphanumeric not starting with underscore and without trailing spaces";
+                error-message "'log-syslog-name' must be numeric 1..10 or alphanumeric not starting with underscore and without trailing spaces";
             }
         }
         description "The value of log name specifies an event stream log.";
@@ -3123,7 +3157,7 @@ module nokia-types-log {
         type string {
             length "1..64";
             pattern "(([1-9]|[1-2][0-9]|30)|([^\\s0-9_])|([^\\s0-9_]\\P{C}*[^\\s])|([0-9]+[^\\s0-9])|([0-9]+[^0-9]\\P{C}*[^\\s]))" {
-                error-message "must be numeric in range 1..30, or alphanumeric not starting with underscore and without trailing spaces";
+                error-message "'log-vprn-syslog-name' must be numeric 1..30 or alphanumeric not starting with underscore and without trailing spaces";
             }
         }
         description "The value of log name specifies an event stream log.";
@@ -3133,7 +3167,7 @@ module nokia-types-log {
         type string {
             length "1..64";
             pattern "(([1-9]|[1-9][0-9]|100)|([^\\s0-9_])|([^\\s0-9_]\\P{C}*[^\\s])|([0-9]+[^\\s0-9])|([0-9]+[^0-9]\\P{C}*[^\\s]))" {
-                error-message "must be numeric in range 1..100, or alphanumeric not starting with underscore and without trailing spaces";
+                error-message "'li-log-name' must be numeric 1..100 or alphanumeric not starting with underscore and without trailing spaces";
             }
         }
         description "The value of log name specifies an event stream log.";
@@ -3143,7 +3177,7 @@ module nokia-types-log {
         type string {
             length "1..64";
             pattern "(([1-9]|[1-9][0-9]|[1-9][0-9][0-9]|1[0-4][0-9][0-9]|1500)|([^\\s0-9_])|([^\\s0-9_]\\P{C}*[^\\s])|([0-9]+[^\\s0-9])|([0-9]+[^0-9]\\P{C}*[^\\s]))" {
-                error-message "must be numeric in range 1..1500, or alphanumeric not starting with underscore and without trailing spaces";
+                error-message "'log-filter-name' must be numeric 1..1500 or alphanumeric not starting with underscore and without trailing spaces";
             }
         }
         description "The value of log name specifies an event log filter.";
@@ -3153,7 +3187,7 @@ module nokia-types-log {
         type string {
             length "1..64";
             pattern "(([1-9]|[1-9][0-9]|[1-9][0-9][0-9])|([^\\s0-9_])|([^\\s0-9_]\\P{C}*[^\\s])|([0-9]+[^\\s0-9])|([0-9]+[^0-9]\\P{C}*[^\\s]))" {
-                error-message "must be numeric in range 1..999, or alphanumeric not starting with underscore and without trailing spaces";
+                error-message "'log-filter-entry-name' must be numeric 1..999 or alphanumeric not starting with underscore and without trailing spaces";
             }
         }
         description "The value of log name specifies an event log filter.";

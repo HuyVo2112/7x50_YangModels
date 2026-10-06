@@ -17,7 +17,7 @@ submodule nokia-conf-svc-vprn-ospf {
     include nokia-conf-system-ned;
     include nokia-conf-system-security;
 
-    sros-ext:sros-major-release "rel25";
+    sros-ext:sros-major-release "rel26";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -40,7 +40,7 @@ submodule nokia-conf-svc-vprn-ospf {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2026-07-22";
+    revision "2026-07-08";
 
     grouping conf-svc-vprn-ospf {
         list ospf {
@@ -52,7 +52,7 @@ submodule nokia-conf-svc-vprn-ospf {
                 type uint32 {
                     range "0";
                 }
-                description "Integrated OSPF instance";
+                description "OSPF instance";
             }
 
             leaf admin-state {
@@ -103,6 +103,14 @@ submodule nokia-conf-svc-vprn-ospf {
                 type boolean;
                 default "false";
                 description "Submit routes into the multicast Route Table Manager";
+            }
+
+            leaf max-ecmp-routes {
+                type uint32 {
+                    range "1..128";
+                }
+                default "64";
+                description "Maximum ECMP value for the OSPF instance";
             }
 
             leaf overload-include-ext-1 {
@@ -318,11 +326,37 @@ submodule nokia-conf-svc-vprn-ospf {
                     description "Enable graceful restart helper for OSPF";
                 }
 
+                leaf helper-resync-timeout {
+                    type uint32 {
+                        range "120..900";
+                    }
+                    units "seconds";
+                    default "120";
+                    description "Maximum resynchronization period";
+                }
+
                 leaf strict-lsa-checking {
                     type boolean;
                     default "true";
                     description "Perform strict LSA checking during graceful restart";
                 }
+
+                container protocol {
+                    description "Enter the protocol context";
+
+                    leaf standard {
+                        type boolean;
+                        default "true";
+                        description "Enable standard protocol for restart signaling";
+                    }
+
+                    leaf lls-restart-signaling {
+                        type boolean;
+                        default "false";
+                        description "Enable LLS restart signaling protocol";
+                    }
+
+                } // container protocol
 
             } // container graceful-restart
 
@@ -798,7 +832,7 @@ submodule nokia-conf-svc-vprn-ospf {
 
                     leaf authentication-key {
                         type types-sros:encrypted-leaf {
-                            length "1..38";
+                            length "1..94";
                         }
                         description "Authentication key";
                     }
@@ -890,7 +924,7 @@ submodule nokia-conf-svc-vprn-ospf {
 
                         leaf md5 {
                             type types-sros:encrypted-leaf {
-                                length "1..51";
+                                length "1..102";
                             }
                             mandatory true;
                             description "MD5 hash key";
@@ -995,7 +1029,7 @@ submodule nokia-conf-svc-vprn-ospf {
 
                     leaf authentication-key {
                         type types-sros:encrypted-leaf {
-                            length "1..38";
+                            length "1..94";
                         }
                         description "Authentication key";
                     }
@@ -1036,7 +1070,7 @@ submodule nokia-conf-svc-vprn-ospf {
 
                         leaf md5 {
                             type types-sros:encrypted-leaf {
-                                length "1..51";
+                                length "1..102";
                             }
                             mandatory true;
                             description "MD5 hash key";
@@ -1128,7 +1162,7 @@ submodule nokia-conf-svc-vprn-ospf {
 
                     leaf authentication-key {
                         type types-sros:encrypted-leaf {
-                            length "1..38";
+                            length "1..94";
                         }
                         description "Authentication key to send and receive OSPF packets";
                     }
@@ -1177,7 +1211,7 @@ submodule nokia-conf-svc-vprn-ospf {
 
                         leaf md5 {
                             type types-sros:encrypted-leaf {
-                                length "1..51";
+                                length "1..102";
                             }
                             mandatory true;
                             description "MD5 key or hash key";

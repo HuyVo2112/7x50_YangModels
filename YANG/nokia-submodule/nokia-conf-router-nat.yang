@@ -15,7 +15,7 @@ submodule nokia-conf-router-nat {
     include nokia-conf-service;
     include nokia-conf-svc-nat;
 
-    sros-ext:sros-major-release "rel25";
+    sros-ext:sros-major-release "rel26";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -38,7 +38,7 @@ submodule nokia-conf-router-nat {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2026-07-22";
+    revision "2026-07-08";
 
     grouping conf-router-nat {
         container nat {
@@ -135,9 +135,9 @@ submodule nokia-conf-router-nat {
                         description "Enter the nat44 context";
 
                         leaf max-subscriber-limit {
-                            type types-nat:lsn-max-subscriber-limit;
+                            type types-nat:nat44-max-subscriber-limit;
                             sros-ext:isa-auto-clear-on-modify;
-                            description "Largest value for all subscriber limits in each deterministic pool";
+                            description "Ingress hashing for load distribution across ESA-VMs";
                         }
 
                         leaf-list nat-import {
@@ -148,6 +148,28 @@ submodule nokia-conf-router-nat {
                             ordered-by user;
                             description "Import BGP-VPN routes in NAT inside routing context";
                         }
+
+                        container hash-mask {
+                            presence "Enable the hash-mask context";
+                            description "Enable the hash-mask context";
+
+                            leaf min-prefix-length {
+                                type uint32 {
+                                    range "0..31";
+                                }
+                                default "0";
+                                description "Minimum prefix length for hash mask";
+                            }
+
+                            leaf max-selector-end-prefix-length {
+                                type uint32 {
+                                    range "0..31";
+                                }
+                                default "0";
+                                description "Maximum prefix and port selector length for hash mask";
+                            }
+
+                        } // container hash-mask
 
                         list destination-prefix {
                             key "ip-prefix-length";
@@ -424,6 +446,29 @@ submodule nokia-conf-router-nat {
                                     description "Exclude a configuration group at this level";
                                 }
 
+                                container selector-mappings {
+                                    presence "Enable the selector-mappings context";
+                                    sros-ext:auto-restart-to-modify;
+                                    description "Enable the selector-mappings context";
+
+                                    leaf port-selector-length {
+                                        type uint32 {
+                                            range "0..31";
+                                        }
+                                        sros-ext:auto-restart-to-modify;
+                                        default "0";
+                                        description "Port selector length for deterministic prefix mapping";
+                                    }
+
+                                    leaf reverse-port-mappings {
+                                        type boolean;
+                                        sros-ext:auto-restart-to-modify;
+                                        default "false";
+                                        description "Enable reverse port mappings";
+                                    }
+
+                                } // container selector-mappings
+
                                 list map {
                                     key "from to";
                                     description "Enter the map list instance";
@@ -481,7 +526,7 @@ submodule nokia-conf-router-nat {
                         }
 
                         leaf max-subscriber-limit {
-                            type types-nat:lsn-max-subscriber-limit;
+                            type types-nat:dsl-max-subscriber-limit;
                             sros-ext:isa-auto-clear-on-modify;
                             description "Largest value for all subscriber limits in each deterministic pool";
                         }
@@ -911,6 +956,96 @@ submodule nokia-conf-router-nat {
 
                     } // container nat64
 
+                    container nat66 {
+                        presence "Enable the nat66 context";
+                        description "Enable the nat66 context";
+
+                        leaf admin-state {
+                            type types-sros:admin-state;
+                            default "disable";
+                            description "Administrative state of NAT66";
+                        }
+
+                        leaf subscriber-prefix-length {
+                            type types-nat:ipv6-subscriber-prefix-length;
+                            sros-ext:auto-restart-to-modify;
+                            sros-ext:isa-auto-clear-on-modify;
+                            description "Prefix length under which resources are aggregated";
+                        }
+
+                        leaf hash-prefix-length {
+                            type types-nat:ipv6-nat66-hash-prefix-length;
+                            sros-ext:auto-restart-to-modify;
+                            sros-ext:isa-auto-clear-on-modify;
+                            description "Prefix length used for ingress traffic load balancing";
+                        }
+
+                        leaf-list apply-groups {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            sros-ext:auto-restart-to-modify;
+                            description "Apply a configuration group at this level";
+                        }
+
+                        leaf-list apply-groups-exclude {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            sros-ext:auto-restart-to-modify;
+                            description "Exclude a configuration group at this level";
+                        }
+
+                        list destination-prefix {
+                            key "prefix";
+                            max-elements 6144;
+                            description "Enter the destination-prefix list instance";
+
+                            leaf prefix {
+                                type types-sros:ipv6-prefix;
+                                description "NAT66 destination prefix";
+                            }
+
+                            leaf-list apply-groups {
+                                type leafref {
+                                    path "../../../../../../../groups/group/name";
+                                }
+                                max-elements 8;
+                                ordered-by user;
+                                description "Apply a configuration group at this level";
+                            }
+
+                            leaf-list apply-groups-exclude {
+                                type leafref {
+                                    path "../../../../../../../groups/group/name";
+                                }
+                                max-elements 8;
+                                ordered-by user;
+                                description "Exclude a configuration group at this level";
+                            }
+
+                            choice policy {
+                                mandatory true;
+                                case firewall {
+
+                                    leaf firewall-policy {
+                                        type leafref {
+                                            path "../../../../../../../service/nat/firewall-policy/name";
+                                        }
+                                        sros-ext:immutable;
+                                        description "Firewall policy association with destination prefix";
+                                    }
+
+                                }
+                            }
+                        } // list destination-prefix
+
+                    } // container nat66
+
                     container subscriber-identification {
                         description "Enter the subscriber-identification context";
 
@@ -1037,6 +1172,14 @@ submodule nokia-conf-router-nat {
                     description "MTU for downstream traffic";
                 }
 
+                leaf route-limit {
+                    type uint32 {
+                        range "1..131072";
+                    }
+                    default "32768";
+                    description "Limit the number of IPv4 and IPv6 routes in the outside";
+                }
+
                 container filters {
                     description "Enter the filters context";
 
@@ -1081,9 +1224,11 @@ submodule nokia-conf-router-nat {
                 } // container filters
 
                 container dnat-only {
+                    status obsolete;
                     description "Enter the dnat-only context";
 
                     leaf route-limit {
+                        status obsolete;
                         type uint32 {
                             range "1..131072";
                         }
@@ -1394,6 +1539,12 @@ submodule nokia-conf-router-nat {
                                 description "Number of ports per protocol reserved for CPM traffic";
                             }
 
+                            leaf use-well-known-ports {
+                                type boolean;
+                                default "false";
+                                description "Enable dynamic allocation of well-known ports";
+                            }
+
                         } // container use-interface-ip
 
                         container flexible-port-allocation {
@@ -1664,6 +1815,87 @@ submodule nokia-conf-router-nat {
                     } // list address-range
 
                 } // list pool
+
+                list domain {
+                    key "name";
+                    max-elements 1024;
+                    description "Enter the domain list instance";
+
+                    leaf name {
+                        type types-sros:named-item;
+                        description "NAT pool name";
+                    }
+
+                    leaf nat-group {
+                        type leafref {
+                            path "../../../../../isa/nat-group/id";
+                        }
+                        sros-ext:immutable;
+                        sros-ext:isa-auto-clear-on-modify;
+                        mandatory true;
+                        description "NAT outside group name";
+                    }
+
+                    leaf admin-state {
+                        type types-sros:admin-state;
+                        default "disable";
+                        description "Administrative state of NAT outside domain";
+                    }
+
+                    leaf-list apply-groups {
+                        type leafref {
+                            path "../../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Apply a configuration group at this level";
+                    }
+
+                    leaf-list apply-groups-exclude {
+                        type leafref {
+                            path "../../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Exclude a configuration group at this level";
+                    }
+
+                    list prefix {
+                        key "ip-prefix";
+                        max-elements 8192;
+                        description "Enter the prefix list instance";
+
+                        leaf ip-prefix {
+                            type types-sros:ipv6-unicast-prefix;
+                            description "Attribute prefix/prefix-length for prefix";
+                        }
+
+                        leaf description {
+                            type types-sros:description;
+                            description "Text description";
+                        }
+
+                        leaf-list apply-groups {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Apply a configuration group at this level";
+                        }
+
+                        leaf-list apply-groups-exclude {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Exclude a configuration group at this level";
+                        }
+
+                    } // list prefix
+
+                } // list domain
 
             } // container outside
 

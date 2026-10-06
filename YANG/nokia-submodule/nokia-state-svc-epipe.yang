@@ -17,7 +17,7 @@ submodule nokia-state-svc-epipe {
     include nokia-state-router;
     include nokia-state-router-segment-routing;
 
-    sros-ext:sros-major-release "rel25";
+    sros-ext:sros-major-release "rel26";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -40,7 +40,7 @@ submodule nokia-state-svc-epipe {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2026-02-11";
+    revision "2026-07-08";
 
     grouping state-svc-epipe {
         list epipe {
@@ -442,7 +442,7 @@ submodule nokia-state-svc-epipe {
                             enum sap                            { value 1; }
                             enum sdp-bind                       { value 2; }
                             enum sdp-fec                        { value 3; }
-                            enum evpn-mpls                      { value 4; }
+                            enum evpn                           { value 4; }
                         }
                         description "The type of endpoint object that is current transmit active. ";
                     }
@@ -463,6 +463,15 @@ submodule nokia-state-svc-epipe {
                         description
                             "The active 'up' time of the endpoint object
                              that is current transmit active.";
+                    }
+
+                    leaf encap {
+                        type enumeration {
+                            enum mpls                           { value 0; }
+                            enum vxlan                          { value 1; }
+                            enum srv6                           { value 2; }
+                        }
+                        description "Encap associated with the bgp-instance per object";
                     }
 
                 } // container tx-active
@@ -526,6 +535,8 @@ submodule nokia-state-svc-epipe {
                         bit vccv-bfd-down                  { position 32; }
                         bit stitching-svc-pw-fault         { position 33; }
                         bit out-of-anysec-resource         { position 34; }
+                        bit anysec-service-and-tunnel-config-conflict { position 35; }
+                        bit anysec-group-or-peer-oper-down { position 36; }
                     }
                     description
                         "This object indicates all the conditions that affect the
@@ -987,7 +998,7 @@ submodule nokia-state-svc-epipe {
                                 }
                                 description
                                     "Indicates the MC-LAG inactive state of the mep.  The value of
-                                     system/eth-cfm/redundancy/mc-lag/standby-mep must be 'true (1)' 
+                                     system/eth-cfm/redundancy/mc-lag/standby-mep must be 'true (1)'
                                      on the node for this leaf to have meaning.";
                             }
 
@@ -2092,7 +2103,7 @@ submodule nokia-state-svc-epipe {
                                     }
 
                                     leaf adapted-admin-cbs {
-                                        type types-qos:bytes;
+                                        type int64;
                                         units "bytes";
                                         description "Admin CBS.";
                                     }
@@ -3698,7 +3709,7 @@ submodule nokia-state-svc-epipe {
                                         description
                                             "Info queue-set-size-overridden is set to true when the shaper is created by
                                              the override configured for sap egress qos policy. When it is set to false,
-                                             it indicates that fp-resource-policy default-size setting is used to create 
+                                             it indicates that fp-resource-policy default-size setting is used to create
                                              this shaper.";
                                     }
 
@@ -4026,7 +4037,7 @@ submodule nokia-state-svc-epipe {
                                     }
 
                                     leaf adapted-admin-mbs {
-                                        type types-qos:bytes;
+                                        type int64;
                                         units "bytes";
                                         description "Admin MBS.";
                                     }
@@ -4080,7 +4091,7 @@ submodule nokia-state-svc-epipe {
                                     }
 
                                     leaf operational-cbs {
-                                        type types-qos:bytes;
+                                        type int64;
                                         units "bytes";
                                         description "Oper CBS.";
                                     }
@@ -4096,7 +4107,7 @@ submodule nokia-state-svc-epipe {
                                     }
 
                                     leaf operational-mbs {
-                                        type types-qos:bytes;
+                                        type int64;
                                         units "bytes";
                                         description "Oper MBS.";
                                     }
@@ -6257,7 +6268,7 @@ submodule nokia-state-svc-epipe {
                                 }
                                 description
                                     "Indicates the MC-LAG inactive state of the mep.  The value of
-                                     system/eth-cfm/redundancy/mc-lag/standby-mep must be 'true (1)' 
+                                     system/eth-cfm/redundancy/mc-lag/standby-mep must be 'true (1)'
                                      on the node for this leaf to have meaning.";
                             }
 
@@ -6383,6 +6394,41 @@ submodule nokia-state-svc-epipe {
 
             container vxlan {
                 description "Enter the vxlan context";
+
+                container statistics {
+                    description "Enter the statistics context";
+
+                    leaf last-cleared {
+                        type types-sros:date-time;
+                        description "Indicates the time of the last clearing of vpls vxlan statistics.";
+                    }
+
+                    leaf vni-failure-statistics {
+                        type types-sros:date-time;
+                        description "Indicates the VTEP egress VNI failure statistics time";
+                    }
+
+                    leaf vtep {
+                        type uint32;
+                        description "Indicates the number of VTEPs";
+                    }
+
+                    leaf service-multicast-limit {
+                        type uint32;
+                        description "Indicates the vxlan TLS multicast limit";
+                    }
+
+                    leaf system-limit {
+                        type uint32;
+                        description "Indicates the system limit";
+                    }
+
+                    leaf egress-multicast-list-limit {
+                        type uint32;
+                        description "indicates the egress multicast system limit";
+                    }
+
+                } // container statistics
 
                 list instance {
                     key "vxlan-instance";
@@ -6683,6 +6729,46 @@ submodule nokia-state-svc-epipe {
 
                     } // container destinations
 
+                    container statistics {
+                        description "Enter the statistics context";
+
+                        leaf last-cleared {
+                            type types-sros:date-time;
+                            description "Indicates the time of the last clearing of vpls evpn-mpls statistics.";
+                        }
+
+                        leaf tep-egress-bind-failure-statistics {
+                            type types-sros:date-time;
+                            description "Indicates the TEP egress bind failure statistics time";
+                        }
+
+                        leaf tep {
+                            type uint32;
+                            description "Indicates the number of TEPs";
+                        }
+
+                        leaf service-multicast-limit {
+                            type uint32;
+                            description "Indicates the evpn-mpls TLS multicast limit";
+                        }
+
+                        leaf system-limit {
+                            type uint32;
+                            description "Indicates the system limit";
+                        }
+
+                        leaf pmsi {
+                            type uint32;
+                            description "indicates the PMSI limit";
+                        }
+
+                        leaf hardware-life-limit {
+                            type uint32;
+                            description "indicates the hardware life limit";
+                        }
+
+                    } // container statistics
+
                 } // list mpls
 
                 list segment-routing-v6 {
@@ -6774,6 +6860,41 @@ submodule nokia-state-svc-epipe {
                         } // list non-ethernet-segment-destination
 
                     } // container destinations
+
+                    container statistics {
+                        description "Enter the statistics context";
+
+                        leaf last-cleared {
+                            type types-sros:date-time;
+                            description "Indicates the time of the last clearing of vpls evpn srv6 statistics.";
+                        }
+
+                        leaf tep-egress-bind-failure-statistics {
+                            type types-sros:date-time;
+                            description "Indicates the TEP egress bind failure statistics time";
+                        }
+
+                        leaf tep {
+                            type uint32;
+                            description "Indicates the number of TEPs";
+                        }
+
+                        leaf service-multicast-limit {
+                            type uint32;
+                            description "Indicates the evpn srv6 TLS multicast limit";
+                        }
+
+                        leaf system-limit {
+                            type uint32;
+                            description "Indicates the system limit";
+                        }
+
+                        leaf egress-multicast-limit {
+                            type uint32;
+                            description "indicates the egress multicast system limit";
+                        }
+
+                    } // container statistics
 
                 } // list segment-routing-v6
 

@@ -20,7 +20,7 @@ submodule nokia-state-svc-ies {
     include nokia-state-svc-ies-sub-if;
     include nokia-state-svc-ies-vdo-if;
 
-    sros-ext:sros-major-release "rel25";
+    sros-ext:sros-major-release "rel26";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -43,7 +43,7 @@ submodule nokia-state-svc-ies {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2026-02-11";
+    revision "2026-07-08";
 
     grouping state-svc-ies {
         list ies {
@@ -144,7 +144,7 @@ submodule nokia-state-svc-ies {
                     }
                     description
                         "The current operational state of the interface.
-                         This leaf has the same semantics as ifOperStatus. 
+                         This leaf has the same semantics as ifOperStatus.
                          in RFC 2863: The Interfaces Group MIB";
                 }
 
@@ -751,7 +751,7 @@ submodule nokia-state-svc-ies {
                         }
                         description
                             "Indicates the reason for why the interface is operationally down.
-                                             
+
                              Values:
                                  admin-disabled                  - Administratively disabled.
                                  service-admin-disabled          - Assiocated service is administratively disabled.
@@ -860,55 +860,6 @@ submodule nokia-state-svc-ies {
 
                 } // container ipv4
 
-                container ipv6 {
-                    description "Enter the ipv6 context";
-
-                    container statistics {
-                        description "Enter the statistics context";
-
-                        leaf out-packets {
-                            type yang:counter64;
-                            description "The number of packets transmitted by this interface.";
-                        }
-
-                        leaf out-octets {
-                            type yang:counter64;
-                            description "The number of octets transmitted by this interface.";
-                        }
-
-                        leaf out-discard-packets {
-                            type yang:counter64;
-                            description "The number of transmit packets discarded.";
-                        }
-
-                        leaf out-discard-octets {
-                            type yang:counter64;
-                            description "The number of transmit octets discarded.";
-                        }
-
-                        leaf in-packets {
-                            type yang:counter64;
-                            description "The number of packets received.";
-                        }
-
-                        leaf in-octets {
-                            type yang:counter64;
-                            description "The number of octets received.";
-                        }
-
-                        leaf urpf-check-fail-packets {
-                            type yang:counter64;
-                            description "The number of packets that fail uRPF check on this interface.";
-                        }
-
-                        leaf urpf-check-fail-octets {
-                            type yang:counter64;
-                            description "The number of octets in the packets that fail uRPF check.";
-                        }
-
-                    } // container statistics
-
-                } // container ipv6
 
                 container statistics {
                     description "Enter the statistics context";
@@ -1024,7 +975,7 @@ submodule nokia-state-svc-ies {
                     }
                     description
                         "The current operational state of the interface.
-                         This leaf has the same semantics as ifOperStatus. 
+                         This leaf has the same semantics as ifOperStatus.
                          in RFC 2863: The Interfaces Group MIB";
                 }
 
@@ -1558,7 +1509,7 @@ submodule nokia-state-svc-ies {
                         }
                         description
                             "Indicates the reason for why the interface is operationally down.
-                                             
+
                              Values:
                                  admin-disabled                  - Administratively disabled.
                                  service-admin-disabled          - Assiocated service is administratively disabled.
@@ -1831,7 +1782,7 @@ submodule nokia-state-svc-ies {
                     }
                     description
                         "The current operational state of the interface.
-                         This leaf has the same semantics as ifOperStatus. 
+                         This leaf has the same semantics as ifOperStatus.
                          in RFC 2863: The Interfaces Group MIB";
                 }
 
@@ -1862,7 +1813,7 @@ submodule nokia-state-svc-ies {
                     }
                     description
                         "Indicates which protocols are configured on the interface.;
-                                         
+
                          Values:
                              ospfv2 - Indicates if OSPFv2 is configured.
                              rip    - Indicates if RIP is configured.
@@ -2515,7 +2466,7 @@ submodule nokia-state-svc-ies {
                                             type yang:counter32;
                                             description
                                                 "The number of crypto errors encountered on this SA.
-                                                     
+
                                                  When the value of direction is 'inbound', the crypto-errors will be set for the following errors:
                                                      MAC miscompare
                                                      Pad errors
@@ -2525,7 +2476,7 @@ submodule nokia-state-svc-ies {
                                                      Payload alignment errors
                                                      Sequence number errors
                                                      Protocol errors
-                                                      
+
                                                  When the value of direction is 'outbound', the crypto-errors will be set for the following errors:
                                                      Sequence wrap errors
                                                      Illegal configure algorithm
@@ -2587,6 +2538,67 @@ submodule nokia-state-svc-ies {
                                 } // container statistics
 
                             } // container isa
+
+                            list ts {
+                                key "side from-address to-address min-port max-port protocol-id";
+                                description "Enter the ts list instance";
+
+                                leaf side {
+                                    type types-ipsec:ts-side;
+                                    description
+                                        "Whether this SA entry is created manually by the user or
+                                         dynamically by the IPsec subsystem.";
+                                }
+
+                                leaf from-address {
+                                    type types-sros:ip-address;
+                                    description "The beginning address of the range for this traffic selector entry.";
+                                }
+
+                                leaf to-address {
+                                    type types-sros:ip-address;
+                                    description "The end address of the range for this traffic selector entry.";
+                                }
+
+                                leaf min-port {
+                                    type types-sros:tcp-udp-port;
+                                    description
+                                        "The minimum port number of the range for this IPsec traffic selector entry.
+
+                                         When the value of min-port is 0 and the value of max-port is 65535,
+                                         it means that the IPsec traffic selector accepts any port number.
+
+                                         When the value of protocol-id is 1 (ICMP) or 58 (ICMPv6), the bits from 0 to 7 of min-port
+                                         represent the minimum ICMP/ICMPv6 code and the bits from 8 to 15
+                                         represent the minimum ICMP/ICMPv6 type.";
+                                }
+
+                                leaf max-port {
+                                    type types-sros:tcp-udp-port;
+                                    description
+                                        "The maximum port number of the range for this IPsec traffic selector entry.
+
+                                         When the value of max-port is 0 and the value of min-port is 65535,
+                                         it means that the IPsec traffic selector accepts the packet only when the
+                                         corresponding port field is unavailable.
+
+                                         When the value of protocol-id is 1 (ICMP) or 58 (ICMPv6), the bits from 0 to 7 of max-port
+                                         represent the maximum ICMP/ICMPv6 code and the bits from 8 to 15
+                                         represent the maximum ICMP/ICMPv6 type.";
+                                }
+
+                                leaf protocol-id {
+                                    type uint32 {
+                                        range "0..255";
+                                    }
+                                    description
+                                        "The IP protocol number for this IPsec traffic selector entry.
+
+                                         A value of zero specifies that the IPsec traffic selector will accept
+                                         packets for any protocol.";
+                                }
+
+                            } // list ts
 
                         } // list ipsec-sa
 
@@ -2662,6 +2674,8 @@ submodule nokia-state-svc-ies {
                             bit vccv-bfd-down                  { position 32; }
                             bit stitching-svc-pw-fault         { position 33; }
                             bit out-of-anysec-resource         { position 34; }
+                            bit anysec-service-and-tunnel-config-conflict { position 35; }
+                            bit anysec-group-or-peer-oper-down { position 36; }
                         }
                         description
                             "This object indicates all the conditions that affect the
@@ -3092,7 +3106,7 @@ submodule nokia-state-svc-ies {
                                     }
                                     description
                                         "Indicates the MC-LAG inactive state of the mep.  The value of
-                                         system/eth-cfm/redundancy/mc-lag/standby-mep must be 'true (1)' 
+                                         system/eth-cfm/redundancy/mc-lag/standby-mep must be 'true (1)'
                                          on the node for this leaf to have meaning.";
                                 }
 
@@ -3550,7 +3564,7 @@ submodule nokia-state-svc-ies {
                                         }
 
                                         leaf adapted-admin-cbs {
-                                            type types-qos:bytes;
+                                            type int64;
                                             units "bytes";
                                             description "Admin CBS.";
                                         }
@@ -5658,7 +5672,7 @@ submodule nokia-state-svc-ies {
                                             description
                                                 "Info queue-set-size-overridden is set to true when the shaper is created by
                                                  the override configured for sap egress qos policy. When it is set to false,
-                                                 it indicates that fp-resource-policy default-size setting is used to create 
+                                                 it indicates that fp-resource-policy default-size setting is used to create
                                                  this shaper.";
                                         }
 
@@ -5766,7 +5780,7 @@ submodule nokia-state-svc-ies {
                                         }
 
                                         leaf adapted-admin-mbs {
-                                            type types-qos:bytes;
+                                            type int64;
                                             units "bytes";
                                             description "Admin MBS.";
                                         }
@@ -5820,7 +5834,7 @@ submodule nokia-state-svc-ies {
                                         }
 
                                         leaf operational-cbs {
-                                            type types-qos:bytes;
+                                            type int64;
                                             units "bytes";
                                             description "Oper CBS.";
                                         }
@@ -5836,7 +5850,7 @@ submodule nokia-state-svc-ies {
                                         }
 
                                         leaf operational-mbs {
-                                            type types-qos:bytes;
+                                            type int64;
                                             units "bytes";
                                             description "Oper MBS.";
                                         }
@@ -8132,7 +8146,7 @@ submodule nokia-state-svc-ies {
                                     }
                                     description
                                         "Indicates the MC-LAG inactive state of the mep.  The value of
-                                         system/eth-cfm/redundancy/mc-lag/standby-mep must be 'true (1)' 
+                                         system/eth-cfm/redundancy/mc-lag/standby-mep must be 'true (1)'
                                          on the node for this leaf to have meaning.";
                                 }
 
@@ -8458,7 +8472,7 @@ submodule nokia-state-svc-ies {
                                             type yang:counter32;
                                             description
                                                 "The number of crypto errors encountered on this SA.
-                                                     
+
                                                  When the value of direction is 'inbound', the crypto-errors will be set for the following errors:
                                                      MAC miscompare
                                                      Pad errors
@@ -8468,7 +8482,7 @@ submodule nokia-state-svc-ies {
                                                      Payload alignment errors
                                                      Sequence number errors
                                                      Protocol errors
-                                                      
+
                                                  When the value of direction is 'outbound', the crypto-errors will be set for the following errors:
                                                      Sequence wrap errors
                                                      Illegal configure algorithm
@@ -9946,7 +9960,7 @@ submodule nokia-state-svc-ies {
                                                 type yang:counter32;
                                                 description
                                                     "The number of crypto errors encountered on this SA.
-                                                         
+
                                                      When the value of direction is 'inbound', the crypto-errors will be set for the following errors:
                                                          MAC miscompare
                                                          Pad errors
@@ -9956,7 +9970,7 @@ submodule nokia-state-svc-ies {
                                                          Payload alignment errors
                                                          Sequence number errors
                                                          Protocol errors
-                                                          
+
                                                      When the value of direction is 'outbound', the crypto-errors will be set for the following errors:
                                                          Sequence wrap errors
                                                          Illegal configure algorithm
@@ -10241,7 +10255,7 @@ submodule nokia-state-svc-ies {
                         }
                         description
                             "Indicates the reason for why the interface is operationally down.
-                                             
+
                              Values:
                                  admin-disabled                  - Administratively disabled.
                                  service-admin-disabled          - Assiocated service is administratively disabled.
@@ -10278,7 +10292,7 @@ submodule nokia-state-svc-ies {
                                 type yang:counter32;
                                 description
                                     "Total Number of ICMPv4 messages received by this interface.
-                                                     
+
                                      This includes all those counted by icmp-in-errors. Note that this
                                      interface is the interface to which the ICMPv4 messages were
                                      addressed which may not be necessarily the input interface
@@ -10289,7 +10303,7 @@ submodule nokia-state-svc-ies {
                                 type yang:counter32;
                                 description
                                     "Number of ICMPv4 errored messages received by this interface.
-                                                     
+
                                      This implies ICMPv4 messages determined as having specific
                                      ICMPv4 errors (bad ICMPv4 checksums, bad length, etc.).";
                             }
@@ -10353,7 +10367,7 @@ submodule nokia-state-svc-ies {
                                 type yang:counter32;
                                 description
                                     "Total number of ICMPv4 messages this interface attempted to send.
-                                                     
+
                                      This includes all those counted by icmp-out-errors.";
                             }
 
@@ -10362,7 +10376,7 @@ submodule nokia-state-svc-ies {
                                 description
                                     "Number of ICMPv4 messages this interface could not be send due to problems
                                      discovered within ICMPv4 such as lack of buffers.
-                                                     
+
                                      This value should not include errors discovered outside the ICMPv4 layer such as
                                      the inability of VRtr IPv4 to route the resultant datagram. In some implementations
                                      there may be no types of error which contribute to this counter's value.";
@@ -10517,6 +10531,7 @@ submodule nokia-state-svc-ies {
                                     enum dynamic                        { value 2; }
                                     enum managed                        { value 100; }
                                     enum evpn                           { value 101; }
+                                    enum evpn-local-es                  { value 102; }
                                 }
                                 description "The type of mapping.";
                             }
@@ -10560,6 +10575,7 @@ submodule nokia-state-svc-ies {
                                     enum dynamic                        { value 2; }
                                     enum managed                        { value 100; }
                                     enum evpn                           { value 101; }
+                                    enum evpn-local-es                  { value 102; }
                                 }
                                 description "The type of mapping.";
                             }
@@ -11215,7 +11231,7 @@ submodule nokia-state-svc-ies {
                         }
                         description
                             "Indicates the reason for why the interface is operationally down.
-                                             
+
                              Values:
                                  admin-disabled                  - Administratively disabled.
                                  service-admin-disabled          - Assiocated service is administratively disabled.
@@ -11252,7 +11268,7 @@ submodule nokia-state-svc-ies {
                                 type yang:counter32;
                                 description
                                     "Total number of ICMPv6 messages received by this interface.
-                                                     
+
                                      This includes all those counted by icmp6-in-errors. Note that this
                                      interface is the interface to which the ICMPv6 messages were
                                      addressed which may not be necessarily the input interface
@@ -11263,7 +11279,7 @@ submodule nokia-state-svc-ies {
                                 type yang:counter32;
                                 description
                                     "Number of ICMPv6 errored messages received by this interface.
-                                                     
+
                                      This implies ICMPv6 messages determined as having specific
                                      ICMPv6 errors (bad ICMP checksums, bad length, etc.).";
                             }
@@ -11349,7 +11365,7 @@ submodule nokia-state-svc-ies {
                                 type yang:counter32;
                                 description
                                     "Total number of ICMPv6 messages this interface attempted to send.
-                                                     
+
                                      This includes all those counted by icmp6-out-errors.";
                             }
 
@@ -11358,7 +11374,7 @@ submodule nokia-state-svc-ies {
                                 description
                                     "Number of ICMPv6 messages this interface could not be send due to problems
                                      discovered within ICMPv6 such as lack of buffers.
-                                                     
+
                                      This value should not include errors discovered outside the ICMPv6 layer such as
                                      the inability of VRtr IPv6 to route the resultant datagram. In some implementations
                                      there may be no types of error which contribute to this counter's value.";
@@ -11603,6 +11619,7 @@ submodule nokia-state-svc-ies {
                                     enum dynamic                        { value 2; }
                                     enum managed                        { value 100; }
                                     enum evpn                           { value 101; }
+                                    enum evpn-local-es                  { value 102; }
                                 }
                                 description "The type of mapping.";
                             }
@@ -12213,7 +12230,7 @@ submodule nokia-state-svc-ies {
                     }
                     description
                         "The current operational state of the interface.
-                         This leaf has the same semantics as ifOperStatus. 
+                         This leaf has the same semantics as ifOperStatus.
                          in RFC 2863: The Interfaces Group MIB";
                 }
 
@@ -12309,6 +12326,8 @@ submodule nokia-state-svc-ies {
                             bit vccv-bfd-down                  { position 32; }
                             bit stitching-svc-pw-fault         { position 33; }
                             bit out-of-anysec-resource         { position 34; }
+                            bit anysec-service-and-tunnel-config-conflict { position 35; }
+                            bit anysec-group-or-peer-oper-down { position 36; }
                         }
                         description
                             "This object indicates all the conditions that affect the
@@ -12488,7 +12507,7 @@ submodule nokia-state-svc-ies {
                         }
                         description
                             "Indicates the reason for why the interface is operationally down.
-                                             
+
                              Values:
                                  admin-disabled                  - Administratively disabled.
                                  service-admin-disabled          - Assiocated service is administratively disabled.
@@ -12787,7 +12806,7 @@ submodule nokia-state-svc-ies {
                     }
                     description
                         "The current operational state of the interface.
-                         This leaf has the same semantics as ifOperStatus. 
+                         This leaf has the same semantics as ifOperStatus.
                          in RFC 2863: The Interfaces Group MIB";
                 }
 
@@ -13129,6 +13148,112 @@ submodule nokia-state-svc-ies {
 
             } // container subscriber-management
 
+            list ip-transport {
+                key "ipt-id";
+                description "Enter the ip-transport list instance";
+
+                leaf ipt-id {
+                    type types-sros:port;
+                    description "IP Transport identifier.";
+                }
+
+                leaf num-remote-hosts {
+                    type uint32;
+                    description "Number of remote hosts under this IP transport.";
+                }
+
+                leaf oper-state {
+                    type types-sros:oper-state;
+                    description "Indicates the current operational status of this IP transport.";
+                }
+
+                leaf oper-state-last-changed {
+                    type yang:date-and-time;
+                    description
+                        "Indicates the date and time when the operational status of
+                         the IP transport changed state.";
+                }
+
+                leaf oper-flags {
+                    type bits {
+                        bit ipt-admin-down                 { position 0; }
+                        bit svc-admin-down                 { position 1; }
+                        bit port-oper-down                 { position 2; }
+                        bit no-if-address                  { position 3; }
+                        bit if-oper-down                   { position 4; }
+                        bit port-num-in-use                { position 5; }
+                        bit port-num-reserved              { position 6; }
+                    }
+                    description
+                        "Indicates the conditions which currently effect operational status
+                         of this IP transport.
+
+                         The bit values are:
+                            ipt-admin-down     (0) - IP Transport is administratively down
+                            svc-admin-down     (1) - Service is administratively down
+                            port-oper-down     (2) - Port is operationally down
+                            no-if-address      (3) - no interface address within the virtual
+                                                     router matches local-host/ip-address
+                            if-oper-down       (4) - matching interface is operationally down
+                            port-num-in-use    (5) - port number already in use in system
+                            port-num-reserved  (6) - port number detected as reserved by system";
+                }
+
+                list remote-host {
+                    key "remote-host-id";
+                    description "Enter the remote-host list instance";
+
+                    leaf remote-host-id {
+                        type uint32 {
+                            range "1..2147483647";
+                        }
+                        description "remote host identifer";
+                    }
+
+                    leaf session-state {
+                        type enumeration {
+                            enum invalid                        { value 0; }
+                            enum ready                          { value 1; }
+                            enum connecting                     { value 2; }
+                            enum connected                      { value 3; }
+                        }
+                        description "Indicates the session state of this remote host.";
+                    }
+
+                    leaf session-up-time {
+                        type uint32;
+                        units "seconds";
+                        description
+                            "Indicates the time elapsed in seconds when the session-state changed
+                             to connected.";
+                    }
+
+                    leaf last-connection-information {
+                        type string {
+                            length "0..32";
+                        }
+                        description "Indicates contextual information about the last connection.";
+                    }
+
+                    leaf check-tcp-result {
+                        type enumeration {
+                            enum unknown                        { value 1; }
+                            enum pass                           { value 2; }
+                            enum fail                           { value 3; }
+                        }
+                        description "Indicates the result of the check-tcp test.";
+                    }
+
+                    leaf check-tcp-information {
+                        type string {
+                            length "0..32";
+                        }
+                        description "Indicates extra information for the result of the check-tcp test.";
+                    }
+
+                } // list remote-host
+
+            } // list ip-transport
 
             uses state-svc-ies-sub-if-subscriber-interface;
             uses state-svc-ies-vdo-if-video-interface;

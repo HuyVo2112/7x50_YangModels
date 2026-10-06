@@ -9,7 +9,7 @@ module nokia-sr-openconfig-if-ip-deviations {
     import openconfig-interfaces          { prefix "oc-if"; }
     import openconfig-yang-types          { prefix "oc-yang"; }
 
-    sros-ext:sros-major-release "rel25";
+    sros-ext:sros-major-release "rel26";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -33,7 +33,7 @@ module nokia-sr-openconfig-if-ip-deviations {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2025-03-12";
+    revision "2026-07-08";
 
     deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:config/oc-ip:preempt-delay {
         deviate not-supported;
@@ -54,11 +54,13 @@ module nokia-sr-openconfig-if-ip-deviations {
         }
     }
 
+
     deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:state/oc-ip:prefix-length {
         deviate add {
             mandatory true;
         }
     }
+
 
     deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:proxy-arp {
         deviate not-supported;
@@ -80,9 +82,6 @@ module nokia-sr-openconfig-if-ip-deviations {
         deviate not-supported;
     }
 
-    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:config/oc-ip:enabled {
-        deviate not-supported;
-    }
 
     deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:config/oc-ip:mtu {
         deviate replace {
@@ -92,13 +91,11 @@ module nokia-sr-openconfig-if-ip-deviations {
         }
     }
 
-    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:config/oc-ip:dhcp-client {
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:config/oc-ip:gratuitous-arp-accepted {
         deviate not-supported;
     }
 
-    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:state/oc-ip:enabled {
-        deviate not-supported;
-    }
+
 
     deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:state/oc-ip:mtu {
         deviate replace {
@@ -108,11 +105,65 @@ module nokia-sr-openconfig-if-ip-deviations {
         }
     }
 
-    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:state/oc-ip:dhcp-client {
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:state/oc-ip:gratuitous-arp-accepted {
         deviate not-supported;
     }
 
-    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:state/oc-ip:counters {
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:state/oc-ip:counters/oc-ip:in-multicast-pkts {
+        deviate not-supported;
+    }
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:state/oc-ip:counters/oc-ip:in-multicast-octets {
+        deviate not-supported;
+    }
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:state/oc-ip:counters/oc-ip:in-error-pkts {
+        deviate not-supported;
+    }
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:state/oc-ip:counters/oc-ip:in-forwarded-pkts {
+        deviate not-supported;
+    }
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:state/oc-ip:counters/oc-ip:in-forwarded-octets {
+        deviate not-supported;
+    }
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:state/oc-ip:counters/oc-ip:in-discarded-pkts {
+        deviate not-supported;
+    }
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:state/oc-ip:counters/oc-ip:out-multicast-pkts {
+        deviate not-supported;
+    }
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:state/oc-ip:counters/oc-ip:out-multicast-octets {
+        deviate not-supported;
+    }
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:state/oc-ip:counters/oc-ip:out-error-pkts {
+        deviate not-supported;
+    }
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:state/oc-ip:counters/oc-ip:out-forwarded-pkts {
+        deviate not-supported;
+    }
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:state/oc-ip:counters/oc-ip:out-forwarded-octets {
+        deviate not-supported;
+    }
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:state/oc-ip:counters/oc-ip:urpf-drop-pkts {
+        deviate not-supported;
+    }
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:state/oc-ip:counters/oc-ip:urpf-drop-bytes {
+        deviate not-supported;
+    }
+
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:urpf {
         deviate not-supported;
     }
 
@@ -127,6 +178,8 @@ module nokia-sr-openconfig-if-ip-deviations {
     deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:interface-tracking {
         deviate not-supported;
     }
+
+
 
 
     deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:router-advertisement {
@@ -149,9 +202,6 @@ module nokia-sr-openconfig-if-ip-deviations {
         deviate not-supported;
     }
 
-    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:config/oc-ip:enabled {
-        deviate not-supported;
-    }
 
     deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:config/oc-ip:mtu {
         deviate replace {
@@ -169,13 +219,11 @@ module nokia-sr-openconfig-if-ip-deviations {
         }
     }
 
-    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:config/oc-ip:dhcp-client {
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:config/oc-ip:learn-unsolicited {
         deviate not-supported;
     }
 
-    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:state/oc-ip:enabled {
-        deviate not-supported;
-    }
+
 
     deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:state/oc-ip:mtu {
         deviate replace {
@@ -193,11 +241,65 @@ module nokia-sr-openconfig-if-ip-deviations {
         }
     }
 
-    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:state/oc-ip:dhcp-client {
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:state/oc-ip:learn-unsolicited {
         deviate not-supported;
     }
 
-    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:state/oc-ip:counters {
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:state/oc-ip:counters/oc-ip:in-multicast-pkts {
+        deviate not-supported;
+    }
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:state/oc-ip:counters/oc-ip:in-multicast-octets {
+        deviate not-supported;
+    }
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:state/oc-ip:counters/oc-ip:in-error-pkts {
+        deviate not-supported;
+    }
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:state/oc-ip:counters/oc-ip:in-forwarded-pkts {
+        deviate not-supported;
+    }
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:state/oc-ip:counters/oc-ip:in-forwarded-octets {
+        deviate not-supported;
+    }
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:state/oc-ip:counters/oc-ip:in-discarded-pkts {
+        deviate not-supported;
+    }
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:state/oc-ip:counters/oc-ip:out-multicast-pkts {
+        deviate not-supported;
+    }
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:state/oc-ip:counters/oc-ip:out-multicast-octets {
+        deviate not-supported;
+    }
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:state/oc-ip:counters/oc-ip:out-error-pkts {
+        deviate not-supported;
+    }
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:state/oc-ip:counters/oc-ip:out-forwarded-pkts {
+        deviate not-supported;
+    }
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:state/oc-ip:counters/oc-ip:out-forwarded-octets {
+        deviate not-supported;
+    }
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:state/oc-ip:counters/oc-ip:urpf-drop-pkts {
+        deviate not-supported;
+    }
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:state/oc-ip:counters/oc-ip:urpf-drop-bytes {
+        deviate not-supported;
+    }
+
+
+    deviation /oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:urpf {
         deviate not-supported;
     }
 

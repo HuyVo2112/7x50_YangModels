@@ -18,7 +18,7 @@ submodule nokia-conf-log {
     include nokia-conf-system-security;
     include nokia-conf-system-security-tls;
 
-    sros-ext:sros-major-release "rel25";
+    sros-ext:sros-major-release "rel26";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -41,7 +41,7 @@ submodule nokia-conf-log {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2026-07-22";
+    revision "2026-07-08";
 
     grouping conf-log {
         container log {
@@ -55,7 +55,7 @@ submodule nokia-conf-log {
 
             leaf encryption-key {
                 type types-sros:encrypted-leaf {
-                    length "1..71";
+                    length "1..126";
                 }
                 description "Secret key for the encryption of log files";
             }
@@ -7659,7 +7659,7 @@ submodule nokia-conf-log {
                     description "Enter the tree-sid list instance";
 
                     leaf event {
-                        type types-log:treesid-events;
+                        type types-log:tree-sid-events;
                         description "Log event as a trigger for one or more EHS handlers";
                     }
 
@@ -17363,7 +17363,7 @@ submodule nokia-conf-log {
                     description "Enter the tree-sid list instance";
 
                     leaf event {
-                        type types-log:treesid-events;
+                        type types-log:tree-sid-events;
                         description "Log event as a trigger for one or more EHS handlers";
                     }
 
@@ -19305,7 +19305,10 @@ submodule nokia-conf-log {
                 }
 
                 leaf address {
-                    type types-sros:ip-unicast-address;
+                    type union {
+                        type types-sros:ip-unicast-address;
+                        type types-sros:fully-qualified-domain-name;
+                    }
                     description "IP address or FQDN of the Syslog target host";
                 }
 
@@ -19363,7 +19366,7 @@ submodule nokia-conf-log {
                         type string {
                             length "1..32";
                             pattern "([!-9;<>-~])+" {
-                                error-message "String must contain only printable characters between 33 - 126 ASCII except ':' and '='";
+                                error-message "'log-prefix' must contain only printable characters between 33 and 126 ASCII except ':' and '='";
                             }
                         }
                     }

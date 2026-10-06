@@ -46,7 +46,7 @@ submodule nokia-conf-svc-ies {
     include nokia-conf-test-oam;
     include nokia-conf-vrrp;
 
-    sros-ext:sros-major-release "rel25";
+    sros-ext:sros-major-release "rel26";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -69,7 +69,7 @@ submodule nokia-conf-svc-ies {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2026-07-22";
+    revision "2026-07-08";
 
     grouping conf-svc-ies {
         list ies {
@@ -447,6 +447,7 @@ submodule nokia-conf-svc-ies {
 
                 } // container ipv4
 
+
             } // list aa-interface
 
             list dms-interface {
@@ -666,6 +667,49 @@ submodule nokia-conf-svc-ies {
                     } // container primary
 
                 } // container ipv4
+
+                container ipv6 {
+                    presence "Enable the ipv6 context";
+                    description "Enable the ipv6 context";
+
+                    list address {
+                        key "ipv6-address";
+                        description "Enter the address list instance";
+
+                        leaf ipv6-address {
+                            type types-sros:ipv6-address;
+                            description "IPv6 address assigned to the interface";
+                        }
+
+                        leaf prefix-length {
+                            type uint32 {
+                                range "4..128";
+                            }
+                            mandatory true;
+                            description "IPv6 address prefix length";
+                        }
+
+                        leaf-list apply-groups {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Apply a configuration group at this level";
+                        }
+
+                        leaf-list apply-groups-exclude {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Exclude a configuration group at this level";
+                        }
+
+                    } // list address
+
+                } // container ipv6
 
             } // list dms-interface
 
@@ -1261,7 +1305,7 @@ submodule nokia-conf-svc-ies {
                         leaf name {
                             type types-sros:named-item {
                                 pattern "[a-zA-Z]+.*" {
-                                    error-message "IPSec tunnel name cannot start with a number";
+                                    error-message "'name' must not start with a number (e.g. tunnel-1)";
                                 }
                             }
                             description "IPsec tunnel name";
@@ -1506,13 +1550,6 @@ submodule nokia-conf-svc-ies {
                                         sros-ext:auto-restart-to-modify;
                                         description "Enable the dynamic context";
 
-                                        leaf auto-establish {
-                                            type boolean;
-                                            sros-ext:auto-restart-to-modify;
-                                            default "false";
-                                            description "Attempt to establish a phase 1 exchange automatically";
-                                        }
-
                                         leaf ike-policy {
                                             type leafref {
                                                 path "../../../../../../../../ipsec/ike-policy/id";
@@ -1530,9 +1567,23 @@ submodule nokia-conf-svc-ies {
                                             description "IPsec transform IDs used by the dynamic key";
                                         }
 
+                                        leaf auto-establish {
+                                            type boolean;
+                                            sros-ext:auto-restart-to-modify;
+                                            default "false";
+                                            description "Attempt to establish a phase 1 exchange automatically";
+                                        }
+
+                                        leaf auto-establish-sustain {
+                                            type boolean;
+                                            sros-ext:auto-restart-to-modify;
+                                            default "false";
+                                            description "Sustain the automatic establishment";
+                                        }
+
                                         leaf pre-shared-key {
                                             type types-sros:encrypted-leaf {
-                                                length "1..115";
+                                                length "1..166";
                                             }
                                             sros-ext:auto-restart-to-modify;
                                             description "Pre-shared key for authentication";
@@ -1641,6 +1692,31 @@ submodule nokia-conf-svc-ies {
                                             }
 
                                         } // container ppk
+
+                                        container reverse-route-injection {
+                                            presence "Enable the reverse-route-injection context";
+                                            sros-ext:auto-restart-to-modify;
+                                            description "Enable the reverse-route-injection context";
+
+                                            leaf metric {
+                                                type uint32 {
+                                                    range "0..65535";
+                                                }
+                                                sros-ext:auto-restart-to-modify;
+                                                default "0";
+                                                description "The metric to be used for reverse route injection";
+                                            }
+
+                                            leaf preference {
+                                                type uint32 {
+                                                    range "0..255";
+                                                }
+                                                sros-ext:auto-restart-to-modify;
+                                                default "0";
+                                                description "The preference to be used for reverse route injection";
+                                            }
+
+                                        } // container reverse-route-injection
 
                                     } // container dynamic
 
@@ -1879,7 +1955,7 @@ submodule nokia-conf-svc-ies {
 
                     leaf anysec-encryption-group {
                         type leafref {
-                            path "../../../../../anysec/service-encryption/encryption-group/group-name";
+                            path "../../../../../anysec/mpls/service-encryption/encryption-group/group-name";
                         }
                         description "ANYsec encryption group name";
                     }
@@ -2759,7 +2835,7 @@ submodule nokia-conf-svc-ies {
                                         leaf cbs {
                                             type union {
                                                 type uint32 {
-                                                    range "0..1048576";
+                                                    range "0..2097151";
                                                 }
                                                 type enumeration {
                                                     enum auto                           { value -1; }
@@ -2772,7 +2848,7 @@ submodule nokia-conf-svc-ies {
                                         leaf mbs {
                                             type union {
                                                 type types-qos:bytes {
-                                                    range "0..1073741824";
+                                                    range "0..2147482624";
                                                 }
                                                 type enumeration {
                                                     enum auto                           { value -1; }
@@ -3250,24 +3326,11 @@ submodule nokia-conf-svc-ies {
                         container aggregate-policer {
                             description "Enter the aggregate-policer context";
 
-                            leaf rate {
-                                type types-qos:aggr-policer-rate;
-                                units "kilobps";
-                                default "max";
-                                description "Aggregate policer rate";
-                            }
-
                             leaf burst {
                                 status obsolete;
                                 type types-qos:aggr-policer-burst;
                                 default "default";
                                 description "Aggregate policer burst";
-                            }
-
-                            leaf cir {
-                                type types-qos:aggr-policer-cir;
-                                units "kilobps";
-                                description "Aggregate policer CIR";
                             }
 
                             leaf cbs {
@@ -3298,6 +3361,50 @@ submodule nokia-conf-svc-ies {
                                 description "Policer algorithm type";
                             }
 
+                            choice rate-or-percent-rate {
+                                default "rate";
+                                case rate {
+
+                                    leaf rate {
+                                        type types-qos:aggr-policer-rate;
+                                        units "kilobps";
+                                        default "max";
+                                        description "Aggregate policer rate";
+                                    }
+
+                                    leaf cir {
+                                        type types-qos:aggr-policer-cir;
+                                        units "kilobps";
+                                        description "Aggregate policer CIR";
+                                    }
+
+                                }
+                                case percent-rate {
+
+                                    container percent-rate {
+                                        description "Enter the percent-rate context";
+
+                                        leaf pir {
+                                            type decimal64 {
+                                                range "0.01..100.00";
+                                                fraction-digits 2;
+                                            }
+                                            description "Administrative PIR percent";
+                                        }
+
+                                        leaf cir {
+                                            type decimal64 {
+                                                range "0.00..100.00";
+                                                fraction-digits 2;
+                                            }
+                                            default "100.00";
+                                            description "Administrative CIR percent";
+                                        }
+
+                                    } // container percent-rate
+
+                                }
+                            }
                         } // container aggregate-policer
 
                     } // container ingress
@@ -3426,6 +3533,12 @@ submodule nokia-conf-svc-ies {
                                 description "Use virtual flows to sink excess bandwidth";
                             }
 
+                            leaf low-rate {
+                                type boolean;
+                                default "false";
+                                description "Use low-rate scheduling";
+                            }
+
                             container sap-egress {
                                 description "Enter the sap-egress context";
 
@@ -3495,7 +3608,7 @@ submodule nokia-conf-svc-ies {
                                         leaf cbs {
                                             type union {
                                                 type uint32 {
-                                                    range "0..1048576";
+                                                    range "0..2097151";
                                                 }
                                                 type enumeration {
                                                     enum auto                           { value -1; }
@@ -3508,7 +3621,7 @@ submodule nokia-conf-svc-ies {
                                         leaf mbs {
                                             type union {
                                                 type types-qos:bytes {
-                                                    range "0..1073741824";
+                                                    range "0..2147482624";
                                                 }
                                                 type enumeration {
                                                     enum auto                           { value -1; }
@@ -4199,18 +4312,6 @@ submodule nokia-conf-svc-ies {
 
                     } // container lag
 
-                    container fwd-wholesale {
-                        description "Enter the fwd-wholesale context";
-
-                        leaf pppoe-service {
-                            type leafref {
-                                path "../../../../../epipe/service-name";
-                            }
-                            description "PPPoE service name";
-                        }
-
-                    } // container fwd-wholesale
-
                     container aarp {
                         presence "Enable the aarp context";
                         description "Enable the aarp context";
@@ -4228,6 +4329,18 @@ submodule nokia-conf-svc-ies {
                         }
 
                     } // container aarp
+
+                    container fwd-wholesale {
+                        description "Enter the fwd-wholesale context";
+
+                        leaf pppoe-service {
+                            type leafref {
+                                path "../../../../../epipe/service-name";
+                            }
+                            description "PPPoE service name";
+                        }
+
+                    } // container fwd-wholesale
 
                     container transit-policy {
                         presence "Enable the transit-policy context";
@@ -4545,6 +4658,57 @@ submodule nokia-conf-svc-ies {
                         } // list mep
 
                     } // container eth-cfm
+
+                    container ethernet {
+                        description "Enter the ethernet context";
+
+                        container loopback-mode {
+                            presence "Enable the loopback-mode context";
+                            description "Enable the loopback-mode context";
+
+                            leaf mode {
+                                type enumeration {
+                                    enum line {
+                                        value 0;
+                                        description "Loop frames back to the remote router";
+                                    }
+                                    enum internal {
+                                        value 1;
+                                        description "Loop local router frames back to the framer";
+                                    }
+                                }
+                                sros-ext:immutable;
+                                default "line";
+                                description "Loopback mode for the associated port or channel";
+                            }
+
+                            leaf mac-swap {
+                                type boolean;
+                                default "false";
+                                description "Enable MAC address swapping";
+                            }
+
+                            leaf-list apply-groups {
+                                type leafref {
+                                    path "../../../../../../../groups/group/name";
+                                }
+                                max-elements 8;
+                                ordered-by user;
+                                description "Apply a configuration group at this level";
+                            }
+
+                            leaf-list apply-groups-exclude {
+                                type leafref {
+                                    path "../../../../../../../groups/group/name";
+                                }
+                                max-elements 8;
+                                ordered-by user;
+                                description "Exclude a configuration group at this level";
+                            }
+
+                        } // container loopback-mode
+
+                    } // container ethernet
 
                     list ip-tunnel {
                         key "tunnel-name";
@@ -4869,7 +5033,7 @@ submodule nokia-conf-svc-ies {
 
                         leaf pre-shared-key {
                             type types-sros:encrypted-leaf {
-                                length "1..115";
+                                length "1..166";
                             }
                             description "Pre-shared key for the IPsec gateway";
                         }
@@ -5472,6 +5636,35 @@ submodule nokia-conf-svc-ies {
                                 description "Allow CPM originated ARP frames to flood R-VPLS service";
                             }
 
+                            container evpn-local-es {
+                                description "Enter the evpn-local-es context";
+
+                                leaf entry-type {
+                                    type enumeration {
+                                        enum evpn {
+                                            value 0;
+                                            description "Allow EVPN routes to be advertised";
+                                        }
+                                        enum evpn-local-es {
+                                            value 1;
+                                            description "Allow EVPN local ES routes to be advertised";
+                                        }
+                                    }
+                                    default "evpn";
+                                    description "Type of EVPN entry";
+                                }
+
+                                leaf retention-timer {
+                                    type uint32 {
+                                        range "0..65535";
+                                    }
+                                    units "seconds";
+                                    default "0";
+                                    description "Retention timer of the entry";
+                                }
+
+                            } // container evpn-local-es
+
                             list advertise {
                                 key "route-type";
                                 description "Enter the advertise list instance";
@@ -5480,6 +5673,7 @@ submodule nokia-conf-svc-ies {
                                     type enumeration {
                                         enum static                         { value 1; }
                                         enum dynamic                        { value 2; }
+                                        enum evpn-local-es                  { value 3; }
                                     }
                                     description "Type of ARP or ND entries that generate host routes";
                                 }
@@ -5523,6 +5717,35 @@ submodule nokia-conf-svc-ies {
                                 description "Process ARP or ND messages on EVPN tunnels";
                             }
 
+                            container evpn-local-es {
+                                description "Enter the evpn-local-es context";
+
+                                leaf entry-type {
+                                    type enumeration {
+                                        enum evpn {
+                                            value 0;
+                                            description "Allow EVPN routes to be advertised";
+                                        }
+                                        enum evpn-local-es {
+                                            value 1;
+                                            description "Allow EVPN local ES routes to be advertised";
+                                        }
+                                    }
+                                    default "evpn";
+                                    description "Type of EVPN entry";
+                                }
+
+                                leaf retention-timer {
+                                    type uint32 {
+                                        range "0..65535";
+                                    }
+                                    units "seconds";
+                                    default "0";
+                                    description "Retention timer of the entry";
+                                }
+
+                            } // container evpn-local-es
+
                             list advertise {
                                 key "route-type";
                                 description "Enter the advertise list instance";
@@ -5531,6 +5754,7 @@ submodule nokia-conf-svc-ies {
                                     type enumeration {
                                         enum static                         { value 1; }
                                         enum dynamic                        { value 2; }
+                                        enum evpn-local-es                  { value 3; }
                                     }
                                     description "Type of ARP or ND entries that generate host routes";
                                 }
@@ -5987,6 +6211,19 @@ submodule nokia-conf-svc-ies {
                             description "SRRP instance whose state is tracked on the IP address";
                         }
 
+                        leaf tag {
+                            type union {
+                                type uint32 {
+                                    range "1..4294967295";
+                                }
+                                type enumeration {
+                                    enum no-tag                         { value 0; }
+                                }
+                            }
+                            default "no-tag";
+                            description "Route tag to be matched by BGP export policy rules";
+                        }
+
                         leaf-list apply-groups {
                             type leafref {
                                 path "../../../../../../groups/group/name";
@@ -6041,6 +6278,19 @@ submodule nokia-conf-svc-ies {
                                 range "1..4294967295";
                             }
                             description "SRRP instance whose state is tracked on the IP address";
+                        }
+
+                        leaf tag {
+                            type union {
+                                type uint32 {
+                                    range "1..4294967295";
+                                }
+                                type enumeration {
+                                    enum no-tag                         { value 0; }
+                                }
+                            }
+                            default "no-tag";
+                            description "Route tag to be matched by BGP export policy rules";
                         }
 
                         leaf-list apply-groups {
@@ -6227,9 +6477,22 @@ submodule nokia-conf-svc-ies {
 
                                 leaf route-type {
                                     type enumeration {
-                                        enum static                         { value 1; }
-                                        enum dynamic                        { value 2; }
-                                        enum evpn                           { value 3; }
+                                        enum static {
+                                            value 1;
+                                            description "Host routes created from EVPN ARP or ND entries";
+                                        }
+                                        enum dynamic {
+                                            value 2;
+                                            description "Host routes created from dynamic ARP or ND entries";
+                                        }
+                                        enum evpn {
+                                            value 3;
+                                            description "Host routes created from EVPN entries";
+                                        }
+                                        enum evpn-local-es {
+                                            value 4;
+                                            description "Host routes created from EVPN local ES entries";
+                                        }
                                     }
                                     description "Type of ARP or ND entries that generate host routes";
                                 }
@@ -6663,7 +6926,7 @@ submodule nokia-conf-svc-ies {
 
                         leaf authentication-key {
                             type types-sros:encrypted-leaf {
-                                length "1..38";
+                                length "1..94";
                             }
                             description "Password for simple text authentication";
                         }
@@ -7168,6 +7431,19 @@ submodule nokia-conf-svc-ies {
                             description "SRRP ID whose state is tracked on this IP address";
                         }
 
+                        leaf tag {
+                            type union {
+                                type uint32 {
+                                    range "1..4294967295";
+                                }
+                                type enumeration {
+                                    enum no-tag                         { value 0; }
+                                }
+                            }
+                            default "no-tag";
+                            description "Route tag to be matched by BGP export policy rules";
+                        }
+
                         leaf-list apply-groups {
                             type leafref {
                                 path "../../../../../../groups/group/name";
@@ -7570,9 +7846,22 @@ submodule nokia-conf-svc-ies {
 
                                 leaf route-type {
                                     type enumeration {
-                                        enum static                         { value 1; }
-                                        enum dynamic                        { value 2; }
-                                        enum evpn                           { value 3; }
+                                        enum static {
+                                            value 1;
+                                            description "Host routes created from EVPN ARP or ND entries";
+                                        }
+                                        enum dynamic {
+                                            value 2;
+                                            description "Host routes created from dynamic ARP or ND entries";
+                                        }
+                                        enum evpn {
+                                            value 3;
+                                            description "Host routes created from EVPN entries";
+                                        }
+                                        enum evpn-local-es {
+                                            value 4;
+                                            description "Host routes created from EVPN local ES entries";
+                                        }
                                     }
                                     description "Type of ARP or ND entries that generate host routes";
                                 }
@@ -8534,6 +8823,180 @@ submodule nokia-conf-svc-ies {
 
             } // container network
 
+            list ip-transport {
+                key "ipt-id";
+                description "Enter the ip-transport list instance";
+
+                leaf ipt-id {
+                    type types-sros:port;
+                    description "IP Transport identifier.";
+                }
+
+                leaf admin-state {
+                    type types-sros:admin-state;
+                    default "disable";
+                    description "Administrative state of the IP transport.";
+                }
+
+                leaf description {
+                    type types-sros:description;
+                    description "Description for the IP transport.";
+                }
+
+                leaf filter-unknown-host {
+                    type boolean;
+                    sros-ext:auto-restart-to-modify;
+                    default "false";
+                    description "Enable/Disable unknown host filtering.";
+                }
+
+                leaf dscp-name {
+                    type types-qos:dscp-name;
+                    sros-ext:auto-restart-to-modify;
+                    default "ef";
+                    description "dscp name";
+                }
+
+                leaf-list apply-groups {
+                    type leafref {
+                        path "../../../../groups/group/name";
+                    }
+                    max-elements 8;
+                    ordered-by user;
+                    description "Apply a configuration group at this level";
+                }
+
+                leaf-list apply-groups-exclude {
+                    type leafref {
+                        path "../../../../groups/group/name";
+                    }
+                    max-elements 8;
+                    ordered-by user;
+                    description "Exclude a configuration group at this level";
+                }
+
+                container local-host {
+                    description "Enter the local-host context";
+
+                    leaf ip-address {
+                        type types-sros:ipv4-unicast-address;
+                        sros-ext:auto-restart-to-modify;
+                        description "IPv4 address used for this local host.";
+                    }
+
+                    leaf port-num {
+                        type types-sros:tcp-udp-port {
+                            range "1026..49150";
+                        }
+                        sros-ext:auto-restart-to-modify;
+                        description "TCP/UDP port number.";
+                    }
+
+                    leaf protocol {
+                        type enumeration {
+                            enum tcp                            { value 6; }
+                            enum udp                            { value 17; }
+                        }
+                        sros-ext:auto-restart-to-modify;
+                        description "Protocol used.";
+                    }
+
+                } // container local-host
+
+                container tcp {
+                    description "Enter the tcp context";
+
+                    leaf max-retries {
+                        type uint32 {
+                            range "0..10";
+                        }
+                        sros-ext:auto-restart-to-modify;
+                        default "5";
+                        description "Number of max retries.";
+                    }
+
+                    leaf retry-interval {
+                        type uint32 {
+                            range "0..300";
+                        }
+                        units "seconds";
+                        sros-ext:auto-restart-to-modify;
+                        default "5";
+                        description "Length of time to wait before a TCP retry.";
+                    }
+
+                    leaf inactivity-timeout {
+                        type uint32 {
+                            range "1..65535";
+                        }
+                        units "seconds";
+                        sros-ext:auto-restart-to-modify;
+                        default "30";
+                        description "Length of time to wait before disconnecting an inactive TCP connection.";
+                    }
+
+                } // container tcp
+
+                list remote-host {
+                    key "remote-host-id";
+                    description "Enter the remote-host list instance";
+
+                    leaf remote-host-id {
+                        type uint32 {
+                            range "1..2147483647";
+                        }
+                        description "remote host identifer";
+                    }
+
+                    leaf ip-address {
+                        type types-sros:ipv4-unicast-address;
+                        sros-ext:immutable;
+                        mandatory true;
+                        description "IPv4 address used for this remote host.";
+                    }
+
+                    leaf port-num {
+                        type types-sros:tcp-udp-port {
+                            range "1..65535";
+                        }
+                        sros-ext:immutable;
+                        mandatory true;
+                        description "TCP/UDP port number.";
+                    }
+
+                    leaf description {
+                        type types-sros:description;
+                        description "User provided description for the remote host.";
+                    }
+
+                    leaf remote-host-name {
+                        type string {
+                            length "1..64";
+                        }
+                        description "User provided name for the remote host.";
+                    }
+
+                    leaf-list apply-groups {
+                        type leafref {
+                            path "../../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Apply a configuration group at this level";
+                    }
+
+                    leaf-list apply-groups-exclude {
+                        type leafref {
+                            path "../../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Exclude a configuration group at this level";
+                    }
+
+                } // list remote-host
+
+            } // list ip-transport
 
             uses conf-svc-ies-sub-if-subscriber-interface;
             uses conf-svc-ies-vdo-if-video-interface;

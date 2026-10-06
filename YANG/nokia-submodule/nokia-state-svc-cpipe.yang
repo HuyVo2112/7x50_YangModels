@@ -11,7 +11,7 @@ submodule nokia-state-svc-cpipe {
     import nokia-types-services           { prefix "types-services"; }
     import nokia-types-sros               { prefix "types-sros"; }
 
-    sros-ext:sros-major-release "rel25";
+    sros-ext:sros-major-release "rel26";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -34,7 +34,7 @@ submodule nokia-state-svc-cpipe {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2025-12-17";
+    revision "2026-07-08";
 
     grouping state-svc-cpipe {
         list cpipe {
@@ -114,7 +114,7 @@ submodule nokia-state-svc-cpipe {
                             enum sap                            { value 1; }
                             enum sdp-bind                       { value 2; }
                             enum sdp-fec                        { value 3; }
-                            enum evpn-mpls                      { value 4; }
+                            enum evpn                           { value 4; }
                         }
                         description "The type of endpoint object that is current transmit active. ";
                     }
@@ -1043,7 +1043,7 @@ submodule nokia-state-svc-cpipe {
                                     }
 
                                     leaf adapted-admin-cbs {
-                                        type types-qos:bytes;
+                                        type int64;
                                         units "bytes";
                                         description "Admin CBS.";
                                     }
@@ -2119,7 +2119,7 @@ submodule nokia-state-svc-cpipe {
                                         description
                                             "Info queue-set-size-overridden is set to true when the shaper is created by
                                              the override configured for sap egress qos policy. When it is set to false,
-                                             it indicates that fp-resource-policy default-size setting is used to create 
+                                             it indicates that fp-resource-policy default-size setting is used to create
                                              this shaper.";
                                     }
 
@@ -2447,7 +2447,7 @@ submodule nokia-state-svc-cpipe {
                                     }
 
                                     leaf adapted-admin-mbs {
-                                        type types-qos:bytes;
+                                        type int64;
                                         units "bytes";
                                         description "Admin MBS.";
                                     }
@@ -2501,7 +2501,7 @@ submodule nokia-state-svc-cpipe {
                                     }
 
                                     leaf operational-cbs {
-                                        type types-qos:bytes;
+                                        type int64;
                                         units "bytes";
                                         description "Oper CBS.";
                                     }
@@ -2517,7 +2517,7 @@ submodule nokia-state-svc-cpipe {
                                     }
 
                                     leaf operational-mbs {
-                                        type types-qos:bytes;
+                                        type int64;
                                         units "bytes";
                                         description "Oper MBS.";
                                     }
@@ -3790,10 +3790,42 @@ submodule nokia-state-svc-cpipe {
                                 description "The current packet depth of the jitter buffer.";
                             }
 
+                            leaf adc-jitter-buffer-delay {
+                                type uint32;
+                                units "microseconds";
+                                description "Jitter buffer delay.";
+                            }
+
+                            leaf adc-jitter-buffer-sampling-done-count {
+                                type uint32;
+                                description "Jitter buffer sampling done count.";
+                            }
+
+                            leaf adc-jitter-buffer-adjustment-done-count {
+                                type uint32;
+                                description "Jitter buffer adjustment done count.";
+                            }
+
+                            leaf adc-jitter-buffer-average-sampling-delay {
+                                type uint32;
+                                units "microseconds";
+                                description "Jitter buffer average sampling delay.";
+                            }
+
                         } // container egress
 
                     } // container statistics
 
+                    container asym-delay-control {
+                        description "Enter the asym-delay-control context";
+
+                        leaf jitter-buffer-target-delay {
+                            type uint32;
+                            units "microseconds";
+                            description "Jitter buffer target delay.";
+                        }
+
+                    } // container asym-delay-control
 
                 } // container cem
 
@@ -4030,6 +4062,8 @@ submodule nokia-state-svc-cpipe {
                         bit vccv-bfd-down                  { position 32; }
                         bit stitching-svc-pw-fault         { position 33; }
                         bit out-of-anysec-resource         { position 34; }
+                        bit anysec-service-and-tunnel-config-conflict { position 35; }
+                        bit anysec-group-or-peer-oper-down { position 36; }
                     }
                     description
                         "This object indicates all the conditions that affect the
@@ -4216,6 +4250,22 @@ submodule nokia-state-svc-cpipe {
                              from the remote peer.";
                     }
 
+                    leaf asym-delay {
+                        type types-sros:enabled-disabled;
+                        description "Asymetric delay status";
+                    }
+
+                    leaf jitter-buffer {
+                        type uint32;
+                        units "microseconds";
+                        description "Jitter Buffer in microseconds";
+                    }
+
+                    leaf network-latency {
+                        type boolean;
+                        description "Network latency";
+                    }
+
                 } // container local
 
                 container peer {
@@ -4264,11 +4314,51 @@ submodule nokia-state-svc-cpipe {
                              from the local peer.";
                     }
 
+                    leaf asym-delay {
+                        type types-sros:enabled-disabled;
+                        description "Asymetric delay status";
+                    }
+
+                    leaf jitter-buffer {
+                        type uint32;
+                        units "microseconds";
+                        description "Jitter Buffer in microseconds";
+                    }
+
+                    leaf network-latency {
+                        type boolean;
+                        description "Network latency";
+                    }
+
                 } // container peer
 
                 container statistics {
                     description "Enter the statistics context";
 
+                    container network-latency-measurement {
+                        description "Enter the network-latency-measurement context";
+
+                        leaf average {
+                            type yang:counter64;
+                            description "Average path average latency";
+                        }
+
+                        leaf minimum {
+                            type yang:counter64;
+                            description "Minimum path average latency";
+                        }
+
+                        leaf maximum {
+                            type yang:counter64;
+                            description "Minimum path average latency";
+                        }
+
+                        leaf last-update {
+                            type types-sros:date-time;
+                            description "Last update to the statistics";
+                        }
+
+                    } // container network-latency-measurement
 
                 } // container statistics
 

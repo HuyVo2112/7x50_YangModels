@@ -14,7 +14,7 @@ submodule nokia-conf-svc-nat {
     include nokia-conf-service;
     include nokia-conf-svc-ipfix;
 
-    sros-ext:sros-major-release "rel25";
+    sros-ext:sros-major-release "rel26";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -37,7 +37,7 @@ submodule nokia-conf-svc-nat {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2026-07-22";
+    revision "2026-07-08";
 
     grouping conf-svc-nat {
         container nat {
@@ -126,6 +126,26 @@ submodule nokia-conf-svc-nat {
                         } // container domain
 
                     }
+                    case nat-domain {
+
+                        container nat-domain {
+                            description "Enter the nat-domain context";
+
+                            leaf router-instance {
+                                type string;
+                                sros-ext:isa-auto-clear-on-modify;
+                                description "Virtual router instance of the NAT domain";
+                            }
+
+                            leaf name {
+                                type types-sros:named-item;
+                                sros-ext:isa-auto-clear-on-modify;
+                                description "NAT domain name";
+                            }
+
+                        } // container nat-domain
+
+                    }
                 }
                 container alg {
                     description "Enter the alg context";
@@ -149,6 +169,7 @@ submodule nokia-conf-svc-nat {
                     }
 
                 } // container alg
+
 
                 container port-limits {
                     description "Enter the port-limits context";
@@ -260,6 +281,12 @@ submodule nokia-conf-svc-nat {
 
                 container tcp {
                     description "Enter the tcp context";
+
+                    leaf reset-unknown {
+                        type boolean;
+                        default "false";
+                        description "Send of TCP RST upon non-SYN TCP message for unknown flow";
+                    }
 
                     leaf mss-adjust {
                         type uint32 {
@@ -853,7 +880,7 @@ submodule nokia-conf-svc-nat {
                     description "Enter the default context";
 
                     leaf dnat-ip-address {
-                        type types-sros:ipv4-unicast-address;
+                        type types-sros:ip-unicast-address;
                         sros-ext:isa-auto-clear-on-modify;
                         description "Default destination IP address for matching entries with dNAT action";
                     }
@@ -884,7 +911,7 @@ submodule nokia-conf-svc-nat {
                                     description "Enable the destination-nat context";
 
                                     leaf ip-address {
-                                        type types-sros:ipv4-unicast-address;
+                                        type types-sros:ip-unicast-address;
                                         description "Substitute destination IP address of matching packets";
                                     }
 
@@ -965,7 +992,7 @@ submodule nokia-conf-svc-nat {
                                     description "Enable the destination-nat context";
 
                                     leaf ip-address {
-                                        type types-sros:ipv4-unicast-address;
+                                        type types-sros:ip-unicast-address;
                                         description "Replacement destination IP address for packets";
                                     }
 
@@ -994,7 +1021,7 @@ submodule nokia-conf-svc-nat {
                         }
 
                         leaf foreign-ip-address {
-                            type types-sros:ipv4-unicast-address;
+                            type types-sros:ip-unicast-address;
                             sros-ext:isa-auto-clear-on-modify;
                             description "Foreign IP address as the match criterion";
                         }
@@ -2402,7 +2429,7 @@ submodule nokia-conf-svc-nat {
                             }
                             sros-ext:auto-restart-to-modify;
                             default "0";
-                            description "Embedded address bits of the rule";
+                            description "Length of embedded address (EA) bits in the MAP rule";
                         }
 
                         leaf psid-offset {
@@ -2411,7 +2438,7 @@ submodule nokia-conf-svc-nat {
                             }
                             sros-ext:auto-restart-to-modify;
                             default "6";
-                            description "PSID offset";
+                            description "PSID offset within the IPv6 address";
                         }
 
                         leaf rule-prefix {
@@ -2457,6 +2484,7 @@ submodule nokia-conf-svc-nat {
                 } // list domain
 
             } // container map-t
+
 
         } // container nat
 

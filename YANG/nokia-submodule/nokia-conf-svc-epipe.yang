@@ -4,6 +4,7 @@ submodule nokia-conf-svc-epipe {
 
     belongs-to nokia-conf { prefix "conf"; }
 
+    import ietf-yang-types                { prefix "yang"; }
     import nokia-sros-yang-extensions     { prefix "sros-ext"; }
     import nokia-types-eth-cfm            { prefix "types-eth-cfm"; }
     import nokia-types-qos                { prefix "types-qos"; }
@@ -31,7 +32,7 @@ submodule nokia-conf-svc-epipe {
     include nokia-conf-system;
     include nokia-conf-system-security;
 
-    sros-ext:sros-major-release "rel25";
+    sros-ext:sros-major-release "rel26";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -54,7 +55,7 @@ submodule nokia-conf-svc-epipe {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2026-07-22";
+    revision "2026-07-08";
 
     grouping conf-svc-epipe {
         list epipe {
@@ -766,9 +767,18 @@ submodule nokia-conf-svc-epipe {
 
                 leaf force-vc-forwarding {
                     type enumeration {
-                        enum vlan                           { value 1; }
-                        enum qinq-c-tag-c-tag               { value 2; }
-                        enum qinq-s-tag-c-tag               { value 3; }
+                        enum vlan {
+                            value 1;
+                            description "Push VLAN ID and 802.1p bits of service-delimiting qtag";
+                        }
+                        enum qinq-c-tag-c-tag {
+                            value 2;
+                            description "Push two tags identical to inner service-delimiting tag";
+                        }
+                        enum qinq-s-tag-c-tag {
+                            value 3;
+                            description "Push two tags based on QinQ service-delimiting values";
+                        }
                     }
                     description "VLAN tag processing action";
                 }
@@ -804,7 +814,7 @@ submodule nokia-conf-svc-epipe {
 
                 leaf anysec-encryption-group {
                     type leafref {
-                        path "../../../../anysec/service-encryption/encryption-group/group-name";
+                        path "../../../../anysec/mpls/service-encryption/encryption-group/group-name";
                     }
                     description "ANYsec encryption group name";
                 }
@@ -1855,54 +1865,6 @@ submodule nokia-conf-svc-epipe {
 
                     }
                 }
-                container qtag-normalization {
-                    presence "Enable the qtag-normalization context";
-                    description "Enable the qtag-normalization context";
-
-                    choice q-tag {
-                        case single-tag {
-
-                            container single-tag {
-                                description "Enter the single-tag context";
-
-                                leaf tag {
-                                    type int32 {
-                                        range "1..4094";
-                                    }
-                                    sros-ext:immutable;
-                                    description "Tag normalization value";
-                                }
-
-                            } // container single-tag
-
-                        }
-                        case double-tag {
-
-                            container double-tag {
-                                description "Enter the double-tag context";
-
-                                leaf c-tag {
-                                    type int32 {
-                                        range "1..4094";
-                                    }
-                                    sros-ext:immutable;
-                                    description "C-tag value used for the tag normalization";
-                                }
-
-                                leaf s-tag {
-                                    type int32 {
-                                        range "1..4094";
-                                    }
-                                    sros-ext:immutable;
-                                    description "S-tag value used for the tag normalization";
-                                }
-
-                            } // container double-tag
-
-                        }
-                    }
-                } // container qtag-normalization
-
                 container ingress {
                     description "Enter the ingress context";
 
@@ -1997,7 +1959,7 @@ submodule nokia-conf-svc-epipe {
                                     leaf cbs {
                                         type union {
                                             type uint32 {
-                                                range "0..1048576";
+                                                range "0..2097151";
                                             }
                                             type enumeration {
                                                 enum auto                           { value -1; }
@@ -2010,7 +1972,7 @@ submodule nokia-conf-svc-epipe {
                                     leaf mbs {
                                         type union {
                                             type types-qos:bytes {
-                                                range "0..1073741824";
+                                                range "0..2147482624";
                                             }
                                             type enumeration {
                                                 enum auto                           { value -1; }
@@ -2547,24 +2509,11 @@ submodule nokia-conf-svc-epipe {
                     container aggregate-policer {
                         description "Enter the aggregate-policer context";
 
-                        leaf rate {
-                            type types-qos:aggr-policer-rate;
-                            units "kilobps";
-                            default "max";
-                            description "Aggregate policer rate";
-                        }
-
                         leaf burst {
                             status obsolete;
                             type types-qos:aggr-policer-burst;
                             default "default";
                             description "Aggregate policer burst";
-                        }
-
-                        leaf cir {
-                            type types-qos:aggr-policer-cir;
-                            units "kilobps";
-                            description "Aggregate policer CIR";
                         }
 
                         leaf cbs {
@@ -2595,6 +2544,50 @@ submodule nokia-conf-svc-epipe {
                             description "Policer algorithm type";
                         }
 
+                        choice rate-or-percent-rate {
+                            default "rate";
+                            case rate {
+
+                                leaf rate {
+                                    type types-qos:aggr-policer-rate;
+                                    units "kilobps";
+                                    default "max";
+                                    description "Aggregate policer rate";
+                                }
+
+                                leaf cir {
+                                    type types-qos:aggr-policer-cir;
+                                    units "kilobps";
+                                    description "Aggregate policer CIR";
+                                }
+
+                            }
+                            case percent-rate {
+
+                                container percent-rate {
+                                    description "Enter the percent-rate context";
+
+                                    leaf pir {
+                                        type decimal64 {
+                                            range "0.01..100.00";
+                                            fraction-digits 2;
+                                        }
+                                        description "Administrative PIR percent";
+                                    }
+
+                                    leaf cir {
+                                        type decimal64 {
+                                            range "0.00..100.00";
+                                            fraction-digits 2;
+                                        }
+                                        default "100.00";
+                                        description "Administrative CIR percent";
+                                    }
+
+                                } // container percent-rate
+
+                            }
+                        }
                     } // container aggregate-policer
 
                 } // container ingress
@@ -2716,6 +2709,12 @@ submodule nokia-conf-svc-epipe {
                             description "Use virtual flows to sink excess bandwidth";
                         }
 
+                        leaf low-rate {
+                            type boolean;
+                            default "false";
+                            description "Use low-rate scheduling";
+                        }
+
                         container sap-egress {
                             description "Enter the sap-egress context";
 
@@ -2785,7 +2784,7 @@ submodule nokia-conf-svc-epipe {
                                     leaf cbs {
                                         type union {
                                             type uint32 {
-                                                range "0..1048576";
+                                                range "0..2097151";
                                             }
                                             type enumeration {
                                                 enum auto                           { value -1; }
@@ -2798,7 +2797,7 @@ submodule nokia-conf-svc-epipe {
                                     leaf mbs {
                                         type union {
                                             type types-qos:bytes {
-                                                range "0..1073741824";
+                                                range "0..2147482624";
                                             }
                                             type enumeration {
                                                 enum auto                           { value -1; }
@@ -3504,24 +3503,6 @@ submodule nokia-conf-svc-epipe {
 
                 } // container lag
 
-                container aarp {
-                    presence "Enable the aarp context";
-                    description "Enable the aarp context";
-
-                    leaf id {
-                        type leafref {
-                            path "../../../../../application-assurance/aarp/aarp-id";
-                        }
-                        description "AARP instance ID";
-                    }
-
-                    leaf type {
-                        type types-services:dual-homing-bsx-aarp-service-ref-type;
-                        description "Role referenced by the AARP";
-                    }
-
-                } // container aarp
-
                 container transit-policy {
                     presence "Enable the transit-policy context";
                     description "Enable the transit-policy context";
@@ -3553,6 +3534,79 @@ submodule nokia-conf-svc-epipe {
                     }
                 } // container transit-policy
 
+
+                container qtag-normalization {
+                    presence "Enable the qtag-normalization context";
+                    description "Enable the qtag-normalization context";
+
+                    leaf rfc9744-encoding {
+                        type boolean;
+                        sros-ext:immutable;
+                        default "false";
+                        description "Encode the S-tag in compliance with RFC 9744";
+                    }
+
+                    choice q-tag {
+                        case single-tag {
+
+                            container single-tag {
+                                description "Enter the single-tag context";
+
+                                leaf tag {
+                                    type int32 {
+                                        range "1..4094";
+                                    }
+                                    sros-ext:immutable;
+                                    description "Tag normalization value";
+                                }
+
+                            } // container single-tag
+
+                        }
+                        case double-tag {
+
+                            container double-tag {
+                                description "Enter the double-tag context";
+
+                                leaf c-tag {
+                                    type int32 {
+                                        range "1..4094";
+                                    }
+                                    sros-ext:immutable;
+                                    description "C-tag value used for the tag normalization";
+                                }
+
+                                leaf s-tag {
+                                    type int32 {
+                                        range "1..4094";
+                                    }
+                                    sros-ext:immutable;
+                                    description "S-tag value used for the tag normalization";
+                                }
+
+                            } // container double-tag
+
+                        }
+                    }
+                } // container qtag-normalization
+
+                container aarp {
+                    presence "Enable the aarp context";
+                    description "Enable the aarp context";
+
+                    leaf id {
+                        type leafref {
+                            path "../../../../../application-assurance/aarp/aarp-id";
+                        }
+                        description "AARP instance ID";
+                    }
+
+                    leaf type {
+                        type types-services:dual-homing-bsx-aarp-service-ref-type;
+                        description "Role referenced by the AARP";
+                    }
+
+                } // container aarp
 
                 container l2tpv3-session {
                     presence "Enable the l2tpv3-session context";
@@ -4108,6 +4162,69 @@ submodule nokia-conf-svc-epipe {
 
                     } // container llf
 
+                    container loopback-mode {
+                        presence "Enable the loopback-mode context";
+                        description "Enable the loopback-mode context";
+
+                        leaf mode {
+                            type enumeration {
+                                enum line {
+                                    value 0;
+                                    description "Loop frames back to the remote router";
+                                }
+                                enum internal {
+                                    value 1;
+                                    description "Loop local router frames back to the framer";
+                                }
+                            }
+                            sros-ext:immutable;
+                            default "line";
+                            description "Loopback mode for the associated port or channel";
+                        }
+
+                        leaf mac-swap {
+                            type boolean;
+                            default "false";
+                            description "Enable MAC address swapping";
+                        }
+
+                        leaf mac-address {
+                            type yang:mac-address;
+                            description "MAC address to swap";
+                        }
+
+                        leaf all {
+                            type boolean;
+                            default "false";
+                            description "Apply loopback mode to all addresses";
+                        }
+
+                        leaf ip-swap {
+                            type boolean;
+                            default "false";
+                            description "Enable IP address swapping";
+                        }
+
+                        leaf-list apply-groups {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Apply a configuration group at this level";
+                        }
+
+                        leaf-list apply-groups-exclude {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Exclude a configuration group at this level";
+                        }
+
+                    } // container loopback-mode
+
                 } // container ethernet
 
             } // list sap
@@ -4185,6 +4302,12 @@ submodule nokia-conf-svc-epipe {
                 leaf evi {
                     type types-services:evi;
                     description "EVPN ID";
+                }
+
+                leaf ignore-mtu-mismatch {
+                    type boolean;
+                    default "false";
+                    description "Bgp-Evpn ignore MTU mismatch.";
                 }
 
                 leaf-list apply-groups {
@@ -4296,6 +4419,23 @@ submodule nokia-conf-svc-epipe {
                         ordered-by user;
                         description "Exclude a configuration group at this level";
                     }
+
+                    container srv6 {
+                        description "Enter the srv6 context";
+
+                        leaf instance {
+                            type leafref {
+                                path "../../../../segment-routing-v6/instance";
+                            }
+                            description "Segment Routing SRv6 instance";
+                        }
+
+                        leaf default-locator {
+                            type string;
+                            description "Default route locator";
+                        }
+
+                    } // container srv6
 
                 } // list local-attachment-circuit
 
@@ -4812,11 +4952,11 @@ submodule nokia-conf-svc-epipe {
                     }
 
                     container srv6 {
-                        status deprecated;
+                        status obsolete;
                         description "Enter the srv6 context";
 
                         leaf instance {
-                            status deprecated;
+                            status obsolete;
                             type leafref {
                                 path "../../../../segment-routing-v6/instance";
                             }
@@ -4825,7 +4965,7 @@ submodule nokia-conf-svc-epipe {
                         }
 
                         leaf default-locator {
-                            status deprecated;
+                            status obsolete;
                             type string;
                             sros-ext:immutable;
                             description "Default route locator";

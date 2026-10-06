@@ -27,7 +27,7 @@ submodule nokia-state-system {
     include nokia-state-system-telemetry;
     include nokia-state-system-time;
 
-    sros-ext:sros-major-release "rel25";
+    sros-ext:sros-major-release "rel26";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -50,7 +50,7 @@ submodule nokia-state-system {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2026-02-11";
+    revision "2026-07-08";
 
     grouping state-system {
         container system {
@@ -190,7 +190,6 @@ submodule nokia-state-system {
                     bit upgrade-asl-change             { position 0; }
                     bit fp-resource-policy-change      { position 1; }
                     bit bof-configuration-change       { position 2; }
-                    bit ptp-configuration-change       { position 3; }
                     bit fp-options-change              { position 4; }
                     bit fp-resource-alloc-change       { position 5; }
                     bit fp-cam-alloc-change            { position 6; }
@@ -213,6 +212,13 @@ submodule nokia-state-system {
                 description
                     "Whether the system is currently locked by the Anti-Theft
                      component of the OS Security feature suite.";
+            }
+
+            leaf port-speed-mode {
+                type string {
+                    length "1..40";
+                }
+                description "Indicates the port speed mode that the chassis is operating in.";
             }
 
             leaf boot-good-exec-status {
@@ -503,6 +509,16 @@ submodule nokia-state-system {
                             }
 
                         } // container sap-shared-policer
+
+                        container ethernet-storm-control {
+                            description "Enter the ethernet-storm-control context";
+
+                            leaf oper-state {
+                                type types-sros:enabled-disabled;
+                                description "Indicates the QOS ethernet storm control operational state.";
+                            }
+
+                        } // container ethernet-storm-control
 
                     } // container qos
 
@@ -1832,6 +1848,7 @@ submodule nokia-state-system {
                                     enum dual-mode-16k-bank-4           { value 4; }
                                     enum dual-mode-16k-bank-5           { value 5; }
                                     enum dual-mode-16k-bank-6           { value 6; }
+                                    enum dual-mode-4k-bank-1            { value 7; }
                                 }
                                 description "Specifies the bank name.";
                             }
@@ -1841,7 +1858,7 @@ submodule nokia-state-system {
 
                                 leaf oper-group {
                                     type int32 {
-                                        range "1..3";
+                                        range "1..5";
                                     }
                                     description "Specifies the operational group.";
                                 }
@@ -1887,7 +1904,7 @@ submodule nokia-state-system {
 
                                 leaf group-id {
                                     type uint32 {
-                                        range "1..3";
+                                        range "1..5";
                                     }
                                     description "Specifies the group identifier.";
                                 }
@@ -1911,6 +1928,7 @@ submodule nokia-state-system {
                                                 enum aggregate-policers             { value 8; }
                                                 enum shared-policers                { value 9; }
                                                 enum filter-shared-policers         { value 11; }
+                                                enum storm-control                  { value 12; }
                                             }
                                             description "The unique application to the group.";
                                         }
@@ -1939,6 +1957,7 @@ submodule nokia-state-system {
                                                 enum shared-policers                { value 9; }
                                                 enum fc-policers                    { value 10; }
                                                 enum filter-shared-policers         { value 11; }
+                                                enum egress-filter                  { value 13; }
                                             }
                                             description "The unique application to the group.";
                                         }
@@ -2098,6 +2117,18 @@ submodule nokia-state-system {
                                 description
                                     "Specifies the operational value of the total statistics allocated for the
                                      egr-filter-statistics application";
+                            }
+
+                            leaf lag-alb {
+                                type uint32;
+                                description "Specifies the total statistics allocated for the lag-alb application.";
+                            }
+
+                            leaf lag-alb-oper {
+                                type uint32;
+                                description
+                                    "Specifies the operational value of the total statistics allocated for the
+                                     lag-alb application";
                             }
 
                         } // container application-resource-allocation
@@ -2283,6 +2314,21 @@ submodule nokia-state-system {
 
                         } // container virtual-flow
 
+                        container low-rate {
+                            description "Enter the low-rate context";
+
+                            leaf oper-four-queue-scale {
+                                type uint32;
+                                description "Operational resource allocation value for vlan qos low-rate 4-queue parameter.";
+                            }
+
+                            leaf oper-eight-queue-scale {
+                                type uint32;
+                                description "Operational resource allocation value for vlan qos low-rate 8-queue parameter.";
+                            }
+
+                        } // container low-rate
+
                     } // container vlan-qos
 
                     container load-balancing {
@@ -2323,6 +2369,160 @@ submodule nokia-state-system {
                     description "The reason due to which gRPC server is operationally down.";
                 }
 
+                list custom-proto {
+                    key "name";
+                    description "Enter the custom-proto list instance";
+
+                    leaf name {
+                        type types-sros:named-item;
+                        description "The custom-proto service name";
+                    }
+
+                    leaf oper-state {
+                        type types-sros:oper-state;
+                        description "Operational state of custom-proto service";
+                    }
+
+                    leaf oper-down-reason {
+                        type string {
+                            length "1..512";
+                        }
+                        description "The reason due to which custom-proto service is operationally down";
+                    }
+
+                    leaf file-size {
+                        type uint32;
+                        units "bytes";
+                        description "The size of loaded proto service file";
+                    }
+
+                    leaf last-changed {
+                        type types-sros:date-time;
+                        description "The time when proto service file was last loaded";
+                    }
+
+                    leaf active-url {
+                        type types-sros:cflash-url;
+                        description "Active location of loaded proto service file";
+                    }
+
+                    leaf hmac-sha512-hash {
+                        type string {
+                            length "128";
+                        }
+                        description "The sha512 hash of loaded proto service file";
+                    }
+
+                    list package {
+                        key "name";
+                        description "Enter the package list instance";
+
+                        leaf name {
+                            type string {
+                                length "0..255";
+                            }
+                            description "The package name in loaded proto file";
+                        }
+
+                        list service {
+                            key "name";
+                            description "Enter the service list instance";
+
+                            leaf name {
+                                type string {
+                                    length "0..255";
+                                }
+                                description "The service name in loaded proto file";
+                            }
+
+                            container statistics {
+                                description "Enter the statistics context";
+
+                                leaf successful-msgs-in {
+                                    type yang:counter64;
+                                    description "The number of successfully received rpc mesages";
+                                }
+
+                                leaf successful-msgs-out {
+                                    type yang:counter64;
+                                    description "The number of successfully sent rpc mesages";
+                                }
+
+                                leaf successful-rpcs {
+                                    type yang:counter64;
+                                    description "The number of successfully called rpcs";
+                                }
+
+                                leaf error-msgs-in {
+                                    type yang:counter64;
+                                    description "The number of unsuccessfully received rpc mesages";
+                                }
+
+                                leaf error-msgs-out {
+                                    type yang:counter64;
+                                    description "The number of unsuccessfully sent rpc mesages";
+                                }
+
+                                leaf error-rpcs {
+                                    type yang:counter64;
+                                    description "The number of unsuccessfully called rpcs";
+                                }
+
+                            } // container statistics
+
+                            list rpc {
+                                key "name";
+                                description "Enter the rpc list instance";
+
+                                leaf name {
+                                    type string {
+                                        length "0..255";
+                                    }
+                                    description "The rpc name in loaded proto file";
+                                }
+
+                                container statistics {
+                                    description "Enter the statistics context";
+
+                                    leaf successful-msgs-in {
+                                        type yang:counter64;
+                                        description "The number of successfully received rpc mesages";
+                                    }
+
+                                    leaf successful-msgs-out {
+                                        type yang:counter64;
+                                        description "The number of successfully sent rpc mesages";
+                                    }
+
+                                    leaf successful-rpcs {
+                                        type yang:counter64;
+                                        description "The number of successfully called rpcs";
+                                    }
+
+                                    leaf error-msgs-in {
+                                        type yang:counter64;
+                                        description "The number of unsuccessfully received rpc mesages";
+                                    }
+
+                                    leaf error-msgs-out {
+                                        type yang:counter64;
+                                        description "The number of unsuccessfully sent rpc mesages";
+                                    }
+
+                                    leaf error-rpcs {
+                                        type yang:counter64;
+                                        description "The number of unsuccessfully called rpcs";
+                                    }
+
+                                } // container statistics
+
+                            } // list rpc
+
+                        } // list service
+
+                    } // list package
+
+                } // list custom-proto
 
                 container gnoi {
                     description "Enter the gnoi context";
@@ -2433,13 +2633,18 @@ submodule nokia-state-system {
                         description "Enter the last-finished-rpc context";
 
                         leaf name {
-                            type types-sros:named-item;
+                            type types-sros:named-item-255;
                             description "The value indicates the name of a RPC.";
                         }
 
                         leaf service-name {
-                            type types-sros:named-item;
+                            type types-sros:named-item-255;
                             description "The value indicates the name of a RPC service.";
+                        }
+
+                        leaf package-name {
+                            type types-sros:named-item-255-or-empty;
+                            description "The value indicates the name of a RPC package.";
                         }
 
                         leaf duration {
@@ -2476,13 +2681,18 @@ submodule nokia-state-system {
                     }
 
                     leaf name {
-                        type types-sros:named-item;
+                        type types-sros:named-item-255;
                         description "The value indicates the name of a RPC.";
                     }
 
                     leaf service-name {
-                        type types-sros:named-item;
+                        type types-sros:named-item-255;
                         description "The value indicates the name of a RPC service.";
+                    }
+
+                    leaf package-name {
+                        type types-sros:named-item-255-or-empty;
+                        description "The value indicates the name of a RPC package.";
                     }
 
                     leaf establishment-time {
@@ -2553,10 +2763,14 @@ submodule nokia-state-system {
                     }
 
                     leaf md-cli-version {
+                        status obsolete;
                         type string {
                             length "1..10";
                         }
-                        description "Indicates the version of MD-CLI service provided by gRPC server.";
+                        description
+                            "Indicates the version of MD-CLI service provided by gRPC server.
+
+                             This leaf was obsoleted in release 26.3.";
                     }
 
                     leaf rib-api-version {
@@ -3473,6 +3687,23 @@ submodule nokia-state-system {
 
                         } // container notifications
 
+                        list session {
+                            key "session-id";
+                            description "Enter the session list instance";
+
+                            leaf session-id {
+                                type uint32;
+                                description "The id of the NETCONF session.";
+                            }
+
+                            leaf idle-time {
+                                type types-sros:time-duration;
+                                units "minutes";
+                                description "Indicates the current session idle-time.";
+                            }
+
+                        } // list session
+
                     } // container listen
 
                     container call-home {
@@ -3695,6 +3926,23 @@ submodule nokia-state-system {
 
                             } // container notifications
 
+                            list session {
+                                key "session-id";
+                                description "Enter the session list instance";
+
+                                leaf session-id {
+                                    type uint32;
+                                    description "The id of the NETCONF session.";
+                                }
+
+                                leaf idle-time {
+                                    type types-sros:time-duration;
+                                    units "minutes";
+                                    description "Indicates the current session idle-time.";
+                                }
+
+                            } // list session
+
                         } // list netconf-client
 
                     } // container call-home
@@ -3864,24 +4112,29 @@ submodule nokia-state-system {
                 } // container operations
 
                 container remote-management {
+                    status obsolete;
                     description "Enter the remote-management context";
 
                     leaf last-registration-status {
+                        status obsolete;
                         type types-system:remote-mgmt-registration-status;
                         description "Last result of registration attempt.";
                     }
 
                     leaf last-registration-time {
+                        status obsolete;
                         type types-sros:date-time;
                         description "Last time the client tried to register.";
                     }
 
                     leaf oper-state {
+                        status obsolete;
                         type types-sros:oper-state;
                         description "Administrative state of registration.";
                     }
 
                     leaf oper-down-reason {
+                        status obsolete;
                         type enumeration {
                             enum unknown                        { value 0; }
                             enum admin-down                     { value 1; }
@@ -3891,24 +4144,29 @@ submodule nokia-state-system {
                     }
 
                     leaf last-hello-time {
+                        status obsolete;
                         type types-sros:date-time;
                         description "Last time the remote-management client tried to register.";
                     }
 
                     container statistics {
+                        status obsolete;
                         description "Enter the statistics context";
 
                         leaf sent-registrations {
+                            status obsolete;
                             type yang:counter64;
                             description "The number of registrations sent.";
                         }
 
                         leaf failed-registrations {
+                            status obsolete;
                             type yang:counter64;
                             description "The number of registrations failed.";
                         }
 
                         leaf cancelled-registrations {
+                            status obsolete;
                             type yang:counter64;
                             description "The number of registrations cancelled.";
                         }
@@ -3916,30 +4174,36 @@ submodule nokia-state-system {
                     } // container statistics
 
                     list manager {
+                        status obsolete;
                         key "manager-name";
                         description "Enter the manager list instance";
 
                         leaf manager-name {
+                            status obsolete;
                             type types-sros:named-item-64;
                             description "Manager name";
                         }
 
                         leaf last-registration-status {
+                            status obsolete;
                             type types-system:remote-mgmt-registration-status;
                             description "Last result of registration attempt.";
                         }
 
                         leaf last-registration-time {
+                            status obsolete;
                             type types-sros:date-time;
                             description "Last time the client tried to register.";
                         }
 
                         leaf oper-state {
+                            status obsolete;
                             type types-sros:oper-state;
                             description "Administrative state of registration.";
                         }
 
                         leaf oper-down-reason {
+                            status obsolete;
                             type enumeration {
                                 enum unknown                        { value 0; }
                                 enum admin-down                     { value 1; }
@@ -3952,11 +4216,13 @@ submodule nokia-state-system {
                         }
 
                         leaf oper-client-tls-profile {
+                            status obsolete;
                             type types-sros:named-item-64;
                             description "Operational TLS client profile.";
                         }
 
                         leaf oper-transport-type {
+                            status obsolete;
                             type enumeration {
                                 enum tls                            { value 1; }
                                 enum unsecured                      { value 2; }
@@ -3965,50 +4231,60 @@ submodule nokia-state-system {
                         }
 
                         leaf oper-connection-timeout {
+                            status obsolete;
                             type uint32;
                             units "seconds";
                             description "Operational manager response timeout.";
                         }
 
                         leaf oper-router-instance {
+                            status obsolete;
                             type types-sros:router-instance-base-management-vprn-loose;
                             description "router-instance used to connect to the manager";
                         }
 
                         leaf oper-device-name {
+                            status obsolete;
                             type types-sros:named-item-64;
                             description "Identifier of this device.";
                         }
 
                         leaf oper-device-label {
+                            status obsolete;
                             type types-sros:named-item-64;
                             description "Label of this device.";
                         }
 
                         leaf oper-source-address {
+                            status obsolete;
                             type types-sros:ip-address;
                             description "Source IP address used to provide access to management of this device.";
                         }
 
                         leaf oper-source-port {
+                            status obsolete;
                             type types-sros:tcp-udp-port;
                             description "Source TCP port used to provide access to management of this device.";
                         }
 
                         container statistics {
+                            status obsolete;
                             description "Enter the statistics context";
 
                             leaf sent-registrations {
+                                status obsolete;
                                 type yang:counter64;
                                 description "The number of registrations sent.";
                             }
 
                             leaf failed-registrations {
+                                status obsolete;
                                 type yang:counter64;
                                 description "The number of registrations failed.";
                             }
 
                             leaf cancelled-registrations {
+                                status obsolete;
                                 type yang:counter64;
                                 description "The number of registrations cancelled.";
                             }
@@ -4954,7 +5230,7 @@ submodule nokia-state-system {
                     }
                     description
                         "Indicates the active conditions present on a given power zone. When
-                         the bit is set, the condition is active. 
+                         the bit is set, the condition is active.
 
                          Conditions include:
                             capacity-exceeded - a device in the power-zone requires power to
@@ -9517,6 +9793,17 @@ submodule nokia-state-system {
 
             } // container version
 
+            list software-repository {
+                key "repository-name";
+                description "Enter the software-repository list instance";
+
+                leaf repository-name {
+                    type types-sros:named-item;
+                    description "Specifies a unique name which identifies the system software repository.";
+                }
+
+            } // list software-repository
+
             container statistics {
                 description "Enter the statistics context";
 
@@ -12417,6 +12704,30 @@ submodule nokia-state-system {
 
                     } // container wlan-gw
 
+                    container lns {
+                        description "Enter the lns context";
+
+                        leaf in-use {
+                            type boolean;
+                            description "Boolean telling whether at least one lns group-interface is configured which is not shutdown";
+                        }
+
+                        leaf sessions-peak {
+                            type uint32;
+                            description "Peak value of measured active LNS sessions";
+                        }
+
+                        leaf tunnels-peak {
+                            type uint32;
+                            description "Peak value of measured active LNS tunnels";
+                        }
+
+                        leaf hosts-peak {
+                            type uint32;
+                            description "Peak value of measured active LNS subscriber hosts";
+                        }
+
+                    } // container lns
 
                 } // container subscriber-management
 

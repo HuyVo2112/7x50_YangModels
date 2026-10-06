@@ -63,6 +63,7 @@ submodule nokia-conf-svc-vprn {
     include nokia-conf-svc-vprn-ospf;
     include nokia-conf-svc-vprn-ospf3;
     include nokia-conf-svc-vprn-radius;
+    include nokia-conf-svc-vprn-rib-api;
     include nokia-conf-svc-vprn-rip;
     include nokia-conf-svc-vprn-ripng;
     include nokia-conf-svc-vprn-sub-if;
@@ -76,7 +77,7 @@ submodule nokia-conf-svc-vprn {
     include nokia-conf-test-oam;
     include nokia-conf-vrrp;
 
-    sros-ext:sros-major-release "rel25";
+    sros-ext:sros-major-release "rel26";
     organization "Nokia";
     contact
         "Nokia SR OS Support
@@ -99,7 +100,7 @@ submodule nokia-conf-svc-vprn {
          This specification is supplied `as is', and Nokia makes no warranty,
          either express or implied, as to the use, operation, condition, or performance
          of the specification.";
-    revision "2026-07-22";
+    revision "2026-07-08";
 
     grouping conf-svc-vprn {
         list vprn {
@@ -395,9 +396,9 @@ submodule nokia-conf-svc-vprn {
                             description "Enter the nat44 context";
 
                             leaf max-subscriber-limit {
-                                type types-nat:lsn-max-subscriber-limit;
+                                type types-nat:nat44-max-subscriber-limit;
                                 sros-ext:isa-auto-clear-on-modify;
-                                description "Largest value for all subscriber limits in each deterministic pool";
+                                description "Ingress hashing for load distribution across ESA-VMs";
                             }
 
                             leaf-list nat-import {
@@ -408,6 +409,28 @@ submodule nokia-conf-svc-vprn {
                                 ordered-by user;
                                 description "Import BGP-VPN routes in NAT inside routing context";
                             }
+
+                            container hash-mask {
+                                presence "Enable the hash-mask context";
+                                description "Enable the hash-mask context";
+
+                                leaf min-prefix-length {
+                                    type uint32 {
+                                        range "0..31";
+                                    }
+                                    default "0";
+                                    description "Minimum prefix length for hash mask";
+                                }
+
+                                leaf max-selector-end-prefix-length {
+                                    type uint32 {
+                                        range "0..31";
+                                    }
+                                    default "0";
+                                    description "Maximum prefix and port selector length for hash mask";
+                                }
+
+                            } // container hash-mask
 
                             list destination-prefix {
                                 key "ip-prefix-length";
@@ -684,6 +707,29 @@ submodule nokia-conf-svc-vprn {
                                         description "Exclude a configuration group at this level";
                                     }
 
+                                    container selector-mappings {
+                                        presence "Enable the selector-mappings context";
+                                        sros-ext:auto-restart-to-modify;
+                                        description "Enable the selector-mappings context";
+
+                                        leaf port-selector-length {
+                                            type uint32 {
+                                                range "0..31";
+                                            }
+                                            sros-ext:auto-restart-to-modify;
+                                            default "0";
+                                            description "Port selector length for deterministic prefix mapping";
+                                        }
+
+                                        leaf reverse-port-mappings {
+                                            type boolean;
+                                            sros-ext:auto-restart-to-modify;
+                                            default "false";
+                                            description "Enable reverse port mappings";
+                                        }
+
+                                    } // container selector-mappings
+
                                     list map {
                                         key "from to";
                                         description "Enter the map list instance";
@@ -741,7 +787,7 @@ submodule nokia-conf-svc-vprn {
                             }
 
                             leaf max-subscriber-limit {
-                                type types-nat:lsn-max-subscriber-limit;
+                                type types-nat:dsl-max-subscriber-limit;
                                 sros-ext:isa-auto-clear-on-modify;
                                 description "Largest value for all subscriber limits in each deterministic pool";
                             }
@@ -1171,6 +1217,96 @@ submodule nokia-conf-svc-vprn {
 
                         } // container nat64
 
+                        container nat66 {
+                            presence "Enable the nat66 context";
+                            description "Enable the nat66 context";
+
+                            leaf admin-state {
+                                type types-sros:admin-state;
+                                default "disable";
+                                description "Administrative state of NAT66";
+                            }
+
+                            leaf subscriber-prefix-length {
+                                type types-nat:ipv6-subscriber-prefix-length;
+                                sros-ext:auto-restart-to-modify;
+                                sros-ext:isa-auto-clear-on-modify;
+                                description "Prefix length under which resources are aggregated";
+                            }
+
+                            leaf hash-prefix-length {
+                                type types-nat:ipv6-nat66-hash-prefix-length;
+                                sros-ext:auto-restart-to-modify;
+                                sros-ext:isa-auto-clear-on-modify;
+                                description "Prefix length used for ingress traffic load balancing";
+                            }
+
+                            leaf-list apply-groups {
+                                type leafref {
+                                    path "../../../../../../../groups/group/name";
+                                }
+                                max-elements 8;
+                                ordered-by user;
+                                sros-ext:auto-restart-to-modify;
+                                description "Apply a configuration group at this level";
+                            }
+
+                            leaf-list apply-groups-exclude {
+                                type leafref {
+                                    path "../../../../../../../groups/group/name";
+                                }
+                                max-elements 8;
+                                ordered-by user;
+                                sros-ext:auto-restart-to-modify;
+                                description "Exclude a configuration group at this level";
+                            }
+
+                            list destination-prefix {
+                                key "prefix";
+                                max-elements 6144;
+                                description "Enter the destination-prefix list instance";
+
+                                leaf prefix {
+                                    type types-sros:ipv6-prefix;
+                                    description "NAT66 destination prefix";
+                                }
+
+                                leaf-list apply-groups {
+                                    type leafref {
+                                        path "../../../../../../../../groups/group/name";
+                                    }
+                                    max-elements 8;
+                                    ordered-by user;
+                                    description "Apply a configuration group at this level";
+                                }
+
+                                leaf-list apply-groups-exclude {
+                                    type leafref {
+                                        path "../../../../../../../../groups/group/name";
+                                    }
+                                    max-elements 8;
+                                    ordered-by user;
+                                    description "Exclude a configuration group at this level";
+                                }
+
+                                choice policy {
+                                    mandatory true;
+                                    case firewall {
+
+                                        leaf firewall-policy {
+                                            type leafref {
+                                                path "../../../../../../../nat/firewall-policy/name";
+                                            }
+                                            sros-ext:immutable;
+                                            description "Firewall policy association with destination prefix";
+                                        }
+
+                                    }
+                                }
+                            } // list destination-prefix
+
+                        } // container nat66
+
                         container subscriber-identification {
                             description "Enter the subscriber-identification context";
 
@@ -1314,6 +1450,14 @@ submodule nokia-conf-svc-vprn {
                         description "MTU for downstream traffic";
                     }
 
+                    leaf route-limit {
+                        type uint32 {
+                            range "1..131072";
+                        }
+                        default "32768";
+                        description "Limit the number of IPv4 and IPv6 routes in the outside";
+                    }
+
                     container filters {
                         description "Enter the filters context";
 
@@ -1358,9 +1502,11 @@ submodule nokia-conf-svc-vprn {
                     } // container filters
 
                     container dnat-only {
+                        status obsolete;
                         description "Enter the dnat-only context";
 
                         leaf route-limit {
+                            status obsolete;
                             type uint32 {
                                 range "1..131072";
                             }
@@ -1671,6 +1817,12 @@ submodule nokia-conf-svc-vprn {
                                     description "Number of ports per protocol reserved for CPM traffic";
                                 }
 
+                                leaf use-well-known-ports {
+                                    type boolean;
+                                    default "false";
+                                    description "Enable dynamic allocation of well-known ports";
+                                }
+
                             } // container use-interface-ip
 
                             container flexible-port-allocation {
@@ -1941,6 +2093,87 @@ submodule nokia-conf-svc-vprn {
                         } // list address-range
 
                     } // list pool
+
+                    list domain {
+                        key "name";
+                        max-elements 1024;
+                        description "Enter the domain list instance";
+
+                        leaf name {
+                            type types-sros:named-item;
+                            description "NAT pool name";
+                        }
+
+                        leaf nat-group {
+                            type leafref {
+                                path "../../../../../../isa/nat-group/id";
+                            }
+                            sros-ext:immutable;
+                            sros-ext:isa-auto-clear-on-modify;
+                            mandatory true;
+                            description "NAT outside group name";
+                        }
+
+                        leaf admin-state {
+                            type types-sros:admin-state;
+                            default "disable";
+                            description "Administrative state of NAT outside domain";
+                        }
+
+                        leaf-list apply-groups {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Apply a configuration group at this level";
+                        }
+
+                        leaf-list apply-groups-exclude {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Exclude a configuration group at this level";
+                        }
+
+                        list prefix {
+                            key "ip-prefix";
+                            max-elements 8192;
+                            description "Enter the prefix list instance";
+
+                            leaf ip-prefix {
+                                type types-sros:ipv6-unicast-prefix;
+                                description "Attribute prefix/prefix-length for prefix";
+                            }
+
+                            leaf description {
+                                type types-sros:description;
+                                description "Text description";
+                            }
+
+                            leaf-list apply-groups {
+                                type leafref {
+                                    path "../../../../../../../groups/group/name";
+                                }
+                                max-elements 8;
+                                ordered-by user;
+                                description "Apply a configuration group at this level";
+                            }
+
+                            leaf-list apply-groups-exclude {
+                                type leafref {
+                                    path "../../../../../../../groups/group/name";
+                                }
+                                max-elements 8;
+                                ordered-by user;
+                                description "Exclude a configuration group at this level";
+                            }
+
+                        } // list prefix
+
+                    } // list domain
 
                 } // container outside
 
@@ -2242,7 +2475,7 @@ submodule nokia-conf-svc-vprn {
                         type string {
                             length "1..80";
                             pattern "([a-zA-Z0-9]+-+)*([a-zA-Z0-9]+\\.([a-zA-Z0-9]+-+)*)*[a-zA-Z0-9]+" {
-                                error-message "wrong format of apn name";
+                                error-message "'apn' must match APN format (e.g. internet.mnc123.mcc456.gprs)";
                             }
                         }
                         description "Network Identifier part of APN";
@@ -2391,7 +2624,7 @@ submodule nokia-conf-svc-vprn {
 
                 leaf password {
                     type types-sros:encrypted-leaf {
-                        length "1..115";
+                        length "1..166";
                     }
                     description "L2TP password";
                 }
@@ -2517,7 +2750,9 @@ submodule nokia-conf-svc-vprn {
                     leaf calling-number-format {
                         type types-sros:ascii-specification {
                             length "1..255";
-                            pattern "([^%]+|%[Scrsl%])+";
+                            pattern "([^%]+|%[Scrsl%])+" {
+                                error-message "'calling-number-format' must use text with %S %c %r %s %l escapes only";
+                            }
                         }
                         default "%S %s";
                         description "Calling Number AVP for L2TP control messages";
@@ -2548,7 +2783,9 @@ submodule nokia-conf-svc-vprn {
 
                         leaf ethernet {
                             type types-sros:binary-specification {
-                                pattern "([01]|(\\*[0123456789]+)?[smpoi])+";
+                                pattern "([01]|(\\*[0123456789]+)?[smpoi])+" {
+                                    error-message "'ethernet' must be 0/1 or *N(s|m|p|o|i) bit-spec";
+                                }
                             }
                             description "L2TP Cisco NAS port AVP with binary patterns for Ethernet";
                         }
@@ -2720,7 +2957,7 @@ submodule nokia-conf-svc-vprn {
 
                     leaf password {
                         type types-sros:encrypted-leaf {
-                            length "1..115";
+                            length "1..166";
                         }
                         description "L2TPv3 password";
                     }
@@ -2850,7 +3087,7 @@ submodule nokia-conf-svc-vprn {
 
                     leaf password {
                         type types-sros:encrypted-leaf {
-                            length "1..115";
+                            length "1..166";
                         }
                         description "Password between L2TP LAC and LNS";
                     }
@@ -2938,7 +3175,7 @@ submodule nokia-conf-svc-vprn {
 
                         leaf password {
                             type types-sros:encrypted-leaf {
-                                length "1..115";
+                                length "1..166";
                             }
                             description "L2TPv3 password";
                         }
@@ -3319,7 +3556,7 @@ submodule nokia-conf-svc-vprn {
 
                         leaf password {
                             type types-sros:encrypted-leaf {
-                                length "1..115";
+                                length "1..166";
                             }
                             description "Password between L2TP LAC and LNS";
                         }
@@ -6790,7 +7027,7 @@ submodule nokia-conf-svc-vprn {
 
                     leaf secret {
                         type types-sros:encrypted-leaf {
-                            length "1..115";
+                            length "1..166";
                         }
                         description "Message authentication between portal and BRAS by applying the secret used by WPPv2";
                     }
@@ -6897,6 +7134,13 @@ submodule nokia-conf-svc-vprn {
                     description "Common service label for the MVPN";
                 }
 
+                leaf bier-next-protocol {
+                    type int32 {
+                        range "1";
+                    }
+                    description "BIER next protocol";
+                }
+
                 leaf-list apply-groups {
                     type leafref {
                         path "../../../../groups/group/name";
@@ -6927,6 +7171,7 @@ submodule nokia-conf-svc-vprn {
                     }
 
                     leaf source-address {
+                        status deprecated;
                         type types-sros:ipv4-address;
                         default "0.0.0.0";
                         description "IPv4 source address";
@@ -7955,6 +8200,26 @@ submodule nokia-conf-svc-vprn {
 
                 } // container provider-tunnel
 
+                container bgp-ipvpn {
+                    description "Enter the bgp-ipvpn context";
+
+                    leaf type {
+                        type enumeration {
+                            enum mpls                           { value 0; }
+                            enum segment-routing-v6             { value 1; }
+                        }
+                        description "BGP IP-VPN type";
+                    }
+
+                    leaf bgp-instance {
+                        type int32 {
+                            range "1..2";
+                        }
+                        description "BGP instance to be used";
+                    }
+
+                } // container bgp-ipvpn
+
             } // container mvpn
 
             container ntp {
@@ -8017,7 +8282,7 @@ submodule nokia-conf-svc-vprn {
 
                     leaf key {
                         type types-sros:encrypted-leaf {
-                            length "1..71";
+                            length "1..126";
                         }
                         mandatory true;
                         description "Key to authenticate NTP packets";
@@ -8355,7 +8620,7 @@ submodule nokia-conf-svc-vprn {
 
                     leaf anysec-encryption-group {
                         type leafref {
-                            path "../../../../../anysec/service-encryption/encryption-group/group-name";
+                            path "../../../../../anysec/mpls/service-encryption/encryption-group/group-name";
                         }
                         description "ANYsec encryption group name";
                     }
@@ -9156,7 +9421,7 @@ submodule nokia-conf-svc-vprn {
 
                     leaf anysec-encryption-group {
                         type leafref {
-                            path "../../../../../anysec/service-encryption/encryption-group/group-name";
+                            path "../../../../../anysec/mpls/service-encryption/encryption-group/group-name";
                         }
                         description "ANYsec encryption group name";
                     }
@@ -9449,6 +9714,12 @@ submodule nokia-conf-svc-vprn {
                         description "Resolution options for routes";
                     }
 
+                    leaf flex-algo-class-forwarding {
+                        type boolean;
+                        default "false";
+                        description "Enable flexible algorithm class-based forwarding";
+                    }
+
                     leaf-list apply-groups {
                         type leafref {
                             path "../../../../../groups/group/name";
@@ -9614,6 +9885,64 @@ submodule nokia-conf-svc-vprn {
                 } // container attribute-set
 
             } // container bgp-ipvpn
+
+            container evpn-neighbor-synchronization {
+                presence "Enable the evpn-neighbor-synchronization context";
+                description "Enable the evpn-neighbor-synchronization context";
+
+                leaf admin-state {
+                    type types-sros:admin-state;
+                    default "disable";
+                    description "Administrative state of EVPN synchronization";
+                }
+
+                leaf route-distinguisher {
+                    type types-services:vpn-route-distinguisher;
+                    sros-ext:auto-restart-to-modify;
+                    description "Route distinguisher used for synchronization";
+                }
+
+                leaf evi-route-target {
+                    type types-services:evi-route-target;
+                    sros-ext:auto-restart-to-modify;
+                    description "EVI route target to use for EVPN neighbor synchronization";
+                }
+
+                leaf route-tag {
+                    type int32 {
+                        range "1..255";
+                    }
+                    sros-ext:auto-restart-to-modify;
+                    description "BGP route tag for MAC/IP routes synchronization";
+                }
+
+                leaf retention-timer {
+                    type uint32 {
+                        range "1..65535";
+                    }
+                    units "seconds";
+                    description "Time that an EVPN ARP or ND entry is retained";
+                }
+
+                leaf-list apply-groups {
+                    type leafref {
+                        path "../../../../groups/group/name";
+                    }
+                    max-elements 8;
+                    ordered-by user;
+                    description "Apply a configuration group at this level";
+                }
+
+                leaf-list apply-groups-exclude {
+                    type leafref {
+                        path "../../../../groups/group/name";
+                    }
+                    max-elements 8;
+                    ordered-by user;
+                    description "Exclude a configuration group at this level";
+                }
+
+            } // container evpn-neighbor-synchronization
 
             container aaa {
                 description "Enter the aaa context";
@@ -9832,7 +10161,7 @@ submodule nokia-conf-svc-vprn {
 
                             leaf secret {
                                 type types-sros:encrypted-leaf {
-                                    length "1..199";
+                                    length "1..254";
                                 }
                                 mandatory true;
                                 description "Secret key to access the TACACS+ server";
@@ -9983,7 +10312,7 @@ submodule nokia-conf-svc-vprn {
 
                             leaf secret {
                                 type types-sros:encrypted-leaf {
-                                    length "1..115";
+                                    length "1..166";
                                 }
                                 description "Secret key to access the RADIUS server";
                             }
@@ -10592,7 +10921,9 @@ submodule nokia-conf-svc-vprn {
 
                 leaf default-domain {
                     type types-sros:fully-qualified-domain-name {
-                        pattern "[a-z0-9\\-\\.]+";
+                        pattern "[a-z0-9\\-\\.]+" {
+                            error-message "'default-domain' must be lowercase letters, digits, hyphen, dot (DNS label form)";
+                        }
                     }
                     description "Domain name added in DNS retries";
                 }
@@ -10722,7 +11053,7 @@ submodule nokia-conf-svc-vprn {
 
                 leaf authentication-key {
                     type types-sros:encrypted-leaf {
-                        length "1..370";
+                        length "1..422";
                     }
                     description "BGP authentication key for all peers";
                 }
@@ -12196,7 +12527,7 @@ submodule nokia-conf-svc-vprn {
 
                     leaf authentication-key {
                         type types-sros:encrypted-leaf {
-                            length "1..370";
+                            length "1..422";
                         }
                         description "BGP authentication key for peers in the group";
                     }
@@ -12236,7 +12567,6 @@ submodule nokia-conf-svc-vprn {
 
                     leaf type {
                         type types-bgp:peer-type;
-                        default "no-type";
                         description "BGP peer type";
                     }
 
@@ -13088,7 +13418,9 @@ submodule nokia-conf-svc-vprn {
 
                                 leaf-list allowed-peer-as {
                                     type string {
-                                        pattern "(([1-9]|[1-9][0-9]{1,8}|[1-3][0-9]{9}|4[0-1][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[0-1][0-9]{2}|42949672[0-8][0-9]|429496729[0-5]))|(([1-9]|[1-9][0-9]{1,8}|[1-3][0-9]{9}|4[0-1][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[0-1][0-9]{2}|42949672[0-8][0-9]|429496729[0-5])\\.\\.([1-9]|[1-9][0-9]{1,8}|[1-3][0-9]{9}|4[0-1][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[0-1][0-9]{2}|42949672[0-8][0-9]|429496729[0-5]))";
+                                        pattern "(([1-9]|[1-9][0-9]{1,8}|[1-3][0-9]{9}|4[0-1][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[0-1][0-9]{2}|42949672[0-8][0-9]|429496729[0-5]))|(([1-9]|[1-9][0-9]{1,8}|[1-3][0-9]{9}|4[0-1][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[0-1][0-9]{2}|42949672[0-8][0-9]|429496729[0-5])\\.\\.([1-9]|[1-9][0-9]{1,8}|[1-3][0-9]{9}|4[0-1][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[0-1][0-9]{2}|42949672[0-8][0-9]|429496729[0-5]))" {
+                                            error-message "'allowed-peer-as' must be 4-byte decimal AS number or AS..AS range";
+                                        }
                                     }
                                     max-elements 32;
                                     ordered-by user;
@@ -13130,7 +13462,9 @@ submodule nokia-conf-svc-vprn {
 
                             leaf-list allowed-peer-as {
                                 type string {
-                                    pattern "(([1-9]|[1-9][0-9]{1,8}|[1-3][0-9]{9}|4[0-1][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[0-1][0-9]{2}|42949672[0-8][0-9]|429496729[0-5]))|(([1-9]|[1-9][0-9]{1,8}|[1-3][0-9]{9}|4[0-1][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[0-1][0-9]{2}|42949672[0-8][0-9]|429496729[0-5])\\.\\.([1-9]|[1-9][0-9]{1,8}|[1-3][0-9]{9}|4[0-1][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[0-1][0-9]{2}|42949672[0-8][0-9]|429496729[0-5]))";
+                                    pattern "(([1-9]|[1-9][0-9]{1,8}|[1-3][0-9]{9}|4[0-1][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[0-1][0-9]{2}|42949672[0-8][0-9]|429496729[0-5]))|(([1-9]|[1-9][0-9]{1,8}|[1-3][0-9]{9}|4[0-1][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[0-1][0-9]{2}|42949672[0-8][0-9]|429496729[0-5])\\.\\.([1-9]|[1-9][0-9]{1,8}|[1-3][0-9]{9}|4[0-1][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[0-1][0-9]{2}|42949672[0-8][0-9]|429496729[0-5]))" {
+                                        error-message "'allowed-peer-as' must be 4-byte decimal AS number or AS..AS range";
+                                    }
                                 }
                                 max-elements 32;
                                 ordered-by user;
@@ -13429,7 +13763,7 @@ submodule nokia-conf-svc-vprn {
 
                     leaf authentication-key {
                         type types-sros:encrypted-leaf {
-                            length "1..370";
+                            length "1..422";
                         }
                         description "BGP authentication key";
                     }
@@ -14780,6 +15114,7 @@ submodule nokia-conf-svc-vprn {
 
                 } // container ipv4
 
+
             } // list aa-interface
 
             list dms-interface {
@@ -14999,6 +15334,49 @@ submodule nokia-conf-svc-vprn {
                     } // container primary
 
                 } // container ipv4
+
+                container ipv6 {
+                    presence "Enable the ipv6 context";
+                    description "Enable the ipv6 context";
+
+                    list address {
+                        key "ipv6-address";
+                        description "Enter the address list instance";
+
+                        leaf ipv6-address {
+                            type types-sros:ipv6-address;
+                            description "IPv6 address assigned to the interface";
+                        }
+
+                        leaf prefix-length {
+                            type uint32 {
+                                range "4..128";
+                            }
+                            mandatory true;
+                            description "IPv6 address prefix length";
+                        }
+
+                        leaf-list apply-groups {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Apply a configuration group at this level";
+                        }
+
+                        leaf-list apply-groups-exclude {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Exclude a configuration group at this level";
+                        }
+
+                    } // list address
+
+                } // container ipv6
 
             } // list dms-interface
 
@@ -15658,7 +16036,7 @@ submodule nokia-conf-svc-vprn {
                         leaf name {
                             type types-sros:named-item {
                                 pattern "[a-zA-Z]+.*" {
-                                    error-message "IPSec tunnel name cannot start with a number";
+                                    error-message "'name' must not start with a number (e.g. tunnel-1)";
                                 }
                             }
                             description "IPsec tunnel name";
@@ -15903,13 +16281,6 @@ submodule nokia-conf-svc-vprn {
                                         sros-ext:auto-restart-to-modify;
                                         description "Enable the dynamic context";
 
-                                        leaf auto-establish {
-                                            type boolean;
-                                            sros-ext:auto-restart-to-modify;
-                                            default "false";
-                                            description "Attempt to establish a phase 1 exchange automatically";
-                                        }
-
                                         leaf ike-policy {
                                             type leafref {
                                                 path "../../../../../../../../ipsec/ike-policy/id";
@@ -15927,9 +16298,23 @@ submodule nokia-conf-svc-vprn {
                                             description "IPsec transform IDs used by the dynamic key";
                                         }
 
+                                        leaf auto-establish {
+                                            type boolean;
+                                            sros-ext:auto-restart-to-modify;
+                                            default "false";
+                                            description "Attempt to establish a phase 1 exchange automatically";
+                                        }
+
+                                        leaf auto-establish-sustain {
+                                            type boolean;
+                                            sros-ext:auto-restart-to-modify;
+                                            default "false";
+                                            description "Sustain the automatic establishment";
+                                        }
+
                                         leaf pre-shared-key {
                                             type types-sros:encrypted-leaf {
-                                                length "1..115";
+                                                length "1..166";
                                             }
                                             sros-ext:auto-restart-to-modify;
                                             description "Pre-shared key for authentication";
@@ -16038,6 +16423,31 @@ submodule nokia-conf-svc-vprn {
                                             }
 
                                         } // container ppk
+
+                                        container reverse-route-injection {
+                                            presence "Enable the reverse-route-injection context";
+                                            sros-ext:auto-restart-to-modify;
+                                            description "Enable the reverse-route-injection context";
+
+                                            leaf metric {
+                                                type uint32 {
+                                                    range "0..65535";
+                                                }
+                                                sros-ext:auto-restart-to-modify;
+                                                default "0";
+                                                description "The metric to be used for reverse route injection";
+                                            }
+
+                                            leaf preference {
+                                                type uint32 {
+                                                    range "0..255";
+                                                }
+                                                sros-ext:auto-restart-to-modify;
+                                                default "0";
+                                                description "The preference to be used for reverse route injection";
+                                            }
+
+                                        } // container reverse-route-injection
 
                                     } // container dynamic
 
@@ -16288,6 +16698,12 @@ submodule nokia-conf-svc-vprn {
                         type boolean;
                         default "false";
                         description "Forward directed broadcasts";
+                    }
+
+                    leaf flex-algo-cbf-lookup {
+                        type boolean;
+                        default "false";
+                        description "Allow flexible algorithm class-based forwarding lookup";
                     }
 
                     leaf local-dhcp-server {
@@ -16560,6 +16976,19 @@ submodule nokia-conf-svc-vprn {
                             description "SRRP instance whose state is tracked on the IP address";
                         }
 
+                        leaf tag {
+                            type union {
+                                type uint32 {
+                                    range "1..4294967295";
+                                }
+                                type enumeration {
+                                    enum no-tag                         { value 0; }
+                                }
+                            }
+                            default "no-tag";
+                            description "Route tag to be matched by BGP export policy rules";
+                        }
+
                         leaf-list apply-groups {
                             type leafref {
                                 path "../../../../../../groups/group/name";
@@ -16614,6 +17043,19 @@ submodule nokia-conf-svc-vprn {
                                 range "1..4294967295";
                             }
                             description "SRRP instance whose state is tracked on the IP address";
+                        }
+
+                        leaf tag {
+                            type union {
+                                type uint32 {
+                                    range "1..4294967295";
+                                }
+                                type enumeration {
+                                    enum no-tag                         { value 0; }
+                                }
+                            }
+                            default "no-tag";
+                            description "Route tag to be matched by BGP export policy rules";
                         }
 
                         leaf-list apply-groups {
@@ -16800,9 +17242,22 @@ submodule nokia-conf-svc-vprn {
 
                                 leaf route-type {
                                     type enumeration {
-                                        enum static                         { value 1; }
-                                        enum dynamic                        { value 2; }
-                                        enum evpn                           { value 3; }
+                                        enum static {
+                                            value 1;
+                                            description "Host routes created from EVPN ARP or ND entries";
+                                        }
+                                        enum dynamic {
+                                            value 2;
+                                            description "Host routes created from dynamic ARP or ND entries";
+                                        }
+                                        enum evpn {
+                                            value 3;
+                                            description "Host routes created from EVPN entries";
+                                        }
+                                        enum evpn-local-es {
+                                            value 4;
+                                            description "Host routes created from EVPN local ES entries";
+                                        }
                                     }
                                     description "Type of ARP or ND entries that generate host routes";
                                 }
@@ -17236,7 +17691,7 @@ submodule nokia-conf-svc-vprn {
 
                         leaf authentication-key {
                             type types-sros:encrypted-leaf {
-                                length "1..38";
+                                length "1..94";
                             }
                             description "Password for simple text authentication";
                         }
@@ -17495,7 +17950,7 @@ submodule nokia-conf-svc-vprn {
 
                     leaf anysec-encryption-group {
                         type leafref {
-                            path "../../../../../anysec/service-encryption/encryption-group/group-name";
+                            path "../../../../../anysec/mpls/service-encryption/encryption-group/group-name";
                         }
                         description "ANYsec encryption group name";
                     }
@@ -18311,7 +18766,7 @@ submodule nokia-conf-svc-vprn {
                                         leaf cbs {
                                             type union {
                                                 type uint32 {
-                                                    range "0..1048576";
+                                                    range "0..2097151";
                                                 }
                                                 type enumeration {
                                                     enum auto                           { value -1; }
@@ -18324,7 +18779,7 @@ submodule nokia-conf-svc-vprn {
                                         leaf mbs {
                                             type union {
                                                 type types-qos:bytes {
-                                                    range "0..1073741824";
+                                                    range "0..2147482624";
                                                 }
                                                 type enumeration {
                                                     enum auto                           { value -1; }
@@ -18802,24 +19257,11 @@ submodule nokia-conf-svc-vprn {
                         container aggregate-policer {
                             description "Enter the aggregate-policer context";
 
-                            leaf rate {
-                                type types-qos:aggr-policer-rate;
-                                units "kilobps";
-                                default "max";
-                                description "Aggregate policer rate";
-                            }
-
                             leaf burst {
                                 status obsolete;
                                 type types-qos:aggr-policer-burst;
                                 default "default";
                                 description "Aggregate policer burst";
-                            }
-
-                            leaf cir {
-                                type types-qos:aggr-policer-cir;
-                                units "kilobps";
-                                description "Aggregate policer CIR";
                             }
 
                             leaf cbs {
@@ -18850,6 +19292,50 @@ submodule nokia-conf-svc-vprn {
                                 description "Policer algorithm type";
                             }
 
+                            choice rate-or-percent-rate {
+                                default "rate";
+                                case rate {
+
+                                    leaf rate {
+                                        type types-qos:aggr-policer-rate;
+                                        units "kilobps";
+                                        default "max";
+                                        description "Aggregate policer rate";
+                                    }
+
+                                    leaf cir {
+                                        type types-qos:aggr-policer-cir;
+                                        units "kilobps";
+                                        description "Aggregate policer CIR";
+                                    }
+
+                                }
+                                case percent-rate {
+
+                                    container percent-rate {
+                                        description "Enter the percent-rate context";
+
+                                        leaf pir {
+                                            type decimal64 {
+                                                range "0.01..100.00";
+                                                fraction-digits 2;
+                                            }
+                                            description "Administrative PIR percent";
+                                        }
+
+                                        leaf cir {
+                                            type decimal64 {
+                                                range "0.00..100.00";
+                                                fraction-digits 2;
+                                            }
+                                            default "100.00";
+                                            description "Administrative CIR percent";
+                                        }
+
+                                    } // container percent-rate
+
+                                }
+                            }
                         } // container aggregate-policer
 
                     } // container ingress
@@ -18978,6 +19464,12 @@ submodule nokia-conf-svc-vprn {
                                 description "Use virtual flows to sink excess bandwidth";
                             }
 
+                            leaf low-rate {
+                                type boolean;
+                                default "false";
+                                description "Use low-rate scheduling";
+                            }
+
                             container sap-egress {
                                 description "Enter the sap-egress context";
 
@@ -19047,7 +19539,7 @@ submodule nokia-conf-svc-vprn {
                                         leaf cbs {
                                             type union {
                                                 type uint32 {
-                                                    range "0..1048576";
+                                                    range "0..2097151";
                                                 }
                                                 type enumeration {
                                                     enum auto                           { value -1; }
@@ -19060,7 +19552,7 @@ submodule nokia-conf-svc-vprn {
                                         leaf mbs {
                                             type union {
                                                 type types-qos:bytes {
-                                                    range "0..1073741824";
+                                                    range "0..2147482624";
                                                 }
                                                 type enumeration {
                                                     enum auto                           { value -1; }
@@ -19751,18 +20243,6 @@ submodule nokia-conf-svc-vprn {
 
                     } // container lag
 
-                    container fwd-wholesale {
-                        description "Enter the fwd-wholesale context";
-
-                        leaf pppoe-service {
-                            type leafref {
-                                path "../../../../../epipe/service-name";
-                            }
-                            description "PPPoE service name";
-                        }
-
-                    } // container fwd-wholesale
-
                     container aarp {
                         presence "Enable the aarp context";
                         description "Enable the aarp context";
@@ -19780,6 +20260,18 @@ submodule nokia-conf-svc-vprn {
                         }
 
                     } // container aarp
+
+                    container fwd-wholesale {
+                        description "Enter the fwd-wholesale context";
+
+                        leaf pppoe-service {
+                            type leafref {
+                                path "../../../../../epipe/service-name";
+                            }
+                            description "PPPoE service name";
+                        }
+
+                    } // container fwd-wholesale
 
                     container transit-policy {
                         presence "Enable the transit-policy context";
@@ -20097,6 +20589,57 @@ submodule nokia-conf-svc-vprn {
                         } // list mep
 
                     } // container eth-cfm
+
+                    container ethernet {
+                        description "Enter the ethernet context";
+
+                        container loopback-mode {
+                            presence "Enable the loopback-mode context";
+                            description "Enable the loopback-mode context";
+
+                            leaf mode {
+                                type enumeration {
+                                    enum line {
+                                        value 0;
+                                        description "Loop frames back to the remote router";
+                                    }
+                                    enum internal {
+                                        value 1;
+                                        description "Loop local router frames back to the framer";
+                                    }
+                                }
+                                sros-ext:immutable;
+                                default "line";
+                                description "Loopback mode for the associated port or channel";
+                            }
+
+                            leaf mac-swap {
+                                type boolean;
+                                default "false";
+                                description "Enable MAC address swapping";
+                            }
+
+                            leaf-list apply-groups {
+                                type leafref {
+                                    path "../../../../../../../groups/group/name";
+                                }
+                                max-elements 8;
+                                ordered-by user;
+                                description "Apply a configuration group at this level";
+                            }
+
+                            leaf-list apply-groups-exclude {
+                                type leafref {
+                                    path "../../../../../../../groups/group/name";
+                                }
+                                max-elements 8;
+                                ordered-by user;
+                                description "Exclude a configuration group at this level";
+                            }
+
+                        } // container loopback-mode
+
+                    } // container ethernet
 
                     list ip-tunnel {
                         key "tunnel-name";
@@ -20421,7 +20964,7 @@ submodule nokia-conf-svc-vprn {
 
                         leaf pre-shared-key {
                             type types-sros:encrypted-leaf {
-                                length "1..115";
+                                length "1..166";
                             }
                             description "Pre-shared key for the IPsec gateway";
                         }
@@ -20870,7 +21413,7 @@ submodule nokia-conf-svc-vprn {
                         leaf name {
                             type types-sros:named-item {
                                 pattern "[a-zA-Z]+.*" {
-                                    error-message "IPSec tunnel name cannot start with a number";
+                                    error-message "'name' must not start with a number (e.g. tunnel-1)";
                                 }
                             }
                             description "IPsec tunnel name";
@@ -21086,13 +21629,6 @@ submodule nokia-conf-svc-vprn {
                                         sros-ext:auto-restart-to-modify;
                                         description "Enable the dynamic context";
 
-                                        leaf auto-establish {
-                                            type boolean;
-                                            sros-ext:auto-restart-to-modify;
-                                            default "false";
-                                            description "Attempt to establish a phase 1 exchange automatically";
-                                        }
-
                                         leaf ike-policy {
                                             type leafref {
                                                 path "../../../../../../../../ipsec/ike-policy/id";
@@ -21110,9 +21646,23 @@ submodule nokia-conf-svc-vprn {
                                             description "IPsec transform IDs used by the dynamic key";
                                         }
 
+                                        leaf auto-establish {
+                                            type boolean;
+                                            sros-ext:auto-restart-to-modify;
+                                            default "false";
+                                            description "Attempt to establish a phase 1 exchange automatically";
+                                        }
+
+                                        leaf auto-establish-sustain {
+                                            type boolean;
+                                            sros-ext:auto-restart-to-modify;
+                                            default "false";
+                                            description "Sustain the automatic establishment";
+                                        }
+
                                         leaf pre-shared-key {
                                             type types-sros:encrypted-leaf {
-                                                length "1..115";
+                                                length "1..166";
                                             }
                                             sros-ext:auto-restart-to-modify;
                                             description "Pre-shared key for authentication";
@@ -21221,6 +21771,31 @@ submodule nokia-conf-svc-vprn {
                                             }
 
                                         } // container ppk
+
+                                        container reverse-route-injection {
+                                            presence "Enable the reverse-route-injection context";
+                                            sros-ext:auto-restart-to-modify;
+                                            description "Enable the reverse-route-injection context";
+
+                                            leaf metric {
+                                                type uint32 {
+                                                    range "0..65535";
+                                                }
+                                                sros-ext:auto-restart-to-modify;
+                                                default "0";
+                                                description "The metric to be used for reverse route injection";
+                                            }
+
+                                            leaf preference {
+                                                type uint32 {
+                                                    range "0..255";
+                                                }
+                                                sros-ext:auto-restart-to-modify;
+                                                default "0";
+                                                description "The preference to be used for reverse route injection";
+                                            }
+
+                                        } // container reverse-route-injection
 
                                     } // container dynamic
 
@@ -21595,6 +22170,35 @@ submodule nokia-conf-svc-vprn {
                                 description "Allow CPM originated ARP frames to flood R-VPLS service";
                             }
 
+                            container evpn-local-es {
+                                description "Enter the evpn-local-es context";
+
+                                leaf entry-type {
+                                    type enumeration {
+                                        enum evpn {
+                                            value 0;
+                                            description "Allow EVPN routes to be advertised";
+                                        }
+                                        enum evpn-local-es {
+                                            value 1;
+                                            description "Allow EVPN local ES routes to be advertised";
+                                        }
+                                    }
+                                    default "evpn";
+                                    description "Type of EVPN entry";
+                                }
+
+                                leaf retention-timer {
+                                    type uint32 {
+                                        range "0..65535";
+                                    }
+                                    units "seconds";
+                                    default "0";
+                                    description "Retention timer of the entry";
+                                }
+
+                            } // container evpn-local-es
+
                             list advertise {
                                 key "route-type";
                                 description "Enter the advertise list instance";
@@ -21603,6 +22207,7 @@ submodule nokia-conf-svc-vprn {
                                     type enumeration {
                                         enum static                         { value 1; }
                                         enum dynamic                        { value 2; }
+                                        enum evpn-local-es                  { value 3; }
                                     }
                                     description "Type of ARP or ND entries that generate host routes";
                                 }
@@ -21660,6 +22265,35 @@ submodule nokia-conf-svc-vprn {
                                 description "Process ARP or ND messages on EVPN tunnels";
                             }
 
+                            container evpn-local-es {
+                                description "Enter the evpn-local-es context";
+
+                                leaf entry-type {
+                                    type enumeration {
+                                        enum evpn {
+                                            value 0;
+                                            description "Allow EVPN routes to be advertised";
+                                        }
+                                        enum evpn-local-es {
+                                            value 1;
+                                            description "Allow EVPN local ES routes to be advertised";
+                                        }
+                                    }
+                                    default "evpn";
+                                    description "Type of EVPN entry";
+                                }
+
+                                leaf retention-timer {
+                                    type uint32 {
+                                        range "0..65535";
+                                    }
+                                    units "seconds";
+                                    default "0";
+                                    description "Retention timer of the entry";
+                                }
+
+                            } // container evpn-local-es
+
                             list advertise {
                                 key "route-type";
                                 description "Enter the advertise list instance";
@@ -21668,6 +22302,7 @@ submodule nokia-conf-svc-vprn {
                                     type enumeration {
                                         enum static                         { value 1; }
                                         enum dynamic                        { value 2; }
+                                        enum evpn-local-es                  { value 3; }
                                     }
                                     description "Type of ARP or ND entries that generate host routes";
                                 }
@@ -21805,6 +22440,12 @@ submodule nokia-conf-svc-vprn {
                 container ipv6 {
                     presence "Enable the ipv6 context";
                     description "Enable the ipv6 context";
+
+                    leaf flex-algo-cbf-lookup {
+                        type boolean;
+                        default "false";
+                        description "Allow flexible algorithm class-based forwarding lookup";
+                    }
 
                     leaf qos-route-lookup {
                         type types-router:qos-route-lookup;
@@ -22110,6 +22751,19 @@ submodule nokia-conf-svc-vprn {
                                 range "1..4294967295";
                             }
                             description "SRRP ID whose state is tracked on this IP address";
+                        }
+
+                        leaf tag {
+                            type union {
+                                type uint32 {
+                                    range "1..4294967295";
+                                }
+                                type enumeration {
+                                    enum no-tag                         { value 0; }
+                                }
+                            }
+                            default "no-tag";
+                            description "Route tag to be matched by BGP export policy rules";
                         }
 
                         leaf-list apply-groups {
@@ -22514,9 +23168,22 @@ submodule nokia-conf-svc-vprn {
 
                                 leaf route-type {
                                     type enumeration {
-                                        enum static                         { value 1; }
-                                        enum dynamic                        { value 2; }
-                                        enum evpn                           { value 3; }
+                                        enum static {
+                                            value 1;
+                                            description "Host routes created from EVPN ARP or ND entries";
+                                        }
+                                        enum dynamic {
+                                            value 2;
+                                            description "Host routes created from dynamic ARP or ND entries";
+                                        }
+                                        enum evpn {
+                                            value 3;
+                                            description "Host routes created from EVPN entries";
+                                        }
+                                        enum evpn-local-es {
+                                            value 4;
+                                            description "Host routes created from EVPN local ES entries";
+                                        }
                                     }
                                     description "Type of ARP or ND entries that generate host routes";
                                 }
@@ -24988,6 +25655,132 @@ submodule nokia-conf-svc-vprn {
 
                     } // container blackhole
 
+                    list dhcp-next-hop {
+                        key "interface-name";
+                        description "Enter the dhcp-next-hop list instance";
+
+                        leaf interface-name {
+                            type types-sros:interface-name;
+                            description "Router interface name.";
+                        }
+
+                        leaf description {
+                            type types-sros:description-allow-all-white-spaces;
+                            description "Text description";
+                        }
+
+                        leaf metric {
+                            type uint32 {
+                                range "0..65535";
+                            }
+                            default "1";
+                            description "Static route metric";
+                        }
+
+                        leaf preference {
+                            type uint32 {
+                                range "1..255";
+                            }
+                            default "5";
+                            description "Priority of static route over different route sources";
+                        }
+
+                        leaf tag {
+                            type uint32 {
+                                range "1..max";
+                            }
+                            description "Static route tag";
+                        }
+
+                        leaf community {
+                            type types-sros:community;
+                            description "Community ID associated with the static route";
+                        }
+
+                        leaf admin-state {
+                            type types-sros:admin-state;
+                            description "Administrative state of the static route operation";
+                        }
+
+                        leaf-list apply-groups {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Apply a configuration group at this level";
+                        }
+
+                        leaf-list apply-groups-exclude {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Exclude a configuration group at this level";
+                        }
+
+                    } // list dhcp-next-hop
+
+                    container follow {
+                        presence "Enable the follow context";
+                        description "Enable the follow context";
+
+                        leaf description {
+                            type types-sros:description-allow-all-white-spaces;
+                            description "Text description";
+                        }
+
+                        leaf metric {
+                            type uint32 {
+                                range "0..65535";
+                            }
+                            default "1";
+                            description "Static route metric";
+                        }
+
+                        leaf preference {
+                            type uint32 {
+                                range "1..255";
+                            }
+                            default "5";
+                            description "Priority of static route over different route sources";
+                        }
+
+                        leaf destination-class {
+                            type types-sros:class-index;
+                            description "Destination class for this static route";
+                        }
+
+                        leaf source-class {
+                            type types-sros:class-index;
+                            description "Source class for the static route";
+                        }
+
+                        leaf admin-state {
+                            type types-sros:admin-state;
+                            description "Administrative state of the static route operation";
+                        }
+
+                        leaf-list apply-groups {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Apply a configuration group at this level";
+                        }
+
+                        leaf-list apply-groups-exclude {
+                            type leafref {
+                                path "../../../../../../groups/group/name";
+                            }
+                            max-elements 8;
+                            ordered-by user;
+                            description "Exclude a configuration group at this level";
+                        }
+
+                    } // container follow
 
                     container grt {
                         presence "Enable the grt context";
@@ -26679,7 +27472,10 @@ submodule nokia-conf-svc-vprn {
                     }
 
                     leaf address {
-                        type types-sros:ip-unicast-address;
+                        type union {
+                            type types-sros:ip-unicast-address;
+                            type types-sros:fully-qualified-domain-name;
+                        }
                         description "IP address or FQDN of the Syslog target host";
                     }
 
@@ -26737,7 +27533,7 @@ submodule nokia-conf-svc-vprn {
                             type string {
                                 length "1..32";
                                 pattern "([!-9;<>-~])+" {
-                                    error-message "String must contain only printable characters between 33 - 126 ASCII except ':' and '='";
+                                    error-message "'log-prefix' must contain only printable characters between 33 and 126 ASCII except ':' and '='";
                                 }
                             }
                         }
@@ -27527,7 +28323,7 @@ submodule nokia-conf-svc-vprn {
 
                     leaf community-string {
                         type types-sros:encrypted-leaf {
-                            length "1..114";
+                            length "1..166";
                         }
                         description "SNMP v1/v2c community name associated with the VPRN";
                     }
@@ -27730,6 +28526,180 @@ submodule nokia-conf-svc-vprn {
 
             } // container management
 
+            list ip-transport {
+                key "ipt-id";
+                description "Enter the ip-transport list instance";
+
+                leaf ipt-id {
+                    type types-sros:port;
+                    description "IP Transport identifier.";
+                }
+
+                leaf admin-state {
+                    type types-sros:admin-state;
+                    default "disable";
+                    description "Administrative state of the IP transport.";
+                }
+
+                leaf description {
+                    type types-sros:description;
+                    description "Description for the IP transport.";
+                }
+
+                leaf filter-unknown-host {
+                    type boolean;
+                    sros-ext:auto-restart-to-modify;
+                    default "false";
+                    description "Enable/Disable unknown host filtering.";
+                }
+
+                leaf dscp-name {
+                    type types-qos:dscp-name;
+                    sros-ext:auto-restart-to-modify;
+                    default "ef";
+                    description "dscp name";
+                }
+
+                leaf-list apply-groups {
+                    type leafref {
+                        path "../../../../groups/group/name";
+                    }
+                    max-elements 8;
+                    ordered-by user;
+                    description "Apply a configuration group at this level";
+                }
+
+                leaf-list apply-groups-exclude {
+                    type leafref {
+                        path "../../../../groups/group/name";
+                    }
+                    max-elements 8;
+                    ordered-by user;
+                    description "Exclude a configuration group at this level";
+                }
+
+                container local-host {
+                    description "Enter the local-host context";
+
+                    leaf ip-address {
+                        type types-sros:ipv4-unicast-address;
+                        sros-ext:auto-restart-to-modify;
+                        description "IPv4 address used for this local host.";
+                    }
+
+                    leaf port-num {
+                        type types-sros:tcp-udp-port {
+                            range "1026..49150";
+                        }
+                        sros-ext:auto-restart-to-modify;
+                        description "TCP/UDP port number.";
+                    }
+
+                    leaf protocol {
+                        type enumeration {
+                            enum tcp                            { value 6; }
+                            enum udp                            { value 17; }
+                        }
+                        sros-ext:auto-restart-to-modify;
+                        description "Protocol used.";
+                    }
+
+                } // container local-host
+
+                container tcp {
+                    description "Enter the tcp context";
+
+                    leaf max-retries {
+                        type uint32 {
+                            range "0..10";
+                        }
+                        sros-ext:auto-restart-to-modify;
+                        default "5";
+                        description "Number of max retries.";
+                    }
+
+                    leaf retry-interval {
+                        type uint32 {
+                            range "0..300";
+                        }
+                        units "seconds";
+                        sros-ext:auto-restart-to-modify;
+                        default "5";
+                        description "Length of time to wait before a TCP retry.";
+                    }
+
+                    leaf inactivity-timeout {
+                        type uint32 {
+                            range "1..65535";
+                        }
+                        units "seconds";
+                        sros-ext:auto-restart-to-modify;
+                        default "30";
+                        description "Length of time to wait before disconnecting an inactive TCP connection.";
+                    }
+
+                } // container tcp
+
+                list remote-host {
+                    key "remote-host-id";
+                    description "Enter the remote-host list instance";
+
+                    leaf remote-host-id {
+                        type uint32 {
+                            range "1..2147483647";
+                        }
+                        description "remote host identifer";
+                    }
+
+                    leaf ip-address {
+                        type types-sros:ipv4-unicast-address;
+                        sros-ext:immutable;
+                        mandatory true;
+                        description "IPv4 address used for this remote host.";
+                    }
+
+                    leaf port-num {
+                        type types-sros:tcp-udp-port {
+                            range "1..65535";
+                        }
+                        sros-ext:immutable;
+                        mandatory true;
+                        description "TCP/UDP port number.";
+                    }
+
+                    leaf description {
+                        type types-sros:description;
+                        description "User provided description for the remote host.";
+                    }
+
+                    leaf remote-host-name {
+                        type string {
+                            length "1..64";
+                        }
+                        description "User provided name for the remote host.";
+                    }
+
+                    leaf-list apply-groups {
+                        type leafref {
+                            path "../../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Apply a configuration group at this level";
+                    }
+
+                    leaf-list apply-groups-exclude {
+                        type leafref {
+                            path "../../../../../groups/group/name";
+                        }
+                        max-elements 8;
+                        ordered-by user;
+                        description "Exclude a configuration group at this level";
+                    }
+
+                } // list remote-host
+
+            } // list ip-transport
 
             uses conf-svc-vprn-dhcp-server;
             uses conf-svc-vprn-isis;
@@ -27737,6 +28707,7 @@ submodule nokia-conf-svc-vprn {
             uses conf-svc-vprn-ospf;
             uses conf-svc-vprn-ospf3;
             uses conf-svc-vprn-radius;
+            uses conf-svc-vprn-rib-api;
             uses conf-svc-vprn-rip;
             uses conf-svc-vprn-ripng;
             uses conf-svc-vprn-sub-if-subscriber-interface;
